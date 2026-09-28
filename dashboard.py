@@ -1980,3 +1980,43 @@ with tab_autotrac:
         st.write(
             "No hay máquinas aptas con datos disponibles para mostrar en la tabla."
         )
+with tab_cosechadoras:
+
+    st.title("🌽 Uso de Tecnología en Cosechadoras")
+
+    subtab_s7x9, subtab_s700 = st.tabs([
+        "🚜 S7 / X9",
+        "🌾 S700"
+    ])
+
+    with subtab_s7x9:
+
+        st.subheader(
+            "Automatización de Cosecha — S7 / X9"
+        )
+
+        st.info(
+            "En esta sección se analizará la base histórica "
+            "datos_automatizacion_cosecha.csv."
+        )
+
+    with subtab_s700:
+
+        st.subheader(
+            "Tecnología en Cosechadoras S700"
+        )
+
+        st.info(
+            "Sección preparada para incorporar "
+            "la futura base de cosechadoras S700."
+        )
+
+
+with tab_pulverizadoras:
+
+    st.title("💧 Uso de Tecnología en Pulverizadoras")
+
+    st.info(
+        "Sección reservada para el análisis futuro "
+        "de pulverizadoras."
+    )
