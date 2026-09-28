@@ -33,6 +33,35 @@ def cargar_base_datos():
     raw_url = f"https://raw.githubusercontent.com/{repo}/main/{path}"
     return pd.read_csv(raw_url)
 
+@st.cache_data(ttl=60, show_spinner=False)
+def cargar_base_cosecha():
+
+    repo = st.secrets["github_cosecha"]["repo"]
+    path = st.secrets["github_cosecha"]["path"]
+
+    token = st.secrets["github_cosecha"]["token"]
+
+    url = f"https://api.github.com/repos/{repo}/contents/{path}"
+
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3.raw"
+    }
+
+    res = requests.get(
+        url,
+        headers=headers
+    )
+
+    if res.status_code == 200:
+
+        return pd.read_csv(
+            io.StringIO(res.text)
+        )
+
+    return pd.DataFrame()
+
+
 # --- 2. FILTRO DE VERSIÓN DE SOFTWARE (≥ 23.3) ---
 def es_version_valida(version_str):
     if pd.isna(version_str):
