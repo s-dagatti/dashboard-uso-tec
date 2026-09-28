@@ -36,10 +36,11 @@ def cargar_base_datos():
 @st.cache_data(ttl=60, show_spinner=False)
 def cargar_base_cosecha():
 
-    repo = st.secrets["github_cosecha"]["repo"]
-    path = st.secrets["github_cosecha"]["path"]
+    repo = st.secrets["github"]["repo"]
 
-    token = st.secrets["github_cosecha"]["token"]
+    token = st.secrets["github"]["token"]
+
+    path = "datos_automatizacion_cosecha.csv"
 
     url = f"https://api.github.com/repos/{repo}/contents/{path}"
 
@@ -60,7 +61,6 @@ def cargar_base_cosecha():
         )
 
     return pd.DataFrame()
-
 
 # --- 2. FILTRO DE VERSIÓN DE SOFTWARE (≥ 23.3) ---
 def es_version_valida(version_str):
