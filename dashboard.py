@@ -2024,10 +2024,69 @@ with tab_cosechadoras:
             "Automatización de Cosecha — S7 / X9"
         )
 
-        st.info(
-            "En esta sección se analizará la base histórica "
-            "datos_automatizacion_cosecha.csv."
+        df_cosecha = cargar_base_cosecha()
+        df_cosecha["Fecha_inicio_dt"] = pd.to_datetime(
+            df_cosecha["Fecha de inicio"],
+            errors="coerce"
         )
+        
+        df_cosecha["Fecha_fin_dt"] = pd.to_datetime(
+            df_cosecha["Fecha de terminación"],
+            errors="coerce"
+        )
+
+        ### KPIs ###
+        st.subheader("📊 Resumen General")
+        
+        cosechadoras = (
+            df_cosecha["Número de serie"]
+            .nunique()
+        )
+        organizaciones = (
+            df_cosecha["Nombre de organización"]
+            .nunique()
+        )
+        hectareas = (
+            df_cosecha[
+                "Superficie cosechada (ha)"
+            ]
+            .fillna(0)
+            .sum()
+        ) 
+        sucursales = (
+            df_cosecha["Sucursal"]
+            .nunique()
+        )
+
+        ## MOSTRAS KPIS ##
+        kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+
+        kpi1.metric(
+            "🚜 Cosechadoras",
+            cosechadoras
+        )
+        
+        kpi2.metric(
+            "🏢 Organizaciones",
+            organizaciones
+        )
+        
+        kpi3.metric(
+            "🌽 Hectáreas",
+            f"{hectareas:,.0f}"
+        )
+        
+        kpi4.metric(
+            "📍 Sucursales",
+            sucursales
+        )
+
+
+
+
+    
+
+
 
     with subtab_s700:
 
