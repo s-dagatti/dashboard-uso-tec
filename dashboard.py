@@ -2021,67 +2021,247 @@ with tab_cosechadoras:
     with subtab_s7x9:
 
         st.subheader(
-            "Automatización de Cosecha — S7 / X9"
+            "🌽 Automatización de Cosecha — S7 / X9"
         )
-
+    
+        # ---------------------------------------------------
+        # CARGA DE DATOS
+        # ---------------------------------------------------
+    
         df_cosecha = cargar_base_cosecha()
+    
         df_cosecha["Fecha_inicio_dt"] = pd.to_datetime(
             df_cosecha["Fecha de inicio"],
             errors="coerce"
         )
-        
+    
         df_cosecha["Fecha_fin_dt"] = pd.to_datetime(
             df_cosecha["Fecha de terminación"],
             errors="coerce"
         )
-
-        ### KPIs ###
+    
+        # ---------------------------------------------------
+        # NORMALIZACIÓN DE COLUMNAS
+        # ---------------------------------------------------
+    
+        col_ajustes = (
+            "Automatización de ajustes de cosecha - Utilización (%)"
+        )
+    
+        col_velocidad = (
+            "Automatización de la velocidad de avance - Utilización (%)"
+        )
+    
+        col_productividad = (
+            "Automatización de la velocidad de avance - Mayor productividad (%)"
+        )
+    
+        # ---------------------------------------------------
+        # KPI GENERALES
+        # ---------------------------------------------------
+    
         st.subheader("📊 Resumen General")
-        
+    
         cosechadoras = (
             df_cosecha["Número de serie"]
             .nunique()
         )
+    
         organizaciones = (
             df_cosecha["Nombre de organización"]
             .nunique()
         )
+    
         hectareas = (
             df_cosecha[
                 "Superficie cosechada (ha)"
             ]
             .fillna(0)
             .sum()
-        ) 
-        sucursales = (
-            df_cosecha["Sucursal"]
-            .nunique()
         )
-
-        ## MOSTRAS KPIS ##
+    
+        productividad_media = (
+            df_cosecha[col_productividad]
+            .mean()
+        )
+    
         kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-
+    
         kpi1.metric(
             "🚜 Cosechadoras",
             cosechadoras
         )
-        
+    
         kpi2.metric(
             "🏢 Organizaciones",
             organizaciones
         )
-        
+    
         kpi3.metric(
-            "🌽 Hectáreas",
+            "🌽 Hectáreas Cosechadas",
             f"{hectareas:,.0f}"
         )
-        
+    
         kpi4.metric(
-            "📍 Sucursales",
-            sucursales
+            "📈 Productividad Promedio",
+            f"{productividad_media:.1f}%"
         )
-
-
+    
+        # ---------------------------------------------------
+        # KPI TECNOLÓGICOS
+        # ---------------------------------------------------
+    
+        st.subheader("🎯 Indicadores Tecnológicos")
+    
+        prom_ajustes = (
+            df_cosecha[col_ajustes]
+            .mean()
+        )
+    
+        prom_velocidad = (
+            df_cosecha[col_velocidad]
+            .mean()
+        )
+    
+        hectareas_automatizadas = (
+            df_cosecha[
+                "Automatización de ajustes de cosecha - Activado (ha)"
+            ]
+            .fillna(0)
+            .sum()
+        )
+    
+        superficie_total = (
+            df_cosecha[
+                "Superficie cosechada (ha)"
+            ]
+            .fillna(0)
+            .sum()
+        )
+    
+        cobertura = (
+            hectareas_automatizadas /
+            superficie_total * 100
+            if superficie_total > 0
+            else 0
+        )
+    
+        kpi5, kpi6, kpi7 = st.columns(3)
+    
+        kpi5.metric(
+            "⚙️ Automatización Ajustes",
+            f"{prom_ajustes:.1f}%"
+        )
+    
+        kpi6.metric(
+            "🚜 Automatización Velocidad",
+            f"{prom_velocidad:.1f}%"
+        )
+    
+        kpi7.metric(
+            "🌽 Cobertura Automatizada",
+            f"{cobertura:.1f}%"
+        )
+    
+        # ---------------------------------------------------
+        # EVOLUCIÓN HISTÓRICA
+        # ---------------------------------------------------
+    
+        st.markdown("---")
+        st.subheader("📈 Evolución Histórica")
+    
+        df_hist = (
+    
+            df_cosecha
+    
+            .groupby("Fecha_fin_dt")
+    
+            .agg(
+    
+                Ajustes=(
+                    col_ajustes,
+                    "mean"
+                ),
+    
+                Velocidad=(
+                    col_velocidad,
+                    "mean"
+                ),
+    
+                Productividad=(
+                    col_productividad,
+                    "mean"
+                )
+    
+            )
+    
+            .reset_index()
+    
+            .sort_values(
+                "Fecha_fin_dt"
+            )
+    
+        )
+    
+        import plotly.graph_objects as go
+    
+        fig_hist = go.Figure()
+    
+        fig_hist.add_trace(
+            go.Scatter(
+                x=df_hist["Fecha_fin_dt"],
+                y=df_hist["Ajustes"],
+                mode="lines+markers",
+                name="Ajustes Automáticos"
+            )
+        )
+    
+        fig_hist.add_trace(
+            go.Scatter(
+                x=df_hist["Fecha_fin_dt"],
+                y=df_hist["Velocidad"],
+                mode="lines+markers",
+                name="Velocidad Automática"
+            )
+        )
+    
+        fig_hist.update_layout(
+            title="Tendencia de Utilización de Automatización",
+            xaxis_title="Período",
+            yaxis_title="% Utilización",
+            hovermode="x unified"
+        )
+    
+        st.plotly_chart(
+            fig_hist,
+            use_container_width=True
+        )
+    
+        # ---------------------------------------------------
+        # PRODUCTIVIDAD
+        # ---------------------------------------------------
+    
+        st.subheader("📈 Evolución de Productividad")
+    
+        fig_prod = px.line(
+    
+            df_hist,
+    
+            x="Fecha_fin_dt",
+    
+            y="Productividad",
+    
+            markers=True,
+    
+            title="Mayor Productividad Generada por Automatización"
+    
+        )
+    
+        st.plotly_chart(
+            fig_prod,
+            use_container_width=True
+        )
+    
 
 
     
