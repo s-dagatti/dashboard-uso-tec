@@ -3807,4 +3807,400 @@ with tab_picadoras:
             use_container_width=True
         )
 
+        # ---------------------------------------------------
+        # KPI 5 - HECTÁREAS CON CONSTITUYENTES
+        # ---------------------------------------------------
+        
+        mask_curva = (
+        
+            df_pic["Almidón"].notna()
+        
+            |
+        
+            df_pic["Proteína bruta"].notna()
+        
+            |
+        
+            df_pic["Fibra detergente neutro"].notna()
+        
+            |
+        
+            df_pic["Fibra detergente ácido"].notna()
+        
+            |
+        
+            df_pic["Azúcar"].notna()
+        
+            |
+        
+            df_pic["Ceniza bruta"].notna()
+        
+        )
+        
+        ha_constituyentes = (
+        
+            df_pic.loc[
+                mask_curva,
+                "Superficie cosechada"
+            ]
+        
+            .fillna(0)
+        
+            .sum()
+        
+        )
+        
+        porc_constituyentes = (
+        
+            ha_constituyentes
+        
+            /
+        
+            superficie_total
+        
+            * 100
+        
+            if superficie_total > 0
+        
+            else 0
+        
+        )
+        
+        # ---------------------------------------------------
+        # KPIs
+        # ---------------------------------------------------
+        
+        st.subheader("📊 Indicadores Generales")
+        
+        k1, k2, k3, k4, k5 = st.columns(5)
+        
+        k1.metric(
+            "🛰️ AutoTrac Promedio",
+            f"{autotrac_promedio:.1f}%"
+        )
+        
+        k2.metric(
+            "🌱 Superficie Total",
+            f"{superficie_total:,.0f} ha"
+        )
+        
+        k3.metric(
+            "⛽ Combustible",
+            f"{combustible_ha:.1f} L/ha"
+        )
+        
+        k4.metric(
+            "🚜 Producción Húmeda",
+            f"{toneladas_humedas:,.0f} t"
+        )
+        
+        k5.metric(
+            "🧪 Ha con Constituyentes",
+            f"{porc_constituyentes:.1f}%"
+        )
+        
+        # ---------------------------------------------------
+        # TABLA POR MÁQUINA
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader("🚜 Uso de Tecnología por Picadora")
+        
+        df_maquinas = (
+            df_pic
+            .groupby(
+                [
+                    "Organizaciones",
+                    "Equipo",
+                    "Nombre de máquina"
+                ],
+                as_index=False
+            )
+            .agg(
+                Hectareas=(
+                    "Superficie cosechada",
+                    "sum"
+                ),
+                AutoTrac=(
+                    "AutoTrac™",
+                    "sum"
+                )
+            )
+        )
+        
+        # -----------------------------------------
+        # % AUTOTRAC
+        # -----------------------------------------
+        
+        df_maquinas["AutoTrac (%)"] = np.where(
+        
+            df_maquinas["Hectareas"] > 0,
+        
+            df_maquinas["AutoTrac"]
+            /
+            df_maquinas["Hectareas"]
+            *
+            100,
+        
+            np.nan
+        
+        )
+        
+        # -----------------------------------------
+        # % HECTÁREAS CON CONSTITUYENTES
+        # -----------------------------------------
+        
+        df_constit = (
+            df_pic.assign(
+                Tiene_Constituyentes=mask_curva
+            )
+            .groupby(
+                [
+                    "Organizaciones",
+                    "Equipo",
+                    "Nombre de máquina"
+                ],
+                as_index=False
+            )
+            .agg(
+                Hectareas_Total=(
+                    "Superficie cosechada",
+                    "sum"
+                ),
+                Hectareas_Const=(
+                    "Superficie cosechada",
+                    lambda x: x[
+                        mask_curva.loc[x.index]
+                    ].sum()
+                )
+            )
+        )
+        
+        df_constit["Constituyentes (%)"] = np.where(
+        
+            df_constit["Hectareas_Total"] > 0,
+        
+            df_constit["Hectareas_Const"]
+            /
+            df_constit["Hectareas_Total"]
+            *
+            100,
+        
+            np.nan
+        
+        )
+        
+        # -----------------------------------------
+        # ESTADO HARVESTLAB
+        # -----------------------------------------
+        
+        def clasificar_maquina(grupo):
+        
+            tiene_const = (
+        
+                grupo["Almidón"].notna()
+        
+                |
+        
+                grupo["Proteína bruta"].notna()
+        
+                |
+        
+                grupo["Fibra detergente neutro"].notna()
+        
+                |
+        
+                grupo["Fibra detergente ácido"].notna()
+        
+                |
+        
+                grupo["Azúcar"].notna()
+        
+                |
+        
+                grupo["Ceniza bruta"].notna()
+        
+            ).any()
+        
+            if tiene_const:
+        
+                return "🟢 Curva Constituyentes Activada"
+        
+            ms = grupo["Materia seca"].dropna()
+        
+            if len(ms) > 0:
+        
+                tiene_decimal = (
+        
+                    (ms % 1 != 0)
+                    .any()
+                )
+        
+                if tiene_decimal:
+        
+                    return "🟡 Curva Constituyentes Desactivada"
+        
+            return "⚪ Sin HarvestLab"
+        
+        df_estado = (
+        
+            df_pic
+        
+            .groupby(
+                [
+                    "Organizaciones",
+                    "Equipo",
+                    "Nombre de máquina"
+                ]
+            )
+        
+            .apply(
+                clasificar_maquina
+            )
+        
+            .reset_index(
+                name="Estado HarvestLab"
+            )
+        
+        )
+        
+        # -----------------------------------------
+        # MERGE
+        # -----------------------------------------
+        
+        df_maquinas = pd.merge(
+            df_maquinas,
+            df_constit[
+                [
+                    "Organizaciones",
+                    "Equipo",
+                    "Nombre de máquina",
+                    "Constituyentes (%)"
+                ]
+            ],
+            on=[
+                "Organizaciones",
+                "Equipo",
+                "Nombre de máquina"
+            ],
+            how="left"
+        )
+        
+        df_maquinas = pd.merge(
+            df_maquinas,
+            df_estado,
+            on=[
+                "Organizaciones",
+                "Equipo",
+                "Nombre de máquina"
+            ],
+            how="left"
+        )
+        
+        # -----------------------------------------
+        # RENOMBRAR
+        # -----------------------------------------
+        
+        df_maquinas = df_maquinas.rename(
+            columns={
+                "Organizaciones": "Organización",
+                "Equipo": "Modelo",
+                "Nombre de máquina": "Serie",
+                "Hectareas": "Hectáreas Picadas"
+            }
+        )
+        
+        # -----------------------------------------
+        # TABLA
+        # -----------------------------------------
+        
+        st.dataframe(
+        
+            df_maquinas.style.format(
+                {
+                    "Hectáreas Picadas": "{:,.0f}",
+                    "AutoTrac (%)": "{:.1f}%",
+                    "Constituyentes (%)": "{:.1f}%"
+                }
+            ),
+        
+            use_container_width=True
+        
+        )
+        
+        # ---------------------------------------------------
+        # PIE CHARTS
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader("🎯 Estado HarvestLab")
+        
+        col_p1, col_p2 = st.columns(2)
+        
+        # -----------------------------------------
+        # PIE MAQUINAS
+        # -----------------------------------------
+        
+        with col_p1:
+        
+            df_pie_maq = (
+                df_maquinas
+                .groupby("Estado HarvestLab")
+                .size()
+                .reset_index(name="Cantidad")
+            )
+        
+            fig_maq = px.pie(
+        
+                df_pie_maq,
+        
+                names="Estado HarvestLab",
+        
+                values="Cantidad",
+        
+                title="Cantidad de Máquinas",
+        
+                hole=0.45
+        
+            )
+        
+            st.plotly_chart(
+                fig_maq,
+                use_container_width=True
+            )
+        
+        # -----------------------------------------
+        # PIE HECTAREAS
+        # -----------------------------------------
+        
+        with col_p2:
+        
+            df_pie_ha = (
+                df_maquinas
+                .groupby("Estado HarvestLab")
+                ["Hectáreas Picadas"]
+                .sum()
+                .reset_index()
+            )
+        
+            fig_ha = px.pie(
+        
+                df_pie_ha,
+        
+                names="Estado HarvestLab",
+        
+                values="Hectáreas Picadas",
+        
+                title="Hectáreas Picadas",
+        
+                hole=0.45
+        
+            )
+        
+            st.plotly_chart(
+                fig_ha,
+                use_container_width=True
+            )
+
+
 
