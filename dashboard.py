@@ -4929,7 +4929,7 @@ with tab_picadoras:
                 "📋 Calidad de Forraje por Cliente, Granja y Campo"
             )
             
-            col_f1, col_f2, col_f3 = st.columns(3)
+            col_f1, col_f2, col_f3, col_f4 = st.columns(4)
             
             with col_f1:
             
@@ -4983,6 +4983,20 @@ with tab_picadoras:
                         .unique()
                     )
                 )
+
+            with col_f4:
+            
+                opciones_calidad = sorted(
+                    df_tabla_hl["Clasificación"]
+                    .dropna()
+                    .unique()
+                )
+            
+                sel_calidad = st.multiselect(
+                    "🏆 Calidad",
+                    opciones_calidad
+                )
+
             
             df_tabla_hl_filtrada = df_tabla_hl.copy()
             
@@ -5012,6 +5026,17 @@ with tab_picadoras:
                         .isin(sel_campos)
                     ]
                 )
+
+            if sel_calidad:
+            
+                df_tabla_hl_filtrada = (
+                    df_tabla_hl_filtrada[
+                        df_tabla_hl_filtrada["Clasificación"]
+                        .isin(sel_calidad)
+                    ]
+                )
+
+
             
             # ---------------------------------------------------
             # TABLA FINAL
