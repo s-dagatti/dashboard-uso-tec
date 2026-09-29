@@ -3021,7 +3021,18 @@ with tab_cosechadoras:
 
 with tab_pulverizadoras:
 
-    st.title("💧 Análisis CropCare")
+    col_logo, col_titulo = st.columns([1,12])
+    with col_logo:
+        st.image(
+            "pulve.png",
+            width=80
+        )
+    
+    with col_titulo:
+        st.title(
+            "Análisis CropCare"
+        )
+
 
     # ---------------------------------------------------
     # BASE FILTRADA DEL DASHBOARD
@@ -3070,7 +3081,7 @@ with tab_pulverizadoras:
         )
 
         st.subheader(
-            f"📊 Resumen Actual (Última Semana: {fecha_formateada})"
+            f"Resumen Actual (Última Semana: {fecha_formateada})"
         )
 
         # ---------------------------------------------------
@@ -3108,7 +3119,7 @@ with tab_pulverizadoras:
 
         with col2:
             st.metric(
-                "🎯 AutoTrac™",
+                "AutoTrac™",
                 f"{promedio_autotrac:.1f}%"
                 if pd.notna(promedio_autotrac)
                 else "Sin datos"
@@ -3116,7 +3127,7 @@ with tab_pulverizadoras:
 
         with col3:
             st.metric(
-                "✅ Control de Secciones",
+                "Control de Secciones",
                 f"{promedio_secciones:.1f}%"
                 if pd.notna(promedio_secciones)
                 else "Sin datos"
@@ -3124,7 +3135,7 @@ with tab_pulverizadoras:
 
         with col4:
             st.metric(
-                "💧 Pulsación",
+                "Pulsación",
                 f"{promedio_pulsacion:.1f}%"
                 if pd.notna(promedio_pulsacion)
                 else "Sin datos"
@@ -3136,7 +3147,7 @@ with tab_pulverizadoras:
 
         st.markdown("---")
         st.subheader(
-            "🚜 Uso de Tecnología por Pulverizadora"
+            "Uso de Tecnología por Pulverizadora"
         )
 
         df_tabla = (
@@ -3218,7 +3229,7 @@ with tab_pulverizadoras:
 
         st.markdown("---")
         st.subheader(
-            "📈 Evolución Histórica del Uso de Tecnología"
+            "Evolución Histórica del Uso de Tecnología"
         )
 
         df_pulv_activas = df_pulv[
@@ -3458,7 +3469,18 @@ with tab_pulverizadoras:
 
 with tab_picadoras:
 
-    st.title("🌿 Uso de Tecnología en Picadoras")
+    col_logo, col_titulo = st.columns([1,12])
+    
+    with col_logo:
+        st.image(
+            "Picadora.png",
+            width=80
+        )
+    with col_titulo:
+        st.title(
+            "Análisis de Calidad de Picado"
+        )
+
 
     st.info(
         "Sección reservada para el análisis futuro "
