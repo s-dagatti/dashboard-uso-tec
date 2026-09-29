@@ -3113,7 +3113,7 @@ with tab_pulverizadoras:
 
         with col1:
             st.metric(
-                "💧 Pulverizadoras",
+                "Pulverizadoras",
                 total_pulverizadoras
             )
 
