@@ -185,11 +185,12 @@ df_filtrado_autotrac = df_filtrado_aptas[
 ]
 
 # --- 6. PESTAÑA: USO DE AUTOTRAC ---
-tab_autotrac, tab_guiado, tab_cosechadoras, tab_pulverizadoras = st.tabs([
+tab_autotrac, tab_guiado, tab_cosechadoras, tab_pulverizadoras, tab_picadoras = st.tabs([
     "🎯 Uso de AutoTrac",
     "🛰️ Guiado Avanzado",
     "🌽 Cosechadoras",
-    "💧 Pulverizadoras"
+    "💧 Pulverizadoras",
+    "🌿 Picadoras"
 ])
 
 with tab_autotrac:
@@ -2288,3 +2289,13 @@ with tab_pulverizadoras:
         "Sección reservada para el análisis futuro "
         "de pulverizadoras."
     )
+
+with tab_picadoras:
+
+    st.title("🌿 Uso de Tecnología en Picadoras")
+
+    st.info(
+        "Sección reservada para el análisis futuro "
+        "de picadoras."
+    )
+
