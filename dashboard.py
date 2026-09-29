@@ -4556,119 +4556,7 @@ with tab_picadoras:
             
                 return "🔴 Calidad Crítica"
             
-            # ---------------------------------------------------
-            # SCATTER: MATERIA SECA × ALMIDÓN
-            # ---------------------------------------------------
-            
-            st.markdown("---")
-            st.subheader(
-                "🌿 Relación Materia Seca × Almidón"
-            )
-            
-            df_scatter = (
-                df_tabla_hl.copy()
-            )
-            
-            if not df_scatter.empty:
-            
-                fig_scatter = px.scatter(
-            
-                    df_scatter,
-            
-                    x="MateriaSeca",
-            
-                    y="Almidon",
-            
-                    color="Score Calidad",
-            
-                    size="Superficie",
-            
-                    hover_data=[
-                        "Clientes",
-                        "Granjas",
-                        "Campos",
-                        "Variedades"
-                    ],
-            
-                    color_continuous_scale=[
-                        "#d62728",   # rojo
-                        "#f2b134",   # amarillo
-                        "#2ca02c"    # verde
-                    ],
-            
-                    labels={
-            
-                        "MateriaSeca":
-                            "Materia Seca (%)",
-            
-                        "Almidon":
-                            "Almidón (%)",
-            
-                        "Score Calidad":
-                            "Score"
-            
-                    },
-            
-                    title=(
-                        "Materia Seca vs Almidón "
-                        "coloreado por Score de Calidad"
-                    )
-            
-                )
-            
-                fig_scatter.update_layout(
-            
-                    hovermode="closest",
-            
-                    coloraxis_colorbar=dict(
-                        title="Score"
-                    )
-            
-                )
-            
-                # ZONA OBJETIVO
-            
-                fig_scatter.add_vrect(
-            
-                    x0=32,
-                    x1=36,
-            
-                    fillcolor="green",
-            
-                    opacity=0.08,
-            
-                    line_width=0
-            
-                )
-            
-                fig_scatter.add_hrect(
-            
-                    y0=32,
-                    y1=38,
-            
-                    fillcolor="green",
-            
-                    opacity=0.08,
-            
-                    line_width=0
-            
-                )
-            
-                st.plotly_chart(
-            
-                    fig_scatter,
-            
-                    use_container_width=True
-            
-                )
-            
-            else:
-            
-                st.info(
-                    "No existen registros con curva "
-                    "de constituyentes activa."
-                )
-
+        
             
             # ---------------------------------------------------
             # TABLA BASE
@@ -4799,6 +4687,120 @@ with tab_picadoras:
                 df_tabla_hl["Score Calidad"]
                 .apply(clasificar_score)
             )
+
+            # ---------------------------------------------------
+            # SCATTER: MATERIA SECA × ALMIDÓN
+            # ---------------------------------------------------
+            
+            st.markdown("---")
+            st.subheader(
+                "🌿 Relación Materia Seca × Almidón"
+            )
+            
+            df_scatter = (
+                df_tabla_hl.copy()
+            )
+            
+            if not df_scatter.empty:
+            
+                fig_scatter = px.scatter(
+            
+                    df_scatter,
+            
+                    x="MateriaSeca",
+            
+                    y="Almidon",
+            
+                    color="Score Calidad",
+            
+                    size="Superficie",
+            
+                    hover_data=[
+                        "Clientes",
+                        "Granjas",
+                        "Campos",
+                        "Variedades"
+                    ],
+            
+                    color_continuous_scale=[
+                        "#d62728",   # rojo
+                        "#f2b134",   # amarillo
+                        "#2ca02c"    # verde
+                    ],
+            
+                    labels={
+            
+                        "MateriaSeca":
+                            "Materia Seca (%)",
+            
+                        "Almidon":
+                            "Almidón (%)",
+            
+                        "Score Calidad":
+                            "Score"
+            
+                    },
+            
+                    title=(
+                        "Materia Seca vs Almidón "
+                        "coloreado por Score de Calidad"
+                    )
+            
+                )
+            
+                fig_scatter.update_layout(
+            
+                    hovermode="closest",
+            
+                    coloraxis_colorbar=dict(
+                        title="Score"
+                    )
+            
+                )
+            
+                # ZONA OBJETIVO
+            
+                fig_scatter.add_vrect(
+            
+                    x0=32,
+                    x1=36,
+            
+                    fillcolor="green",
+            
+                    opacity=0.08,
+            
+                    line_width=0
+            
+                )
+            
+                fig_scatter.add_hrect(
+            
+                    y0=32,
+                    y1=38,
+            
+                    fillcolor="green",
+            
+                    opacity=0.08,
+            
+                    line_width=0
+            
+                )
+            
+                st.plotly_chart(
+            
+                    fig_scatter,
+            
+                    use_container_width=True
+            
+                )
+            
+            else:
+            
+                st.info(
+                    "No existen registros con curva "
+                    "de constituyentes activa."
+                )
+
             
             # ---------------------------------------------------
             # FILTROS TABLA
