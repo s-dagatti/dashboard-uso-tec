@@ -147,22 +147,6 @@ sel_modelos = st.sidebar.multiselect(
     modelos
 )
 
-# Aplicación filtros
-
-if sel_tipo != "Todos":
-
-    df_filtrado_raw = df_filtrado_raw[
-        df_filtrado_raw["Tipo"] == sel_tipo
-    ]
-
-if sel_modelos:
-
-    df_filtrado_raw = df_filtrado_raw[
-        df_filtrado_raw["Modelo"]
-        .isin(sel_modelos)
-    ]
-
-
 # Filtro: Licencia
 if col_licencia:
     licencias = ["Todas"] + sorted([l for l in df_sidebar[col_licencia].dropna().unique() if str(l).strip() != ''])
@@ -203,6 +187,13 @@ if sel_razon != "Todas":
 
 if sel_tipo != "Todos":
     df_filtrado_raw = df_filtrado_raw[df_filtrado_raw['Tipo'] == sel_tipo]
+
+if sel_modelos:
+
+    df_filtrado_raw = df_filtrado_raw[
+        df_filtrado_raw["Modelo"]
+        .isin(sel_modelos)
+    ]
 
 if col_licencia and sel_licencia != "Todas":
     df_filtrado_raw = df_filtrado_raw[df_filtrado_raw[col_licencia] == sel_licencia]
