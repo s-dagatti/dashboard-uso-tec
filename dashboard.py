@@ -2064,13 +2064,16 @@ with tab_cosechadoras:
         
         df_cosecha["Fecha_inicio_dt"] = pd.to_datetime(
             df_cosecha["Fecha de inicio"],
+            format="mixed",
             errors="coerce"
         )
         
         df_cosecha["Fecha_fin_dt"] = pd.to_datetime(
             df_cosecha["Fecha de terminación"],
+            format="mixed",
             errors="coerce"
         )
+
         
         # ---------------------------------------------------
         # FILTRO DE CULTIVO
@@ -2225,150 +2228,191 @@ with tab_cosechadoras:
         )
     
         # ---------------------------------------------------
-        # GRÁFICO 1 - SUPERFICIE POR CULTIVO
+        # GRÁFICO 1 - HISTÓRICO SEMANAL DE SUPERFICIE
+        # APILADA POR CULTIVO
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("🌽 Superficie Cosechada por Cultivo")
+        st.subheader(
+            "🌽 Evolución Semanal de la Superficie Cosechada por Cultivo"
+        )
         
-        df_cult = (
+        df_superficie_semana = (
             df_cosecha_filtrado
-            .groupby("Cultivo")
-            ["Superficie cosechada (ha)"]
-            .sum()
-            .reset_index()
+            .dropna(
+                subset=[
+                    "Fecha_fin_dt",
+                    "Cultivo",
+                    "Superficie cosechada (ha)"
+                ]
+            )
+            .groupby(
+                [
+                    "Fecha_fin_dt",
+                    "Cultivo"
+                ],
+                as_index=False
+            )
+            .agg(
+                Superficie_Cosechada=(
+                    "Superficie cosechada (ha)",
+                    "sum"
+                )
+            )
+            .sort_values("Fecha_fin_dt")
         )
         
-        fig_cult = px.bar(
-            df_cult.sort_values(
-                "Superficie cosechada (ha)",
-                ascending=False
-            ),
+        if not df_superficie_semana.empty:
         
-            x="Cultivo",
+            fig_superficie_semana = px.bar(
+                df_superficie_semana,
+                x="Fecha_fin_dt",
+                y="Superficie_Cosechada",
+                color="Cultivo",
+                barmode="stack",
+                labels={
+                    "Fecha_fin_dt": "Semana",
+                    "Superficie_Cosechada": "Superficie cosechada (ha)"
+                },
+                title="Superficie Cosechada por Semana y Cultivo"
+            )
         
-            y="Superficie cosechada (ha)",
+            fig_superficie_semana.update_layout(
+                xaxis_title="Fecha de terminación de la semana",
+                yaxis_title="Superficie cosechada (ha)",
+                hovermode="x unified",
+                legend_title_text="Cultivo"
+            )
         
-            text_auto=".0f",
+            fig_superficie_semana.update_xaxes(
+                tickformat="%d/%m/%Y"
+            )
         
-            color="Cultivo",
-        
-            title="Superficie Cosechada por Cultivo"
-        )
-        
-        fig_cult.update_layout(
-            xaxis_title="Cultivo",
-            yaxis_title="Superficie Cosechada (ha)",
-            showlegend=False
-        )
-        
-        st.plotly_chart(
-            fig_cult,
-            use_container_width=True
-        )
+            st.plotly_chart(
+                fig_superficie_semana,
+                use_container_width=True
+            )
+
         
         # ---------------------------------------------------
-        # GRÁFICO 2 - ADOPCIÓN TECNOLÓGICA
+        # GRÁFICO 2 - MÁQUINAS Y USO DE TECNOLOGÍA
+        # POR SEMANA
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("📈 Evolución de Adopción Tecnológica")
+        st.subheader(
+            "📈 Evolución Semanal de la Adopción Tecnológica"
+        )
         
         df_sem = (
             df_cosecha_filtrado
-            .groupby("Fecha_fin_dt")
+            .dropna(
+                subset=["Fecha_fin_dt"]
+            )
+            .groupby(
+                "Fecha_fin_dt",
+                as_index=False
+            )
             .agg(
                 Ajustes=(
                     col_ajustes,
                     "mean"
                 ),
-        
                 Velocidad=(
                     col_velocidad,
                     "mean"
                 ),
-        
                 Maquinas=(
                     "Número de serie",
                     "nunique"
                 )
             )
-            .reset_index()
             .sort_values("Fecha_fin_dt")
         )
         
-        from plotly.subplots import make_subplots
-        import plotly.graph_objects as go
+        if not df_sem.empty:
         
-        fig = make_subplots(
-            specs=[[{"secondary_y": True}]]
-        )
+            from plotly.subplots import make_subplots
+            import plotly.graph_objects as go
         
-        # BARRAS
-        fig.add_trace(
-            go.Bar(
-                x=df_sem["Fecha_fin_dt"],
-                y=df_sem["Maquinas"],
-                name="Máquinas Trabajando",
-                marker_color="#2b5c8f",
-                text=df_sem["Maquinas"],
-                textposition="auto"
-            ),
-            secondary_y=False
-        )
-        
-        # AJUSTES AUTOMÁTICOS
-        fig.add_trace(
-            go.Scatter(
-                x=df_sem["Fecha_fin_dt"],
-                y=df_sem["Ajustes"],
-                mode="lines+markers",
-                name="Ajustes Automáticos",
-                line=dict(width=3)
-            ),
-            secondary_y=True
-        )
-        
-        # VELOCIDAD AUTOMÁTICA
-        fig.add_trace(
-            go.Scatter(
-                x=df_sem["Fecha_fin_dt"],
-                y=df_sem["Velocidad"],
-                mode="lines+markers",
-                name="Velocidad Automática",
-                line=dict(width=3)
-            ),
-            secondary_y=True
-        )
-        
-        fig.update_yaxes(
-            title_text="Cantidad de Máquinas",
-            secondary_y=False
-        )
-        
-        fig.update_yaxes(
-            title_text="% Utilización",
-            range=[0, 110],
-            secondary_y=True
-        )
-        
-        fig.update_layout(
-            title="Máquinas Trabajando vs Utilización de Tecnología",
-            hovermode="x unified",
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
+            fig_adopcion = make_subplots(
+                specs=[
+                    [
+                        {
+                            "secondary_y": True
+                        }
+                    ]
+                ]
             )
-        )
         
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
+            # Barras
+            fig_adopcion.add_trace(
+                go.Bar(
+                    x=df_sem["Fecha_fin_dt"],
+                    y=df_sem["Maquinas"],
+                    name="Máquinas trabajando",
+                    marker_color="#2b5c8f",
+                    text=df_sem["Maquinas"],
+                    textposition="auto"
+                ),
+                secondary_y=False
+            )
         
+            # Línea ajustes
+            fig_adopcion.add_trace(
+                go.Scatter(
+                    x=df_sem["Fecha_fin_dt"],
+                    y=df_sem["Ajustes"],
+                    mode="lines+markers",
+                    name="Automatización de ajustes",
+                    line=dict(color="#f2b134", width=3)
+                ),
+                secondary_y=True
+            )
+        
+            # Línea velocidad
+            fig_adopcion.add_trace(
+                go.Scatter(
+                    x=df_sem["Fecha_fin_dt"],
+                    y=df_sem["Velocidad"],
+                    mode="lines+markers",
+                    name="Automatización de velocidad",
+                    line=dict(color="#2ca02c", width=3)
+                ),
+                secondary_y=True
+            )
+        
+            fig_adopcion.update_yaxes(
+                title_text="Cantidad de máquinas",
+                secondary_y=False
+            )
+        
+            fig_adopcion.update_yaxes(
+                title_text="Utilización promedio (%)",
+                range=[0, 110],
+                secondary_y=True
+            )
+        
+            fig_adopcion.update_xaxes(
+                tickformat="%d/%m/%Y"
+            )
+        
+            fig_adopcion.update_layout(
+                title="Máquinas Trabajando y Uso Promedio de Tecnología por Semana",
+                hovermode="x unified",
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1
+                )
+            )
+        
+            st.plotly_chart(
+                fig_adopcion,
+                use_container_width=True
+            )
 
 
     #----------------------------------------------#
