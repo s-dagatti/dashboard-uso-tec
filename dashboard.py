@@ -817,7 +817,17 @@ with tab_autotrac:
                     # ------------------------------------------------------------------
                     # BLOQUE 1: KPIS GENERALES (PROMEDIO ENTRE LAS 4 TECNOLOGÍAS)
                     # ------------------------------------------------------------------
-                    st.subheader("🌐 Resumen General de Guiado Avanzado")
+                    col_logo, col_titulo = st.columns([1,12])
+                    with col_logo:
+                        st.image(
+                            "Tractor.png",
+                            width=80
+                        )
+                    with col_titulo:
+                        st.title(
+                            "Guiado Avanzado"
+                        )
+
             
                     medias_periodo_cols = [df_ga[c].mean() for c in cols_clean]
                     medias_periodo_cols_num = [m if pd.notna(m) else 0.0 for m in medias_periodo_cols]
@@ -871,12 +881,10 @@ with tab_autotrac:
                             delta=delta_maq_str,
                         )
             
-                    st.markdown("---")
             
                     # ------------------------------------------------------------------
                     # BLOQUE 2: KPIS INDIVIDUALES POR TECNOLOGÍA
                     # ------------------------------------------------------------------
-                    st.subheader("📊 % de Uso Promedio por Tecnología (Período Completo)")
             
                     cols_widgets = st.columns(len(cols_presentes))
             
