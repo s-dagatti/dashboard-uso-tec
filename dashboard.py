@@ -885,7 +885,7 @@ with tab_autotrac:
                     # ------------------------------------------------------------------
                     # BLOQUE 2: KPIS INDIVIDUALES POR TECNOLOGÍA
                     # ------------------------------------------------------------------
-            
+                    st.markdown("---")
                     cols_widgets = st.columns(len(cols_presentes))
             
                     for idx, col in enumerate(cols_presentes):
