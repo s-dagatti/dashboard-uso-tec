@@ -918,7 +918,7 @@ with tab_autotrac:
                     # SELECTOR DE TECNOLOGÍA PARA DETALLE Y SERIE HISTÓRICA
                     # ------------------------------------------------------------------
                     st.markdown("---")
-                    st.subheader("🔍 Análisis Detallado por Tecnología")
+                    st.subheader("Análisis Detallado por Tecnología")
             
                     # Mapeo inverso para el selectbox
                     opciones_tech_dict = {nombres_cortos.get(c, c): c for c in cols_presentes}
@@ -936,7 +936,7 @@ with tab_autotrac:
                     # BLOQUE 3: TABLA DETALLE POR MÁQUINA (DINÁMICA SEGÚN SELECCIÓN)
                     # ------------------------------------------------------------------
                     st.markdown("####")
-                    st.markdown(f"📋 **Detalle de {tech_seleccionada_label} y Licencias por Máquina**")
+                    st.markdown(f" **Detalle de {tech_seleccionada_label} y Licencias por Máquina**")
             
                     col_maq = "Máquina" if "Máquina" in df_ga.columns else ("Número de serie de la máquina" if "Número de serie de la máquina" in df_ga.columns else None)
                     col_tipo = "Tipo" if "Tipo" in df_ga.columns else ("Tipo de máquina" if "Tipo de máquina" in df_ga.columns else None)
@@ -1046,7 +1046,7 @@ with tab_autotrac:
                     # BLOQUE 4: SERIE HISTÓRICA (DINÁMICA SEGÚN SELECCIÓN)
                     # ------------------------------------------------------------------
                     st.markdown("---")
-                    st.subheader(f"📈 Serie Histórica - {tech_seleccionada_label}")
+                    st.subheader(f" Serie Histórica - {tech_seleccionada_label}")
 
                     col_fecha_agrup = "Fecha_fin_dt" if "Fecha_fin_dt" in df_ga.columns else ("Fecha" if "Fecha" in df_ga.columns else None)
                     
@@ -1115,7 +1115,7 @@ with tab_autotrac:
                         if tech_seleccionada_label == "Machine Sync":
                         
                             st.markdown("---")
-                            st.subheader("🚀 Oportunidades de Adopción - Machine Sync")
+                            st.subheader("Oportunidades de Adopción - Machine Sync")
                         
                             st.caption(
                                 "Organizaciones que poseen una combinación compatible de "
@@ -1256,19 +1256,19 @@ with tab_autotrac:
                         
                                 with kpi1:
                                     st.metric(
-                                        "🏢 Organizaciones Compatibles",
+                                        "Organizaciones Compatibles",
                                         total_orgs
                                     )
                         
                                 with kpi2:
                                     st.metric(
-                                        "🚀 Potenciales",
+                                        "Potenciales",
                                         orgs_potenciales
                                     )
                         
                                 with kpi3:
                                     st.metric(
-                                        "✅ Adopción Actual",
+                                        "Adopción Actual",
                                         f"{adopcion:.1f}%"
                                     )
                         
@@ -1276,7 +1276,7 @@ with tab_autotrac:
                                 # TABLA
                                 # ------------------------------------------------------
                         
-                                st.markdown("#### 📋 Detalle de Organizaciones")
+                                st.markdown("#### Detalle de Organizaciones")
                         
                                 def color_sync(row):
                         
@@ -1350,7 +1350,7 @@ with tab_autotrac:
                                             x="Sucursal",
                                             y="Cant. Organizaciones",
                         
-                                            title="📍 Potenciales por Sucursal",
+                                            title="Potenciales por Sucursal",
                         
                                             color="Sucursal",
                         
@@ -1390,7 +1390,7 @@ with tab_autotrac:
                         
                                         hole=0.55,
                         
-                                        title="🎯 Estado de Adopción",
+                                        title="Estado de Adopción",
                         
                                         color="Estado",
                         
@@ -1427,7 +1427,7 @@ with tab_autotrac:
                         
                             if tech_seleccionada_label == "Implement Guidance":
                         
-                                st.subheader("🚀 Oportunidades de Adopción - Implement Guidance")
+                                st.subheader("Oportunidades de Adopción - Implement Guidance")
                         
                                 st.info(
                                     "Implement Guidance se encuentra asociado al uso de "
@@ -1437,7 +1437,7 @@ with tab_autotrac:
                         
                             else:
                         
-                                st.subheader("🚀 Oportunidades de Adopción - AutoPath™")
+                                st.subheader("Oportunidades de Adopción - AutoPath™")
                         
                             st.caption(
                                 "Organizaciones que poseen una combinación compatible de "
@@ -1601,25 +1601,25 @@ with tab_autotrac:
                         
                                 with kpi1:
                                     st.metric(
-                                        "🏢 Organizaciones Compatibles",
+                                        "Organizaciones Compatibles",
                                         total_orgs
                                     )
                         
                                 with kpi2:
                                     st.metric(
-                                        "🚀 Potenciales AutoPath",
+                                        "Potenciales AutoPath",
                                         orgs_potenciales
                                     )
                         
                                 with kpi3:
                                     st.metric(
-                                        "✅ Adopción Actual",
+                                        "Adopción Actual",
                                         f"{adopcion:.1f}%"
                                     )
                         
                                 with kpi4:
                                     st.metric(
-                                        "🛰️ Potencial Implement Guidance",
+                                        "Potencial Implement Guidance",
                                         orgs_potenciales
                                     )
                         
@@ -1627,7 +1627,7 @@ with tab_autotrac:
                                 # TABLA
                                 # ------------------------------------------------------
                         
-                                st.markdown("#### 📋 Detalle de Organizaciones")
+                                st.markdown("#### Detalle de Organizaciones")
                         
                                 def color_ap(row):
                         
@@ -1710,7 +1710,7 @@ with tab_autotrac:
                                             x="Sucursal",
                                             y="Cant. Organizaciones",
                         
-                                            title="📍 Potenciales por Sucursal",
+                                            title="Potenciales por Sucursal",
                         
                                             color="Sucursal",
                         
@@ -1750,7 +1750,7 @@ with tab_autotrac:
                         
                                         hole=0.55,
                         
-                                        title="🎯 Estado de Adopción",
+                                        title="Estado de Adopción",
                         
                                         color="Estado",
                         
@@ -1780,7 +1780,7 @@ with tab_autotrac:
                         if tech_seleccionada_label == "Turn Automation":
                         
                             st.markdown("---")
-                            st.subheader("🚀 Oportunidades de Adopción - Turn Automation")
+                            st.subheader("Oportunidades de Adopción - Turn Automation")
                         
                             st.caption(
                                 "Máquinas compatibles con Automatización de Maniobras "
@@ -1893,25 +1893,25 @@ with tab_autotrac:
                         
                                 with kpi1:
                                     st.metric(
-                                        "🏢 Organizaciones Compatibles",
+                                        "Organizaciones Compatibles",
                                         total_orgs
                                     )
                         
                                 with kpi2:
                                     st.metric(
-                                        "🚀 Potenciales ATTA",
+                                        "Potenciales ATTA",
                                         orgs_potenciales
                                     )
                         
                                 with kpi3:
                                     st.metric(
-                                        "✅ Adopción Actual",
+                                        "Adopción Actual",
                                         f"{adopcion:.1f}%"
                                     )
                         
                                 with kpi4:
                                     st.metric(
-                                        "🚜 Máquinas Compatibles",
+                                        "Máquinas Compatibles",
                                         total_maquinas
                                     )
                         
@@ -1919,7 +1919,7 @@ with tab_autotrac:
                                 # TABLA
                                 # ------------------------------------------------------
                         
-                                st.markdown("#### 📋 Detalle de Organizaciones")
+                                st.markdown("#### Detalle de Organizaciones")
                         
                                 def color_atta(row):
                         
@@ -1993,7 +1993,7 @@ with tab_autotrac:
                                             x="Sucursal",
                                             y="Cant. Organizaciones",
                         
-                                            title="📍 Potenciales por Sucursal",
+                                            title="Potenciales por Sucursal",
                         
                                             color="Sucursal",
                         
@@ -2033,7 +2033,7 @@ with tab_autotrac:
                         
                                         hole=0.55,
                         
-                                        title="🎯 Estado de Adopción",
+                                        title="Estado de Adopción",
                         
                                         color="Estado",
                         
@@ -2066,17 +2066,27 @@ with tab_autotrac:
         )
 with tab_cosechadoras:
 
-    st.title("🌽 Uso de Tecnología en Cosechadoras")
+    col_logo, col_titulo = st.columns([1,21])
+    with col_logo:
+        st.image(
+            "Cosechadora.png",
+            width=80
+        )
+    with col_titulo:
+        st.title(
+            "Uso de Tecnología en Cosechadoras"
+        )
+
 
     subtab_s7x9, subtab_s700 = st.tabs([
-        "🚜 S7 / X9",
-        "🌾 S700"
+        "S7 / X9",
+        "S700"
     ])
 
     with subtab_s7x9:
 
         st.subheader(
-            "🌽 Automatización de Cosecha — S7 / X9"
+            "Automatización de Cosecha — S7 / X9"
         )
     
         # ---------------------------------------------------
@@ -2112,7 +2122,7 @@ with tab_cosechadoras:
         ])
         
         sel_cultivos = st.multiselect(
-            "🌽 Cultivo",
+            "Cultivo",
             cultivos
         )
         
@@ -2195,7 +2205,7 @@ with tab_cosechadoras:
         # KPI GENERALES
         # ---------------------------------------------------
     
-        st.subheader("📊 Resumen General")
+        st.subheader("Resumen General")
     
         cosechadoras = (
             df_cosecha_filtrado["Número de serie"]
@@ -2223,17 +2233,17 @@ with tab_cosechadoras:
         kpi1, kpi2, kpi3 = st.columns(3)
     
         kpi1.metric(
-            "🚜 Cosechadoras",
+            "Cosechadoras",
             cosechadoras
         )
     
         kpi2.metric(
-            "🏢 Organizaciones",
+            "Organizaciones",
             organizaciones
         )
     
         kpi3.metric(
-            "🌽 Hectáreas Cosechadas",
+            "Hectáreas Cosechadas",
             f"{hectareas:,.0f}"
         )
     
@@ -2242,7 +2252,7 @@ with tab_cosechadoras:
         # KPI TECNOLÓGICOS
         # ---------------------------------------------------
     
-        st.subheader("🎯 Indicadores Tecnológicos")
+        st.subheader("Indicadores Tecnológicos")
     
         prom_ajustes = (
             df_cosecha_filtrado[col_ajustes]
@@ -2280,17 +2290,17 @@ with tab_cosechadoras:
         kpi5, kpi6, kpi7 = st.columns(3)
     
         kpi5.metric(
-            "⚙️ Automatización Ajustes",
+            "Automatización Ajustes",
             f"{prom_ajustes:.1f}%"
         )
     
         kpi6.metric(
-            "🚜 Automatización Velocidad",
+            "Automatización Velocidad",
             f"{prom_velocidad:.1f}%"
         )
     
         kpi7.metric(
-            "🌽 Cobertura Automatizada",
+            "Cobertura Automatizada",
             f"{cobertura:.1f}%"
         )
     
@@ -2301,7 +2311,7 @@ with tab_cosechadoras:
         
         st.markdown("---")
         st.subheader(
-            "🌽 Evolución Semanal de la Superficie Cosechada por Cultivo"
+            "Evolución Semanal de la Superficie Cosechada por Cultivo"
         )
         
         df_superficie_semana = (
@@ -2368,7 +2378,7 @@ with tab_cosechadoras:
         
         st.markdown("---")
         st.subheader(
-            "📈 Evolución Semanal de la Adopción Tecnológica"
+            "Evolución Semanal de la Adopción Tecnológica"
         )
         
         df_sem = (
@@ -2486,7 +2496,7 @@ with tab_cosechadoras:
         #---------------------------------------
         
         st.markdown("---")
-        st.subheader("🚜 Uso de Tecnología por Máquina")
+        st.subheader("Uso de Tecnología por Máquina")
         
         # ---------------------------------------------------
         # PROMEDIOS HISTÓRICOS
@@ -2693,7 +2703,7 @@ with tab_cosechadoras:
         #       TABLA POR CULTIVO
         #---------------------------------------
     
-        st.subheader("🌽 Uso de Tecnología por Cultivo")
+        st.subheader("Uso de Tecnología por Cultivo")
     
         df_cultivo = (
             df_cosecha_filtrado
@@ -2752,7 +2762,7 @@ with tab_cosechadoras:
     with subtab_s700:
     
         st.subheader(
-            "🌾 Tecnología en Cosechadoras S700"
+            "Tecnología en Cosechadoras S700"
         )
     
         # ---------------------------------------------------
@@ -2774,7 +2784,7 @@ with tab_cosechadoras:
         # KPIs
         # ---------------------------------------------------
     
-        st.subheader("📊 Indicadores Tecnológicos")
+        st.subheader("Indicadores Tecnológicos")
     
         prom_auto = (
             df_s700["Auto Maintain Activado"]
@@ -2795,12 +2805,12 @@ with tab_cosechadoras:
         kpi1, kpi2 = st.columns(2)
     
         kpi1.metric(
-            "⚙️ Auto Maintain",
+            "Auto Maintain",
             f"{prom_auto:.1f}%"
         )
     
         kpi2.metric(
-            "🌾 Harvest Smart",
+            "Harvest Smart",
             f"{prom_hs:.1f}%"
         )
     
@@ -2809,7 +2819,7 @@ with tab_cosechadoras:
         # ---------------------------------------------------
     
         st.markdown("---")
-        st.subheader("🚜 Uso de Tecnología por Máquina")
+        st.subheader("Uso de Tecnología por Máquina")
     
         df_tabla_s700 = (
             df_s700
@@ -2883,7 +2893,7 @@ with tab_cosechadoras:
     
         st.markdown("---")
         st.subheader(
-            "📈 Evolución de Uso de Tecnología"
+            "Evolución de Uso de Tecnología"
         )
     
         df_s700_activas = df_s700[
