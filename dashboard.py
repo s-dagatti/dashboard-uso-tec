@@ -2032,8 +2032,8 @@ with tab_autotrac:
                                     "ℹ️ No se encontraron máquinas compatibles "
                                     "para Turn Automation en el período seleccionado."
                                 )
-                            else:
-                                st.info(f"ℹ️ No hay suficientes datos temporales para graficar la serie histórica de {tech_seleccionada_label}.")
+                        else:
+                             st.info(f"ℹ️ No hay suficientes datos temporales para graficar la serie histórica de {tech_seleccionada_label}.")
                     else:
                         st.info("ℹ️ No se encontraron las columnas de fecha necesarias para generar el gráfico histórico.")
                       
