@@ -62,6 +62,36 @@ def cargar_base_cosecha():
 
     return pd.DataFrame()
 
+@st.cache_data(ttl=60, show_spinner=False)
+def cargar_base_picadoras():
+
+    repo = st.secrets["github"]["repo"]
+
+    token = st.secrets["github"]["token"]
+
+    path = "datos_picadoras_harvestlab.csv"
+
+    url = f"https://api.github.com/repos/{repo}/contents/{path}"
+
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3.raw"
+    }
+
+    res = requests.get(
+        url,
+        headers=headers
+    )
+
+    if res.status_code == 200:
+
+        return pd.read_csv(
+            io.StringIO(res.text)
+        )
+
+    return pd.DataFrame()
+
+
 # --- 2. FILTRO DE VERSIÓN DE SOFTWARE (≥ 23.3) ---
 def es_version_valida(version_str):
     if pd.isna(version_str):
