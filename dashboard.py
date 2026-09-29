@@ -230,7 +230,7 @@ tab_autotrac, tab_guiado, tab_cosechadoras, tab_pulverizadoras, tab_picadoras = 
 ])
 
 with tab_autotrac:
-    col_logo, col_titulo = st.columns([1,9])
+    col_logo, col_titulo = st.columns([1,12])
     with col_logo:
         st.image(
             "mtg.png",
