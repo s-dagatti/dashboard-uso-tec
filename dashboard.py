@@ -2458,6 +2458,15 @@ with tab_cosechadoras:
                 use_container_width=True
             )
 
+    #---------------------------------------
+    #      TABLA POR MAQUINA 
+    #---------------------------------------
+
+    st.markdown("---")
+    st.subheader("🚜 Uso de Tecnología por Máquina")
+
+    
+
 
     #----------------------------------------------#
     #------- SUB TAB S700 -------------------------#
