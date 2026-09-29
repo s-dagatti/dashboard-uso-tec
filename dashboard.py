@@ -2863,8 +2863,18 @@ with tab_cosechadoras:
             "📈 Evolución de Uso de Tecnología"
         )
     
+        df_s700_activas = df_s700[
+            (
+                df_s700["Auto Maintain Activado"].notna()
+            )
+            |
+            (
+                df_s700["Harvest Smart Activado"].notna()
+            )
+        ].copy
+
         df_hist_s700 = (
-            df_s700
+            df_s700_activas
             .groupby("Fecha_fin_dt")
             .agg(
                 AutoMaintain=(
@@ -2883,7 +2893,7 @@ with tab_cosechadoras:
             .reset_index()
             .sort_values("Fecha_fin_dt")
         )
-    
+
         from plotly.subplots import make_subplots
         import plotly.graph_objects as go
     
