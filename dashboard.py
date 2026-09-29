@@ -2153,7 +2153,7 @@ with tab_cosechadoras:
             .mean()
         )
     
-        kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+        kpi1, kpi2, kpi3 = st.columns(3)
     
         kpi1.metric(
             "🚜 Cosechadoras",
