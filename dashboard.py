@@ -2871,7 +2871,7 @@ with tab_cosechadoras:
             (
                 df_s700["Harvest Smart Activado"].notna()
             )
-        ].copy
+        ].copy()
 
         df_hist_s700 = (
             df_s700_activas
