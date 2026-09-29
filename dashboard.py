@@ -4636,6 +4636,264 @@ with tab_picadoras:
             )
 
             # ---------------------------------------------------
+            # RESUMEN DE CALIDAD
+            # ---------------------------------------------------
+            
+            st.markdown("---")
+            st.subheader("🏆 Resumen de Calidad del Forraje")
+            
+            col_res1, col_res2, col_res3 = st.columns(3)
+            
+            cant_alta = (
+                df_tabla_hl["Clasificación"]
+                .str.contains("Alta", na=False)
+                .sum()
+            )
+            
+            cant_media = (
+                df_tabla_hl["Clasificación"]
+                .str.contains("Moderada", na=False)
+                .sum()
+            )
+            
+            cant_baja = (
+                df_tabla_hl["Clasificación"]
+                .str.contains("Crítica", na=False)
+                .sum()
+            )
+            
+            col_res1.metric(
+                "🟢 Calidad Alta",
+                cant_alta
+            )
+            
+            col_res2.metric(
+                "🟡 Calidad Moderada",
+                cant_media
+            )
+            
+            col_res3.metric(
+                "🔴 Calidad Crítica",
+                cant_baja
+            )
+            
+            # ---------------------------------------------------
+            # PERFIL DE CALIDAD
+            # ---------------------------------------------------
+            
+            st.markdown("---")
+            st.subheader("📊 Perfil Promedio de Calidad")
+            
+            perfil = pd.DataFrame({
+            
+                "Indicador": [
+                    "Materia seca",
+                    "Almidón",
+                    "Proteína",
+                    "FDN",
+                    "FDA",
+                    "Cenizas",
+                    "Largo corte"
+                ],
+            
+                "Actual": [
+            
+                    df_tabla_hl["MateriaSeca"].mean(),
+            
+                    df_tabla_hl["Almidon"].mean(),
+            
+                    df_tabla_hl["Proteina"].mean(),
+            
+                    df_tabla_hl["FDN"].mean(),
+            
+                    df_tabla_hl["FDA"].mean(),
+            
+                    df_tabla_hl["Ceniza"].mean(),
+            
+                    df_tabla_hl["LargoCorte"].mean()
+            
+                ],
+            
+                "Objetivo": [
+            
+                    34,
+                    35,
+                    7,
+                    42,
+                    20,
+                    4,
+                    15
+            
+                ]
+            
+            })
+            
+            st.dataframe(
+                perfil.style.format(
+                    {
+                        "Actual": "{:.1f}",
+                        "Objetivo": "{:.1f}"
+                    }
+                ),
+                use_container_width=True
+            )
+            
+            # ---------------------------------------------------
+            # RADAR CHART
+            # ---------------------------------------------------
+            
+            st.markdown("---")
+            st.subheader("🎯 Radar de Calidad")
+            
+            import plotly.graph_objects as go
+            
+            fig_radar = go.Figure()
+            
+            fig_radar.add_trace(
+            
+                go.Scatterpolar(
+            
+                    r=perfil["Objetivo"],
+            
+                    theta=perfil["Indicador"],
+            
+                    fill="toself",
+            
+                    name="Objetivo"
+            
+                )
+            
+            )
+            
+            fig_radar.add_trace(
+            
+                go.Scatterpolar(
+            
+                    r=perfil["Actual"],
+            
+                    theta=perfil["Indicador"],
+            
+                    fill="toself",
+            
+                    name="Actual"
+            
+                )
+            
+            )
+            
+            fig_radar.update_layout(
+            
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True
+                    )
+                ),
+            
+                showlegend=True
+            
+            )
+            
+            st.plotly_chart(
+                fig_radar,
+                use_container_width=True
+            )
+            
+            # ---------------------------------------------------
+            # SCATTER MATERIA SECA x ALMIDÓN
+            # ---------------------------------------------------
+            
+            st.markdown("---")
+            st.subheader(
+                "🌿 Relación Materia Seca × Almidón"
+            )
+            
+            df_scatter = (
+                df_tabla_hl.copy()
+            )
+            
+            df_scatter = df_scatter.dropna(
+                subset=[
+                    "MateriaSeca",
+                    "Almidon"
+                ]
+            )
+            
+            if not df_scatter.empty:
+            
+                fig_scatter = px.scatter(
+            
+                    df_scatter,
+            
+                    x="MateriaSeca",
+            
+                    y="Almidon",
+            
+                    color="Score Calidad",
+            
+                    size="Superficie",
+            
+                    hover_data=[
+                        "Clientes",
+                        "Granjas",
+                        "Campos",
+                        "Variedades"
+                    ],
+            
+                    color_continuous_scale=[
+                        "#d62728",
+                        "#f2b134",
+                        "#2ca02c"
+                    ],
+            
+                    labels={
+            
+                        "MateriaSeca":
+                            "Materia Seca (%)",
+            
+                        "Almidon":
+                            "Almidón (%)",
+            
+                        "Score Calidad":
+                            "Score"
+            
+                    },
+            
+                    title=(
+                        "Materia Seca vs Almidón "
+                        "coloreado por Score"
+                    )
+            
+                )
+            
+                fig_scatter.add_vrect(
+                    x0=32,
+                    x1=36,
+                    fillcolor="green",
+                    opacity=0.08,
+                    line_width=0
+                )
+            
+                fig_scatter.add_hrect(
+                    y0=32,
+                    y1=38,
+                    fillcolor="green",
+                    opacity=0.08,
+                    line_width=0
+                )
+            
+                st.plotly_chart(
+                    fig_scatter,
+                    use_container_width=True
+                )
+            
+            else:
+            
+                st.info(
+                    "No existen registros con curva activa."
+                )
+
+
+            # ---------------------------------------------------
             # SCATTER: MATERIA SECA × ALMIDÓN
             # ---------------------------------------------------
             
