@@ -4678,7 +4678,55 @@ with tab_picadoras:
             )
             
             # ---------------------------------------------------
-            # PERFIL DE CALIDAD
+            # PERFIL PROMEDIO DE CALIDAD
+            # ---------------------------------------------------
+            
+            perfil = pd.DataFrame({
+            
+                "Indicador": [
+                    "Materia seca",
+                    "Almidón",
+                    "Proteína",
+                    "FDN",
+                    "FDA",
+                    "Cenizas",
+                    "Largo corte"
+                ],
+            
+                "Actual": [
+            
+                    df_tabla_hl["MateriaSeca"].mean(),
+            
+                    df_tabla_hl["Almidon"].mean(),
+            
+                    df_tabla_hl["Proteina"].mean(),
+            
+                    df_tabla_hl["FDN"].mean(),
+            
+                    df_tabla_hl["FDA"].mean(),
+            
+                    df_tabla_hl["Ceniza"].mean(),
+            
+                    df_tabla_hl["LargoCorte"].mean()
+            
+                ],
+            
+                "Objetivo": [
+            
+                    34,   # Materia seca
+                    35,   # Almidón
+                    7,    # Proteína
+                    42,   # FDN
+                    20,   # FDA
+                    4,    # Cenizas
+                    15    # Largo corte
+            
+                ]
+            
+            })
+            
+            # ---------------------------------------------------
+            # RADAR + PERFIL LATERAL
             # ---------------------------------------------------
             
             st.markdown("---")
@@ -4691,14 +4739,17 @@ with tab_picadoras:
                 st.markdown("##### 📊 Perfil Promedio")
             
                 st.dataframe(
+            
                     perfil.style.format(
                         {
                             "Actual": "{:.1f}",
                             "Objetivo": "{:.1f}"
                         }
                     ),
+            
                     use_container_width=True,
                     hide_index=True
+            
                 )
             
             with col_radar:
@@ -4706,25 +4757,39 @@ with tab_picadoras:
                 fig_radar = go.Figure()
             
                 fig_radar.add_trace(
+            
                     go.Scatterpolar(
+            
                         r=perfil["Objetivo"],
+            
                         theta=perfil["Indicador"],
+            
                         fill="toself",
+            
                         name="Objetivo"
+            
                     )
+            
                 )
             
                 fig_radar.add_trace(
+            
                     go.Scatterpolar(
+            
                         r=perfil["Actual"],
+            
                         theta=perfil["Indicador"],
+            
                         fill="toself",
+            
                         name="Actual"
+            
                     )
+            
                 )
-
+            
                 fig_radar.update_layout(
-
+            
                     polar=dict(
             
                         bgcolor="rgba(0,0,0,0)",
@@ -4762,68 +4827,6 @@ with tab_picadoras:
                     use_container_width=True
                 )
 
-
-            
-            # ---------------------------------------------------
-            # RADAR CHART
-            # ---------------------------------------------------
-            
-            st.markdown("---")
-            st.subheader("🎯 Radar de Calidad")
-            
-            import plotly.graph_objects as go
-            
-            fig_radar = go.Figure()
-            
-            fig_radar.add_trace(
-            
-                go.Scatterpolar(
-            
-                    r=perfil["Objetivo"],
-            
-                    theta=perfil["Indicador"],
-            
-                    fill="toself",
-            
-                    name="Objetivo"
-            
-                )
-            
-            )
-            
-            fig_radar.add_trace(
-            
-                go.Scatterpolar(
-            
-                    r=perfil["Actual"],
-            
-                    theta=perfil["Indicador"],
-            
-                    fill="toself",
-            
-                    name="Actual"
-            
-                )
-            
-            )
-            
-            fig_radar.update_layout(
-            
-                polar=dict(
-                    radialaxis=dict(
-                        visible=True
-                    )
-                ),
-            
-                showlegend=True
-            
-            )
-            
-            st.plotly_chart(
-                fig_radar,
-                use_container_width=True
-            )
-            
             # ---------------------------------------------------
             # SCATTER MATERIA SECA x ALMIDÓN
             # ---------------------------------------------------
