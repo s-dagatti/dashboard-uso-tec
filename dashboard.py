@@ -4562,11 +4562,6 @@ with tab_picadoras:
             # TABLA BASE
             # ---------------------------------------------------
             
-            st.markdown("---")
-            st.subheader(
-                "📋 Calidad de Forraje por Cliente, Granja y Campo"
-            )
-            
             df_tabla_hl = (
             
                 df_hl[
@@ -4805,6 +4800,10 @@ with tab_picadoras:
             # ---------------------------------------------------
             # FILTROS TABLA
             # ---------------------------------------------------
+            st.markdown("---")
+            st.subheader(
+                "📋 Calidad de Forraje por Cliente, Granja y Campo"
+            )
             
             col_f1, col_f2, col_f3 = st.columns(3)
             
