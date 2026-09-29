@@ -3512,6 +3512,13 @@ with tab_picadoras:
             "Análisis de Calidad de Picado"
         )
 
+    subtab_productividad, subtab_harvestlab = st.tabs([
+        "🚜 Productividad",
+        "🌿 HarvestLab"
+    ])
+
+    with subtab_productividad:
+
     # ---------------------------------------------------
     # CARGA BASE
     # ---------------------------------------------------
