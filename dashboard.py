@@ -2465,6 +2465,99 @@ with tab_cosechadoras:
     st.markdown("---")
     st.subheader("🚜 Uso de Tecnología por Máquina")
 
+    df_maquinas = (
+        df_cosecha_filtrado
+        .groupby(
+            [
+                "Nombre de organización",
+                "Nombre de máquina",
+                "Número de serie"
+            ],
+            as_index=False
+        )
+        .agg(
+            Hectareas=(
+                "Superficie cosechada (ha)",
+                "sum"
+            ),
+            Ajustes=(
+                col_ajustes,
+                "mean"
+            ),
+            Velocidad=(
+                col_velocidad,
+                "mean"
+            ),
+            Productividad=(
+                col_productividad,
+                "mean"
+            )
+        )
+    )
+    
+    df_maquinas = df_maquinas.sort_values(
+        "Hectareas",
+        ascending=False
+    )
+    
+    st.dataframe(
+        df_maquinas,
+        use_container_width=True
+    )
+
+    #---------------------------------------
+    #       TABLA POR CULTIVO
+    #---------------------------------------
+
+    st.subheader("🌽 Uso de Tecnología por Cultivo")
+
+    df_cultivo = (
+        df_cosecha_filtrado
+        .groupby(
+            "Cultivo",
+            as_index=False
+        )
+        .agg(
+            Hectareas=(
+                "Superficie cosechada (ha)",
+                "sum"
+            ),
+            Ajustes=(
+                col_ajustes,
+                "mean"
+            ),
+            Velocidad=(
+                col_velocidad,
+                "mean"
+            ),
+            Productividad=(
+                col_productividad,
+                "mean"
+            )
+        )
+    )
+    
+    df_cultivo = (
+        df_cultivo
+        .sort_values(
+            "Hectareas",
+            ascending=False
+        )
+    )
+
+    st.dataframe(
+        df_cultivo.style.format(
+            {
+                "Hectareas": "{:,.0f}",
+                "Ajustes": "{:.1f}%",
+                "Velocidad": "{:.1f}%",
+                "Productividad": "{:.1f}%"
+            }
+        ),
+        use_container_width=True
+    )
+    
+
     
 
 
