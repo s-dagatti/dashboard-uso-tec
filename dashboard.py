@@ -17,7 +17,7 @@ def cargar_base_datos():
     repo = st.secrets.get("github", {}).get("repo", "s-dagatti/uso-tec-v2")
     path = st.secrets.get("github", {}).get("path", "datos_consolidados_conci.csv")
     token = st.secrets.get("github", {}).get("token", None)
-    
+    <
     # Lectura vía GitHub API con Token
     if token:
         url = f"https://api.github.com/repos/{repo}/contents/{path}"
@@ -222,7 +222,7 @@ df_filtrado_autotrac = df_filtrado_aptas[
 
 # --- 6. PESTAÑA: USO DE AUTOTRAC ---
 tab_autotrac, tab_guiado, tab_cosechadoras, tab_pulverizadoras, tab_picadoras = st.tabs([
-    "🎯 Uso de AutoTrac",
+    "AutoTrac",
     "🛰️ Guiado Avanzado",
     "🌽 Cosechadoras",
     "💧 Pulverizadoras",
@@ -230,7 +230,17 @@ tab_autotrac, tab_guiado, tab_cosechadoras, tab_pulverizadoras, tab_picadoras = 
 ])
 
 with tab_autotrac:
-    st.title("🎯 Uso de AutoTrac™")
+    col_logo, col_titulo = st.columns([1,8])
+    with col_logo:
+        st.image(
+            "mtg.png",
+            width=80
+        )
+    with col_titulo:
+        st.title(
+            "Uso de Autotrac"
+        )
+    
     st.caption("Promedio de adopción para monitores aptos (**software ≥ 23.3**) considerando registros con **uso ≥ 1%**.")
 
     # --- PERÍODO EVALUADO ---
