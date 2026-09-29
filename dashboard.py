@@ -2167,10 +2167,6 @@ with tab_cosechadoras:
             f"{hectareas:,.0f}"
         )
     
-        kpi4.metric(
-            "📈 Productividad Promedio",
-            f"{productividad_media:.1f}%"
-        )
     
         # ---------------------------------------------------
         # KPI TECNOLÓGICOS
@@ -2229,110 +2225,156 @@ with tab_cosechadoras:
         )
     
         # ---------------------------------------------------
-        # EVOLUCIÓN HISTÓRICA
+        # GRÁFICO 1 - SUPERFICIE POR CULTIVO
         # ---------------------------------------------------
-    
+        
         st.markdown("---")
-        st.subheader("📈 Evolución Histórica")
-    
-        df_hist = (
-    
-            df_cosecha
-    
+        st.subheader("🌽 Superficie Cosechada por Cultivo")
+        
+        df_cult = (
+            df_cosecha_filtrado
+            .groupby("Cultivo")
+            ["Superficie cosechada (ha)"]
+            .sum()
+            .reset_index()
+        )
+        
+        fig_cult = px.bar(
+            df_cult.sort_values(
+                "Superficie cosechada (ha)",
+                ascending=False
+            ),
+        
+            x="Cultivo",
+        
+            y="Superficie cosechada (ha)",
+        
+            text_auto=".0f",
+        
+            color="Cultivo",
+        
+            title="Superficie Cosechada por Cultivo"
+        )
+        
+        fig_cult.update_layout(
+            xaxis_title="Cultivo",
+            yaxis_title="Superficie Cosechada (ha)",
+            showlegend=False
+        )
+        
+        st.plotly_chart(
+            fig_cult,
+            use_container_width=True
+        )
+        
+        # ---------------------------------------------------
+        # GRÁFICO 2 - ADOPCIÓN TECNOLÓGICA
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader("📈 Evolución de Adopción Tecnológica")
+        
+        df_sem = (
+            df_cosecha_filtrado
             .groupby("Fecha_fin_dt")
-    
             .agg(
-    
                 Ajustes=(
                     col_ajustes,
                     "mean"
                 ),
-    
+        
                 Velocidad=(
                     col_velocidad,
                     "mean"
                 ),
-    
-                Productividad=(
-                    col_productividad,
-                    "mean"
+        
+                Maquinas=(
+                    "Número de serie",
+                    "nunique"
                 )
-    
             )
-    
             .reset_index()
-    
-            .sort_values(
-                "Fecha_fin_dt"
-            )
-    
+            .sort_values("Fecha_fin_dt")
         )
-    
+        
+        from plotly.subplots import make_subplots
         import plotly.graph_objects as go
-    
-        fig_hist = go.Figure()
-    
-        fig_hist.add_trace(
+        
+        fig = make_subplots(
+            specs=[[{"secondary_y": True}]]
+        )
+        
+        # BARRAS
+        fig.add_trace(
+            go.Bar(
+                x=df_sem["Fecha_fin_dt"],
+                y=df_sem["Maquinas"],
+                name="Máquinas Trabajando",
+                marker_color="#2b5c8f",
+                text=df_sem["Maquinas"],
+                textposition="auto"
+            ),
+            secondary_y=False
+        )
+        
+        # AJUSTES AUTOMÁTICOS
+        fig.add_trace(
             go.Scatter(
-                x=df_hist["Fecha_fin_dt"],
-                y=df_hist["Ajustes"],
+                x=df_sem["Fecha_fin_dt"],
+                y=df_sem["Ajustes"],
                 mode="lines+markers",
-                name="Ajustes Automáticos"
+                name="Ajustes Automáticos",
+                line=dict(width=3)
+            ),
+            secondary_y=True
+        )
+        
+        # VELOCIDAD AUTOMÁTICA
+        fig.add_trace(
+            go.Scatter(
+                x=df_sem["Fecha_fin_dt"],
+                y=df_sem["Velocidad"],
+                mode="lines+markers",
+                name="Velocidad Automática",
+                line=dict(width=3)
+            ),
+            secondary_y=True
+        )
+        
+        fig.update_yaxes(
+            title_text="Cantidad de Máquinas",
+            secondary_y=False
+        )
+        
+        fig.update_yaxes(
+            title_text="% Utilización",
+            range=[0, 110],
+            secondary_y=True
+        )
+        
+        fig.update_layout(
+            title="Máquinas Trabajando vs Utilización de Tecnología",
+            hovermode="x unified",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
             )
         )
-    
-        fig_hist.add_trace(
-            go.Scatter(
-                x=df_hist["Fecha_fin_dt"],
-                y=df_hist["Velocidad"],
-                mode="lines+markers",
-                name="Velocidad Automática"
-            )
-        )
-    
-        fig_hist.update_layout(
-            title="Tendencia de Utilización de Automatización",
-            xaxis_title="Período",
-            yaxis_title="% Utilización",
-            hovermode="x unified"
-        )
-    
+        
         st.plotly_chart(
-            fig_hist,
+            fig,
             use_container_width=True
         )
-    
-        # ---------------------------------------------------
-        # PRODUCTIVIDAD
-        # ---------------------------------------------------
-    
-        st.subheader("📈 Evolución de Productividad")
-    
-        fig_prod = px.line(
-    
-            df_hist,
-    
-            x="Fecha_fin_dt",
-    
-            y="Productividad",
-    
-            markers=True,
-    
-            title="Mayor Productividad Generada por Automatización"
-    
-        )
-    
-        st.plotly_chart(
-            fig_prod,
-            use_container_width=True
-        )
-    
+        
 
 
+    #----------------------------------------------#
+    #------- SUB TAB S700 -------------------------#
+    #----------------------------------------------#
     
-
-
-
     with subtab_s700:
 
         st.subheader(
