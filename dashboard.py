@@ -3362,7 +3362,7 @@ with tab_pulverizadoras:
             names="Estado",
             values="Cantidad",
             title="Control de Secciones",
-            hole=0.4
+            hole=0.4,
             color="Estado",
             color_discrete_map={
                 "Con Uso": "#2ca02c",
