@@ -123,6 +123,35 @@ sel_razon = st.sidebar.selectbox("Razón Social", razones)
 tipos = ["Todos"] + sorted([t for t in df_sidebar['Tipo'].dropna().unique() if str(t).strip() != ''])
 sel_tipo = st.sidebar.selectbox("Tipo de Máquina", tipos)
 
+
+    # Filtro: Modelo de Máquina
+modelos = sorted([
+    m
+    for m in df_sidebar["Modelo"]
+    .dropna()
+    .unique()
+    if str(m).strip() != ""
+])
+
+sel_modelos = st.sidebar.multiselect(
+    "Modelo",
+    modelos
+)
+
+if sel_modelos:
+
+    df_filtrado_raw = df_filtrado_raw[
+        df_filtrado_raw["Modelo"]
+        .isin(sel_modelos)
+    ]
+if sel_tipo != "Todos":
+if sel_modelos:
+
+    df_filtrado_raw = df_filtrado_raw[
+        df_filtrado_raw["Modelo"]
+        .isin(sel_modelos)
+    ]
+
 # Filtro: Licencia
 if col_licencia:
     licencias = ["Todas"] + sorted([l for l in df_sidebar[col_licencia].dropna().unique() if str(l).strip() != ''])
