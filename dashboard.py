@@ -4682,61 +4682,87 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             st.markdown("---")
-            st.subheader("📊 Perfil Promedio de Calidad")
+            st.subheader("🎯 Radar de Calidad")
             
-            perfil = pd.DataFrame({
+            col_radar, col_tabla = st.columns([2,1])
             
-                "Indicador": [
-                    "Materia seca",
-                    "Almidón",
-                    "Proteína",
-                    "FDN",
-                    "FDA",
-                    "Cenizas",
-                    "Largo corte"
-                ],
+            with col_tabla:
             
-                "Actual": [
+                st.markdown("##### 📊 Perfil Promedio")
             
-                    df_tabla_hl["MateriaSeca"].mean(),
+                st.dataframe(
+                    perfil.style.format(
+                        {
+                            "Actual": "{:.1f}",
+                            "Objetivo": "{:.1f}"
+                        }
+                    ),
+                    use_container_width=True,
+                    hide_index=True
+                )
             
-                    df_tabla_hl["Almidon"].mean(),
+            with col_radar:
             
-                    df_tabla_hl["Proteina"].mean(),
+                fig_radar = go.Figure()
             
-                    df_tabla_hl["FDN"].mean(),
+                fig_radar.add_trace(
+                    go.Scatterpolar(
+                        r=perfil["Objetivo"],
+                        theta=perfil["Indicador"],
+                        fill="toself",
+                        name="Objetivo"
+                    )
+                )
             
-                    df_tabla_hl["FDA"].mean(),
+                fig_radar.add_trace(
+                    go.Scatterpolar(
+                        r=perfil["Actual"],
+                        theta=perfil["Indicador"],
+                        fill="toself",
+                        name="Actual"
+                    )
+                )
+
+                fig_radar.update_layout(
+
+                    polar=dict(
             
-                    df_tabla_hl["Ceniza"].mean(),
+                        bgcolor="rgba(0,0,0,0)",
             
-                    df_tabla_hl["LargoCorte"].mean()
+                        radialaxis=dict(
+                            visible=True,
+                            showline=True,
+                            gridcolor="rgba(150,150,150,0.3)"
+                        ),
             
-                ],
+                        angularaxis=dict(
+                            gridcolor="rgba(150,150,150,0.3)"
+                        )
             
-                "Objetivo": [
+                    ),
             
-                    34,
-                    35,
-                    7,
-                    42,
-                    20,
-                    4,
-                    15
+                    paper_bgcolor="rgba(0,0,0,0)",
             
-                ]
+                    plot_bgcolor="rgba(0,0,0,0)",
             
-            })
+                    showlegend=True,
             
-            st.dataframe(
-                perfil.style.format(
-                    {
-                        "Actual": "{:.1f}",
-                        "Objetivo": "{:.1f}"
-                    }
-                ),
-                use_container_width=True
-            )
+                    legend=dict(
+                        orientation="h",
+                        yanchor="bottom",
+                        y=1.02,
+                        xanchor="right",
+                        x=1
+                    )
+            
+                )
+            
+                st.plotly_chart(
+                    fig_radar,
+                    use_container_width=True
+                )
+
+
             
             # ---------------------------------------------------
             # RADAR CHART
