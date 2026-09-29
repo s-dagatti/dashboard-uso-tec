@@ -2098,6 +2098,50 @@ with tab_cosechadoras:
         # ---------------------------------------------------
         
         df_cosecha_filtrado = df_cosecha.copy()
+
+        # ------------------------------------------
+        # FILTROS GLOBALES DEL DASHBOARD
+        # ------------------------------------------
+        
+        if sel_sucursal != "Todas":
+        
+            df_cosecha_filtrado = (
+                df_cosecha_filtrado[
+                    df_cosecha_filtrado["Sucursal"]
+                    == sel_sucursal
+                ]
+            )
+        
+        if sel_razon != "Todas":
+        
+            df_cosecha_filtrado = (
+                df_cosecha_filtrado[
+                    df_cosecha_filtrado[
+                        "Nombre de organización"
+                    ] == sel_razon
+                ]
+            )
+            
+        if rango_fechas:
+            df_cosecha_filtrado = (
+                df_cosecha_filtrado[
+                    (
+                        df_cosecha_filtrado[
+                            "Fecha_inicio_dt"
+                        ].dt.date
+                        >= rango_fechas[0]
+                    )
+                    &
+                    (
+                        df_cosecha_filtrado[
+                            "Fecha_fin_dt"
+                        ].dt.date
+                        <= rango_fechas[1]
+                    )
+                ]
+            )
+        
+
         
         if sel_cultivos:
         
