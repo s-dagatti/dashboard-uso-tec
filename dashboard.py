@@ -2649,8 +2649,7 @@ with tab_cosechadoras:
                 "Ajustes (%)",
                 "Evolución Ajustes",
                 "Velocidad (%)",
-                "Evolución Velocidad",
-                "Productividad (%)"
+                "Evolución Velocidad"
             ]
         ].copy()
         
