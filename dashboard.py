@@ -138,12 +138,7 @@ sel_modelos = st.sidebar.multiselect(
     modelos
 )
 
-if sel_modelos:
 
-    df_filtrado_raw = df_filtrado_raw[
-        df_filtrado_raw["Modelo"]
-        .isin(sel_modelos)
-    ]
 if sel_tipo != "Todos":
 if sel_modelos:
 
