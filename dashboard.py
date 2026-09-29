@@ -3469,21 +3469,305 @@ with tab_pulverizadoras:
 
 with tab_picadoras:
 
-    col_logo, col_titulo = st.columns([1,12])
-    
+    col_logo, col_titulo = st.columns([1, 12])
+
     with col_logo:
         st.image(
             "Picadora.png",
             width=80
         )
+
     with col_titulo:
         st.title(
             "Análisis de Calidad de Picado"
         )
 
+    # ---------------------------------------------------
+    # CARGA BASE
+    # ---------------------------------------------------
 
-    st.info(
-        "Sección reservada para el análisis futuro "
-        "de picadoras."
+    df_pic = cargar_base_picadoras()
+
+    df_pic["Fecha_inicio_dt"] = pd.to_datetime(
+        df_pic["Fecha de inicio"],
+        format="mixed",
+        errors="coerce"
     )
+
+    df_pic["Fecha_fin_dt"] = pd.to_datetime(
+        df_pic["Fecha de terminación"],
+        format="mixed",
+        errors="coerce"
+    )
+
+    # ---------------------------------------------------
+    # KPI 1 - AUTOTRAC
+    # ---------------------------------------------------
+
+    autotrac_promedio = (
+
+        df_pic["AutoTrac™"]
+        .fillna(0)
+
+        /
+
+        df_pic["Superficie cosechada"]
+        .replace(0, np.nan)
+
+        * 100
+
+    ).mean()
+
+    # ---------------------------------------------------
+    # KPI 2 - SUPERFICIE
+    # ---------------------------------------------------
+
+    superficie_total = (
+        df_pic[
+            "Superficie cosechada"
+        ]
+        .fillna(0)
+        .sum()
+    )
+
+    # ---------------------------------------------------
+    # KPI 3 - COMBUSTIBLE
+    # ---------------------------------------------------
+
+    combustible_ha = (
+        df_pic[
+            "Índice de combustible (área)"
+        ]
+        .mean()
+    )
+
+    # ---------------------------------------------------
+    # KPI 4 - TONELADAS HÚMEDAS
+    # ---------------------------------------------------
+
+    toneladas_humedas = (
+        df_pic[
+            "Peso húmedo total"
+        ]
+        .fillna(0)
+        .sum()
+    )
+
+    # ---------------------------------------------------
+    # KPIs
+    # ---------------------------------------------------
+
+    st.subheader("📊 Indicadores Generales")
+
+    k1, k2, k3, k4 = st.columns(4)
+
+    k1.metric(
+        "🛰️ AutoTrac Promedio",
+        f"{autotrac_promedio:.1f}%"
+    )
+
+    k2.metric(
+        "🌱 Superficie Total",
+        f"{superficie_total:,.0f} ha"
+    )
+
+    k3.metric(
+        "⛽ Combustible",
+        f"{combustible_ha:.1f} L/ha"
+    )
+
+    k4.metric(
+        "🚜 Producción Húmeda",
+        f"{toneladas_humedas:,.0f} t"
+    )
+
+    # ---------------------------------------------------
+    # HISTÓRICO
+    # ---------------------------------------------------
+
+    st.markdown("---")
+    st.subheader(
+        "📈 Evolución Semanal de Trabajo"
+    )
+
+    df_hist = (
+
+        df_pic
+
+        .groupby("Fecha_fin_dt")
+
+        .agg(
+
+            Superficie=(
+                "Superficie cosechada",
+                "sum"
+            ),
+
+            AutoTrac=(
+                "AutoTrac™",
+                lambda x: (
+                    x.fillna(0).sum()
+                )
+            ),
+
+            Maquinas=(
+                "Equipo",
+                "nunique"
+            )
+
+        )
+
+        .reset_index()
+
+        .sort_values(
+            "Fecha_fin_dt"
+        )
+
+    )
+
+    # porcentaje de autotrac semanal
+
+    superficie_semana = (
+
+        df_pic
+
+        .groupby("Fecha_fin_dt")
+
+        [
+            "Superficie cosechada"
+        ]
+
+        .sum()
+
+        .reset_index()
+
+        .rename(
+            columns={
+                "Superficie cosechada":
+                    "Sup_Total"
+            }
+        )
+
+    )
+
+    df_hist = pd.merge(
+        df_hist,
+        superficie_semana,
+        on="Fecha_fin_dt",
+        how="left"
+    )
+
+    df_hist["AutoTrac_Porc"] = np.where(
+
+        df_hist["Sup_Total"] > 0,
+
+        df_hist["AutoTrac"]
+        /
+        df_hist["Sup_Total"]
+        *
+        100,
+
+        np.nan
+
+    )
+
+    # ---------------------------------------------------
+    # GRAFICO
+    # ---------------------------------------------------
+
+    from plotly.subplots import make_subplots
+    import plotly.graph_objects as go
+
+    fig_pic = make_subplots(
+        specs=[[{"secondary_y": True}]]
+    )
+
+    # Barras
+    fig_pic.add_trace(
+
+        go.Bar(
+
+            x=df_hist["Fecha_fin_dt"],
+
+            y=df_hist["Maquinas"],
+
+            name="Máquinas Trabajando",
+
+            marker_color="#2b5c8f",
+
+            text=df_hist["Maquinas"],
+
+            textposition="auto"
+
+        ),
+
+        secondary_y=False
+
+    )
+
+    # Línea superficie
+
+    fig_pic.add_trace(
+
+        go.Scatter(
+
+            x=df_hist["Fecha_fin_dt"],
+
+            y=df_hist["Superficie"],
+
+            mode="lines+markers",
+
+            name="Superficie Cosechada",
+
+            line=dict(
+                color="#367c2b",
+                width=3
+            )
+
+        ),
+
+        secondary_y=True
+
+    )
+
+    fig_pic.update_yaxes(
+        title_text="Cantidad de Máquinas",
+        secondary_y=False
+    )
+
+    fig_pic.update_yaxes(
+        title_text="Superficie (ha)",
+        secondary_y=True
+    )
+
+    fig_pic.update_layout(
+
+        title=(
+            "Máquinas Trabajando "
+            "y Superficie Cosechada"
+        ),
+
+        hovermode="x unified",
+
+        legend=dict(
+
+            orientation="h",
+
+            yanchor="bottom",
+
+            y=1.02,
+
+            xanchor="right",
+
+            x=1
+
+        )
+
+    )
+
+    st.plotly_chart(
+        fig_pic,
+        use_container_width=True
+    )
+
 
