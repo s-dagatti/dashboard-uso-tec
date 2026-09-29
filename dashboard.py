@@ -4078,11 +4078,27 @@ with tab_picadoras:
         df_maquinas = df_maquinas.rename(
             columns={
                 "Organizaciones": "Organización",
-                "Equipo": "Modelo",
-                "Nombre de máquina": "Serie",
+                "Nombre de máquina": "Máquina",
+                "Equipo": "Serie",
                 "Hectareas": "Hectáreas Picadas"
             }
         )
+        
+        # -----------------------------------------
+        # COLUMNAS FINALES
+        # -----------------------------------------
+        
+        df_maquinas_view = df_maquinas[
+            [
+                "Organización",
+                "Máquina",
+                "Serie",
+                "Hectáreas Picadas",
+                "AutoTrac (%)",
+                "Constituyentes (%)",
+                "Estado HarvestLab"
+            ]
+        ].copy()
         
         # -----------------------------------------
         # TABLA
@@ -4090,7 +4106,7 @@ with tab_picadoras:
         
         st.dataframe(
         
-            df_maquinas.style.format(
+            df_maquinas_view.style.format(
                 {
                     "Hectáreas Picadas": "{:,.0f}",
                     "AutoTrac (%)": "{:.1f}%",
@@ -4101,6 +4117,7 @@ with tab_picadoras:
             use_container_width=True
         
         )
+
         
         # ---------------------------------------------------
         # PIE CHARTS
