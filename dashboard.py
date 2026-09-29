@@ -4193,5 +4193,309 @@ with tab_picadoras:
                 use_container_width=True
             )
 
+        with subtab_harvestlab:
+
+            st.subheader(
+                "🌿 Calidad de Forraje y Constituyentes"
+            )
+        
+            # ---------------------------------------------------
+            # BASE HARVESTLAB
+            # ---------------------------------------------------
+        
+            df_hl = df_pic.copy()
+        
+            # ---------------------------------------------------
+            # CURVA DE CONSTITUYENTES
+            # ---------------------------------------------------
+        
+            mask_curva = (
+        
+                df_hl["Almidón"].notna()
+        
+                |
+        
+                df_hl["Proteína bruta"].notna()
+        
+                |
+        
+                df_hl["Fibra detergente neutro"].notna()
+        
+                |
+        
+                df_hl["Fibra detergente ácido"].notna()
+        
+                |
+        
+                df_hl["Azúcar"].notna()
+        
+                |
+        
+                df_hl["Ceniza bruta"].notna()
+        
+            )
+        
+            # ---------------------------------------------------
+            # KPIs
+            # ---------------------------------------------------
+        
+            materia_seca = (
+                df_hl["Materia seca"]
+                .mean()
+            )
+        
+            almidon = (
+                df_hl["Almidón"]
+                .mean()
+            )
+        
+            proteina = (
+                df_hl["Proteína bruta"]
+                .mean()
+            )
+        
+            porc_curva = (
+                mask_curva.sum()
+                /
+                len(df_hl)
+                * 100
+                if len(df_hl) > 0
+                else 0
+            )
+        
+            k1, k2, k3, k4 = st.columns(4)
+        
+            k1.metric(
+                "🌿 Materia Seca",
+                f"{materia_seca:.1f}%"
+            )
+        
+            k2.metric(
+                "🌽 Almidón",
+                f"{almidon:.1f}%"
+            )
+        
+            k3.metric(
+                "💪 Proteína Bruta",
+                f"{proteina:.1f}%"
+            )
+        
+            k4.metric(
+                "🧪 Curva Activa",
+                f"{porc_curva:.1f}%"
+            )
+        
+            # ---------------------------------------------------
+            # EVOLUCIÓN HISTÓRICA
+            # ---------------------------------------------------
+        
+            st.markdown("---")
+            st.subheader(
+                "📈 Evolución Semanal de Calidad"
+            )
+        
+            df_hist = (
+        
+                df_hl
+        
+                .groupby("Fecha_fin_dt")
+        
+                .agg(
+        
+                    MateriaSeca=(
+                        "Materia seca",
+                        "mean"
+                    ),
+        
+                    Almidon=(
+                        "Almidón",
+                        "mean"
+                    ),
+        
+                    Proteina=(
+                        "Proteína bruta",
+                        "mean"
+                    )
+        
+                )
+        
+                .reset_index()
+        
+                .sort_values(
+                    "Fecha_fin_dt"
+                )
+        
+            )
+        
+            fig_hist = px.line(
+        
+                df_hist,
+        
+                x="Fecha_fin_dt",
+        
+                y=[
+                    "MateriaSeca",
+                    "Almidon",
+                    "Proteina"
+                ],
+        
+                markers=True,
+        
+                title="Evolución de Constituyentes"
+        
+            )
+        
+            fig_hist.update_layout(
+                hovermode="x unified"
+            )
+        
+            st.plotly_chart(
+                fig_hist,
+                use_container_width=True
+            )
+        
+            # ---------------------------------------------------
+            # SCATTER
+            # ---------------------------------------------------
+        
+            st.markdown("---")
+            st.subheader(
+                "🌿 Materia Seca × Almidón"
+            )
+        
+            df_scatter = (
+                df_hl[
+                    mask_curva
+                ]
+                .copy()
+            )
+        
+            if not df_scatter.empty:
+        
+                fig_scatter = px.scatter(
+        
+                    df_scatter,
+        
+                    x="Materia seca",
+        
+                    y="Almidón",
+        
+                    color="Organizaciones",
+        
+                    hover_data=[
+                        "Clientes",
+                        "Campos",
+                        "Variedades"
+                    ],
+        
+                    title="Relación Materia Seca y Almidón"
+        
+                )
+        
+                st.plotly_chart(
+                    fig_scatter,
+                    use_container_width=True
+                )
+        
+            else:
+        
+                st.info(
+                    "No hay registros con curva de constituyentes activa."
+                )
+        
+            # ---------------------------------------------------
+            # TABLA TÉCNICA
+            # ---------------------------------------------------
+        
+            st.markdown("---")
+            st.subheader(
+                "📋 Tabla Técnica HarvestLab"
+            )
+        
+            df_tabla = (
+        
+                df_hl[
+                    mask_curva
+                ]
+        
+                .groupby(
+                    [
+                        "Clientes",
+                        "Campos",
+                        "Variedades"
+                    ],
+                    as_index=False
+                )
+        
+                .agg(
+        
+                    MateriaSeca=(
+                        "Materia seca",
+                        "mean"
+                    ),
+        
+                    Almidon=(
+                        "Almidón",
+                        "mean"
+                    ),
+        
+                    Proteina=(
+                        "Proteína bruta",
+                        "mean"
+                    ),
+        
+                    FDN=(
+                        "Fibra detergente neutro",
+                        "mean"
+                    ),
+        
+                    FDA=(
+                        "Fibra detergente ácido",
+                        "mean"
+                    ),
+        
+                    Azucar=(
+                        "Azúcar",
+                        "mean"
+                    ),
+        
+                    Ceniza=(
+                        "Ceniza bruta",
+                        "mean"
+                    )
+        
+                )
+        
+            )
+        
+            st.dataframe(
+        
+                df_tabla.style.format(
+        
+                    {
+        
+                        "MateriaSeca": "{:.1f}%",
+        
+                        "Almidon": "{:.1f}%",
+        
+                        "Proteina": "{:.1f}%",
+        
+                        "FDN": "{:.1f}%",
+        
+                        "FDA": "{:.1f}%",
+        
+                        "Azucar": "{:.1f}%",
+        
+                        "Ceniza": "{:.1f}%"
+        
+                    }
+        
+                ),
+        
+                use_container_width=True
+        
+            )
+
+
 
 
