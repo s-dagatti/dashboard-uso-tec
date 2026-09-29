@@ -102,6 +102,11 @@ for c in ['Estado Licencia', 'estado licencia', 'Estado de Licencia', 'Estado de
 df_raw['es_valida'] = df_raw['Versión Software Monitor'].apply(es_version_valida)
 
 # --- 4. SIDEBAR (FILTROS) ---
+st.sidebar.image(
+    "isg.png",
+    use_container_width=True
+)
+
 st.sidebar.header("🔍 Filtros de Análisis")
 
 df_sidebar = df_raw.copy()
