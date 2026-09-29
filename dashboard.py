@@ -2501,9 +2501,17 @@ with tab_cosechadoras:
     )
     
     st.dataframe(
-        df_maquinas,
+        df_maquinas.style.format(
+            {
+                "Hectareas": "{:,.0f}",
+                "Ajustes": "{:.1f}%",
+                "Velocidad": "{:.1f}%",
+                "Productividad": "{:.1f}%"
+            }
+        ),
         use_container_width=True
     )
+
 
     #---------------------------------------
     #       TABLA POR CULTIVO
