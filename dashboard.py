@@ -4354,54 +4354,6 @@ with tab_picadoras:
                 use_container_width=True
             )
         
-            # ---------------------------------------------------
-            # SCATTER
-            # ---------------------------------------------------
-        
-            st.markdown("---")
-            st.subheader(
-                "🌿 Materia Seca × Almidón"
-            )
-        
-            df_scatter = (
-                df_hl[
-                    mask_curva
-                ]
-                .copy()
-            )
-        
-            if not df_scatter.empty:
-        
-                fig_scatter = px.scatter(
-        
-                    df_scatter,
-        
-                    x="Materia seca",
-        
-                    y="Almidón",
-        
-                    color="Organizaciones",
-        
-                    hover_data=[
-                        "Clientes",
-                        "Campos",
-                        "Variedades"
-                    ],
-        
-                    title="Relación Materia Seca y Almidón"
-        
-                )
-        
-                st.plotly_chart(
-                    fig_scatter,
-                    use_container_width=True
-                )
-        
-            else:
-        
-                st.info(
-                    "No hay registros con curva de constituyentes activa."
-                )
         
             # ---------------------------------------------------
             # SCORE DE CALIDAD
