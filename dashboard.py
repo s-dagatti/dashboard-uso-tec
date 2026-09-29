@@ -2872,7 +2872,12 @@ with tab_cosechadoras:
                 df_s700["Harvest Smart Activado"].notna()
             )
         ].copy()
-
+        
+        df_s700_activas["Fecha_fin_dt"] = pd.to_datetime(
+            df_s700_activas["Fecha_fin_dt"],
+            errors="coerce"
+        )
+        
         df_hist_s700 = (
             df_s700_activas
             .groupby("Fecha_fin_dt")
