@@ -3591,31 +3591,95 @@ with tab_picadoras:
         )
     
         # ---------------------------------------------------
+        # KPI 5 - HECTÁREAS CON CONSTITUYENTES
+        # ---------------------------------------------------
+        
+        mask_curva = (
+        
+            df_pic["Almidón"].notna()
+        
+            |
+        
+            df_pic["Proteína bruta"].notna()
+        
+            |
+        
+            df_pic["Fibra detergente neutro"].notna()
+        
+            |
+        
+            df_pic["Fibra detergente ácido"].notna()
+        
+            |
+        
+            df_pic["Azúcar"].notna()
+        
+            |
+        
+            df_pic["Ceniza bruta"].notna()
+        
+        )
+        
+        ha_constituyentes = (
+        
+            df_pic.loc[
+                mask_curva,
+                "Superficie cosechada"
+            ]
+        
+            .fillna(0)
+        
+            .sum()
+        
+        )
+        
+        porc_constituyentes = (
+        
+            ha_constituyentes
+        
+            /
+        
+            superficie_total
+        
+            * 100
+        
+            if superficie_total > 0
+        
+            else 0
+        
+        )
+        
+        # ---------------------------------------------------
         # KPIs
         # ---------------------------------------------------
-    
+        
         st.subheader("📊 Indicadores Generales")
-    
-        k1, k2, k3, k4 = st.columns(4)
-    
+        
+        k1, k2, k3, k4, k5 = st.columns(5)
+        
         k1.metric(
             "🛰️ AutoTrac Promedio",
             f"{autotrac_promedio:.1f}%"
         )
-    
+        
         k2.metric(
             "🌱 Superficie Total",
             f"{superficie_total:,.0f} ha"
         )
-    
+        
         k3.metric(
             "⛽ Combustible",
             f"{combustible_ha:.1f} L/ha"
         )
-    
+        
         k4.metric(
             "🚜 Producción Húmeda",
             f"{toneladas_humedas:,.0f} t"
+        )
+        
+        k5.metric(
+            "🧪 Ha con Constituyentes",
+            f"{porc_constituyentes:.1f}%"
         )
     
         # ---------------------------------------------------
@@ -3807,97 +3871,7 @@ with tab_picadoras:
             use_container_width=True
         )
 
-        # ---------------------------------------------------
-        # KPI 5 - HECTÁREAS CON CONSTITUYENTES
-        # ---------------------------------------------------
-        
-        mask_curva = (
-        
-            df_pic["Almidón"].notna()
-        
-            |
-        
-            df_pic["Proteína bruta"].notna()
-        
-            |
-        
-            df_pic["Fibra detergente neutro"].notna()
-        
-            |
-        
-            df_pic["Fibra detergente ácido"].notna()
-        
-            |
-        
-            df_pic["Azúcar"].notna()
-        
-            |
-        
-            df_pic["Ceniza bruta"].notna()
-        
-        )
-        
-        ha_constituyentes = (
-        
-            df_pic.loc[
-                mask_curva,
-                "Superficie cosechada"
-            ]
-        
-            .fillna(0)
-        
-            .sum()
-        
-        )
-        
-        porc_constituyentes = (
-        
-            ha_constituyentes
-        
-            /
-        
-            superficie_total
-        
-            * 100
-        
-            if superficie_total > 0
-        
-            else 0
-        
-        )
-        
-        # ---------------------------------------------------
-        # KPIs
-        # ---------------------------------------------------
-        
-        st.subheader("📊 Indicadores Generales")
-        
-        k1, k2, k3, k4, k5 = st.columns(5)
-        
-        k1.metric(
-            "🛰️ AutoTrac Promedio",
-            f"{autotrac_promedio:.1f}%"
-        )
-        
-        k2.metric(
-            "🌱 Superficie Total",
-            f"{superficie_total:,.0f} ha"
-        )
-        
-        k3.metric(
-            "⛽ Combustible",
-            f"{combustible_ha:.1f} L/ha"
-        )
-        
-        k4.metric(
-            "🚜 Producción Húmeda",
-            f"{toneladas_humedas:,.0f} t"
-        )
-        
-        k5.metric(
-            "🧪 Ha con Constituyentes",
-            f"{porc_constituyentes:.1f}%"
-        )
+
         
         # ---------------------------------------------------
         # TABLA POR MÁQUINA
