@@ -107,7 +107,7 @@ st.sidebar.image(
     use_container_width=True
 )
 
-st.sidebar.header("🔍 Filtros de Análisis")
+st.sidebar.header("Filtros de Análisis")
 
 df_sidebar = df_raw.copy()
 
@@ -223,17 +223,17 @@ df_filtrado_autotrac = df_filtrado_aptas[
 # --- 6. PESTAÑA: USO DE AUTOTRAC ---
 tab_autotrac, tab_guiado, tab_cosechadoras, tab_pulverizadoras, tab_picadoras = st.tabs([
     "AutoTrac",
-    "🛰️ Guiado Avanzado",
-    "🌽 Cosechadoras",
-    "💧 Pulverizadoras",
-    "🌿 Picadoras"
+    "Guiado Avanzado",
+    "Cosechadoras",
+    "Pulverizadoras",
+    "Picadoras"
 ])
 
 with tab_autotrac:
     col_logo, col_titulo = st.columns([1,12])
     with col_logo:
         st.image(
-            "mtg.png",
+            "autotrac.png",
             width=80
         )
     with col_titulo:
@@ -247,7 +247,7 @@ with tab_autotrac:
     if not df_filtrado_raw.empty:
         primera_fecha = df_filtrado_raw['Fecha_inicio_dt'].min().strftime('%d/%m/%Y')
         ultima_fecha = df_filtrado_raw['Fecha_fin_dt'].max().strftime('%d/%m/%Y')
-        st.info(f"🗓️ **Período Evaluado:** Desde **{primera_fecha}** hasta **{ultima_fecha}**")
+        st.info(f" **Período Evaluado:** Desde **{primera_fecha}** hasta **{ultima_fecha}**")
     else:
         st.warning("⚠️ No existen datos para los filtros seleccionados en el período indicado.")
 
@@ -312,7 +312,7 @@ with tab_autotrac:
         )
 
     # --- TABLA RESUMEN POR MÁQUINA ---
-    st.subheader("📊 Promedio de Uso de AutoTrac™ por Máquina")
+    st.subheader("Promedio de Uso de AutoTrac™ por Máquina")
 
     if not df_filtrado_aptas.empty:
         df_filtrado_aptas.loc[:, "AutoTrac_Filtrado"] = df_filtrado_aptas[
@@ -418,11 +418,11 @@ with tab_autotrac:
             diff = prom_ult - prom_gen
             # Cambio directo en puntos porcentuales reales
             if diff > 0.5:
-                return f"🟢 Genial (+{diff:.2f}%)"
+                return f"🟢(+{diff:.2f}%)"
             elif diff < -0.5:
-                return f"🔴 Peligro ({diff:.2f}%)"
+                return f"🔴({diff:.2f}%)"
             else:
-                return "➡️ Estable (0.00%)"
+                return "➡️(0.00%)"
 
         df_promedios["Evolución AutoTrac"] = df_promedios.apply(
             evaluar_evolucion, axis=1
@@ -502,7 +502,7 @@ with tab_autotrac:
 
         # --- 7. ANÁLISIS DEL ESTADO DE KITS PUK (LICENCIAS RENOVABLES) ---
         st.markdown("---")
-        st.subheader("📦 Análisis del Estado de Kits PUK (Licencias Renovables)")
+        st.subheader("Análisis del Estado de Kits PUK (Licencias Renovables)")
         st.caption(
             "Los PUKs incluyen licencias **Renovable Esencial** y **Renovable"
             " Avanzada**, las cuales requieren estar activas para operar AutoTrac™."
@@ -605,7 +605,7 @@ with tab_autotrac:
                     y="Cantidad",
                     color="Tipo_PUK",
                     barmode="group",
-                    title="📅 Cronograma Histórico y Futuro de Vencimientos PUK",
+                    title="Cronograma Histórico y Futuro de Vencimientos PUK",
                     labels={
                         "Año_Mes": "Mes de Vencimiento",
                         "Cantidad": "Cantidad de Licencias",
@@ -631,7 +631,7 @@ with tab_autotrac:
                 st.info("No hay fechas de vencimiento válidas registradas para graficar.")
 
             # --- TABLA DETALLE DE PUKS ---
-            st.markdown("##### 📋 Detalle de Equipos con Licencia PUK")
+            st.markdown("#####Detalle de Equipos con Licencia PUK")
 
             df_puk["Vencimiento Licencia"] = df_puk["Fecha_venc_dt"].apply(
                 lambda x: x.strftime("%d/%m/%Y") if pd.notna(x) else "-"
@@ -662,7 +662,7 @@ with tab_autotrac:
 
         # --- 8. GRÁFICO HISTÓRICO SEMANAL DE ADOPCIÓN DE AUTOTRAC ---
         st.markdown("---")
-        st.subheader("📈 Evolución Semanal del Uso de AutoTrac™")
+        st.subheader("Evolución Semanal del Uso de AutoTrac™")
         st.caption(
             "Evolución semanal de la cantidad de máquinas aptas que utilizaron"
             " AutoTrac™ (≥ 1%) y el porcentaje promedio de uso registrado."
@@ -726,7 +726,7 @@ with tab_autotrac:
                 )
 
                 fig_semanal.update_layout(
-                    title="📅 Tendencia Semanal: Equipos Activos vs. % de Adopción",
+                    title="Tendencia Semanal: Equipos Activos vs. % de Adopción",
                     xaxis_title="Semana",
                     hovermode="x unified",
                     legend=dict(
