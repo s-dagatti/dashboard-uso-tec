@@ -2059,19 +2059,52 @@ with tab_cosechadoras:
         # ---------------------------------------------------
         # CARGA DE DATOS
         # ---------------------------------------------------
-    
+        
         df_cosecha = cargar_base_cosecha()
-    
+        
         df_cosecha["Fecha_inicio_dt"] = pd.to_datetime(
             df_cosecha["Fecha de inicio"],
             errors="coerce"
         )
-    
+        
         df_cosecha["Fecha_fin_dt"] = pd.to_datetime(
             df_cosecha["Fecha de terminación"],
             errors="coerce"
         )
-    
+        
+        # ---------------------------------------------------
+        # FILTRO DE CULTIVO
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        
+        cultivos = sorted([
+            c
+            for c in df_cosecha["Cultivo"]
+            .dropna()
+            .unique()
+        ])
+        
+        sel_cultivos = st.multiselect(
+            "🌽 Cultivo",
+            cultivos
+        )
+        
+        # ---------------------------------------------------
+        # APLICACIÓN FILTRO
+        # ---------------------------------------------------
+        
+        df_cosecha_filtrado = df_cosecha.copy()
+        
+        if sel_cultivos:
+        
+            df_cosecha_filtrado = (
+                df_cosecha_filtrado[
+                    df_cosecha_filtrado["Cultivo"]
+                    .isin(sel_cultivos)
+                ]
+            )
+
         # ---------------------------------------------------
         # NORMALIZACIÓN DE COLUMNAS
         # ---------------------------------------------------
@@ -2095,17 +2128,17 @@ with tab_cosechadoras:
         st.subheader("📊 Resumen General")
     
         cosechadoras = (
-            df_cosecha["Número de serie"]
+            df_cosecha_filtrado["Número de serie"]
             .nunique()
         )
     
         organizaciones = (
-            df_cosecha["Nombre de organización"]
+            df_cosecha_filtrado["Nombre de organización"]
             .nunique()
         )
     
         hectareas = (
-            df_cosecha[
+            df_cosecha_filtrado[
                 "Superficie cosechada (ha)"
             ]
             .fillna(0)
@@ -2113,7 +2146,7 @@ with tab_cosechadoras:
         )
     
         productividad_media = (
-            df_cosecha[col_productividad]
+            df_cosecha_filtrado[col_productividad]
             .mean()
         )
     
@@ -2146,17 +2179,17 @@ with tab_cosechadoras:
         st.subheader("🎯 Indicadores Tecnológicos")
     
         prom_ajustes = (
-            df_cosecha[col_ajustes]
+            df_cosecha_filtrado[col_ajustes]
             .mean()
         )
     
         prom_velocidad = (
-            df_cosecha[col_velocidad]
+            df_cosecha_filtrado[col_velocidad]
             .mean()
         )
     
         hectareas_automatizadas = (
-            df_cosecha[
+            df_cosecha_filtrado[
                 "Automatización de ajustes de cosecha - Activado (ha)"
             ]
             .fillna(0)
@@ -2164,7 +2197,7 @@ with tab_cosechadoras:
         )
     
         superficie_total = (
-            df_cosecha[
+            df_cosecha_filtrado[
                 "Superficie cosechada (ha)"
             ]
             .fillna(0)
