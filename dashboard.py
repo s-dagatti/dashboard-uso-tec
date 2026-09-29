@@ -2727,15 +2727,244 @@ with tab_cosechadoras:
     #----------------------------------------------#
     
     with subtab_s700:
-
+    
         st.subheader(
-            "Tecnología en Cosechadoras S700"
+            "🌾 Tecnología en Cosechadoras S700"
+        )
+    
+        # ---------------------------------------------------
+        # BASE FILTRADA DEL DASHBOARD
+        # ---------------------------------------------------
+    
+        df_s700 = df_filtrado_raw.copy()
+    
+        # Filtrar únicamente cosechadoras S700
+    
+        df_s700 = df_s700[
+            df_s700["Modelo"]
+            .astype(str)
+            .str.upper()
+            .str.contains("S7", na=False)
+        ].copy()
+    
+        # ---------------------------------------------------
+        # KPIs
+        # ---------------------------------------------------
+    
+        st.subheader("📊 Indicadores Tecnológicos")
+    
+        prom_auto = (
+            df_s700["Auto Maintain Activado"]
+            .mean()
+        )
+    
+        prom_hs = (
+            df_s700["Harvest Smart Activado"]
+            .mean()
+        )
+    
+        if pd.isna(prom_auto):
+            prom_auto = 0
+    
+        if pd.isna(prom_hs):
+            prom_hs = 0
+    
+        kpi1, kpi2 = st.columns(2)
+    
+        kpi1.metric(
+            "⚙️ Auto Maintain",
+            f"{prom_auto:.1f}%"
+        )
+    
+        kpi2.metric(
+            "🌾 Harvest Smart",
+            f"{prom_hs:.1f}%"
+        )
+    
+        # ---------------------------------------------------
+        # TABLA
+        # ---------------------------------------------------
+    
+        st.markdown("---")
+        st.subheader("🚜 Uso de Tecnología por Máquina")
+    
+        df_tabla_s700 = (
+            df_s700
+            .groupby(
+                [
+                    "Organización",
+                    "Modelo",
+                    "Número de serie de la máquina"
+                ],
+                as_index=False
+            )
+            .agg(
+                Auto_Maintain=(
+                    "Auto Maintain Activado",
+                    "mean"
+                ),
+                Harvest_Smart=(
+                    "Harvest Smart Activado",
+                    "mean"
+                ),
+                Sucursal=(
+                    "Sucursal",
+                    "last"
+                ),
+                Licencia=(
+                    col_licencia,
+                    "last"
+                ),
+                Fin_Licencia=(
+                    "Fin Licencia",
+                    "last"
+                ),
+                Estado_Licencia=(
+                    col_estado_licencia,
+                    "last"
+                )
+            )
+        )
+    
+        df_tabla_s700 = df_tabla_s700.rename(
+            columns={
+                "Número de serie de la máquina":
+                    "Serie",
+                "Auto_Maintain":
+                    "Auto Maintain (%)",
+                "Harvest_Smart":
+                    "Harvest Smart (%)",
+                "Fin_Licencia":
+                    "Fin Licencia",
+                "Estado_Licencia":
+                    "Estado Licencia"
+            }
+        )
+    
+        st.dataframe(
+    
+            df_tabla_s700.style.format(
+                {
+                    "Auto Maintain (%)": "{:.1f}%",
+                    "Harvest Smart (%)": "{:.1f}%"
+                }
+            ),
+    
+            use_container_width=True
+    
+        )
+    
+        # ---------------------------------------------------
+        # EVOLUCIÓN HISTÓRICA
+        # ---------------------------------------------------
+    
+        st.markdown("---")
+        st.subheader(
+            "📈 Evolución de Uso de Tecnología"
+        )
+    
+        df_hist_s700 = (
+            df_s700
+            .groupby("Fecha_fin_dt")
+            .agg(
+                AutoMaintain=(
+                    "Auto Maintain Activado",
+                    "mean"
+                ),
+                HarvestSmart=(
+                    "Harvest Smart Activado",
+                    "mean"
+                ),
+                Maquinas=(
+                    "Número de serie de la máquina",
+                    "nunique"
+                )
+            )
+            .reset_index()
+            .sort_values("Fecha_fin_dt")
+        )
+    
+        from plotly.subplots import make_subplots
+        import plotly.graph_objects as go
+    
+        fig_s700 = make_subplots(
+            specs=[[{"secondary_y": True}]]
+        )
+    
+        # Barras
+    
+        fig_s700.add_trace(
+            go.Bar(
+                x=df_hist_s700["Fecha_fin_dt"],
+                y=df_hist_s700["Maquinas"],
+                name="Máquinas Trabajando",
+                marker_color="#2b5c8f",
+                text=df_hist_s700["Maquinas"],
+                textposition="auto"
+            ),
+            secondary_y=False
+        )
+    
+        # Auto Maintain
+    
+        fig_s700.add_trace(
+            go.Scatter(
+                x=df_hist_s700["Fecha_fin_dt"],
+                y=df_hist_s700["AutoMaintain"],
+                mode="lines+markers",
+                name="Auto Maintain",
+                line=dict(
+                    width=3,
+                    color="#367c2b"
+                )
+            ),
+            secondary_y=True
+        )
+    
+        # Harvest Smart
+    
+        fig_s700.add_trace(
+            go.Scatter(
+                x=df_hist_s700["Fecha_fin_dt"],
+                y=df_hist_s700["HarvestSmart"],
+                mode="lines+markers",
+                name="Harvest Smart",
+                line=dict(
+                    width=3,
+                    color="#f2b134"
+                )
+            ),
+            secondary_y=True
+        )
+    
+        fig_s700.update_yaxes(
+            title_text="Cantidad de Máquinas",
+            secondary_y=False
+        )
+    
+        fig_s700.update_yaxes(
+            title_text="% Utilización",
+            range=[0, 110],
+            secondary_y=True
+        )
+    
+        fig_s700.update_layout(
+            title="Uso de Tecnología por Semana",
+            hovermode="x unified",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+    
+        st.plotly_chart(
+            fig_s700,
+            use_container_width=True
         )
 
-        st.info(
-            "Sección preparada para incorporar "
-            "la futura base de cosechadoras S700."
-        )
 
 
 with tab_pulverizadoras:
