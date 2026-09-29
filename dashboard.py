@@ -3653,7 +3653,18 @@ with tab_picadoras:
         # KPIs
         # ---------------------------------------------------
         
-        st.subheader("📊 Indicadores Generales")
+        col_logo, col_titulo = st.columns([1, 12])
+        
+            with col_logo:
+                st.image(
+                    "Picadora.png",
+                    width=80
+                )
+        
+            with col_titulo:
+                st.subheader(
+                    "Análisis de Calidad de Picado"
+                )
         
         k1, k2, k3, k4, k5 = st.columns(5)
         
