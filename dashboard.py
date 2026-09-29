@@ -3347,17 +3347,79 @@ with tab_pulverizadoras:
             }
         )
 
+        df_pie_sec = df_pulv_actual.copy()
+        
+        df_pie_sec["Estado"] = np.where(
+            df_pie_sec[col_secciones].fillna(0) >= 1,
+            "Con Uso",
+            "Sin Datos / Bajo Uso"
+        )
+        
+        fig_sec = px.pie(
+            df_pie_sec.groupby("Estado")
+            .size()
+            .reset_index(name="Cantidad"),
+            names="Estado",
+            values="Cantidad",
+            title="Control de Secciones",
+            hole=0.4
+            color="Estado",
+            color_discrete_map={
+                "Con Uso": "#2ca02c",
+                "Sin Datos / Bajo Uso": "#d62728"
+            }
+        )
+        fig_sec.update_traces(
+            textinfo="percent+label"
+        )
+
+        df_pie_puls = df_pulv_actual.copy()
+        
+        df_pie_puls["Estado"] = np.where(
+            df_pie_puls[col_pulsacion].fillna(0) >= 1,
+            "Con Uso",
+            "Sin Datos / Bajo Uso"
+        )
+        
+        fig_puls = px.pie(
+            df_pie_puls.groupby("Estado")
+            .size()
+            .reset_index(name="Cantidad"),
+            names="Estado",
+            values="Cantidad",
+            title="Pulsación",
+            hole=0.4,
+            color="Estado",
+            color_discrete_map={
+                "Con Uso": "#2ca02c",
+                "Sin Datos / Bajo Uso": "#d62728"
+            }
+        )
+        fig_puls.update_traces(
+            textinfo="percent+label"
+        )
+
         col_p1, col_p2, col_p3 = st.columns(3)
         
         with col_p1:
-            st.plotly_chart(fig_at)
+            st.plotly_chart(
+                fig_at,
+                use_container_width=True
+            )
         
         with col_p2:
-            st.plotly_chart(fig_sec)
+            st.plotly_chart(
+                fig_sec,
+                use_container_width=True
+            )
         
         with col_p3:
-            st.plotly_chart(fig_puls)
-                
+            st.plotly_chart(
+                fig_puls,
+                use_container_width=True
+            )
+        
+                        
 
 
 
