@@ -234,7 +234,7 @@ with tab_autotrac:
     with col_logo:
         st.image(
             "mtg.png",
-            width=80
+            width=50
         )
     with col_titulo:
         st.title(
