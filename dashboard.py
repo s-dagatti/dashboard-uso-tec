@@ -2459,12 +2459,16 @@ with tab_cosechadoras:
             )
 
         #---------------------------------------
-        #      TABLA POR MAQUINA 
+        #      TABLA POR MAQUINA
         #---------------------------------------
-    
+        
         st.markdown("---")
         st.subheader("🚜 Uso de Tecnología por Máquina")
-    
+        
+        # ---------------------------------------------------
+        # PROMEDIOS HISTÓRICOS
+        # ---------------------------------------------------
+        
         df_maquinas = (
             df_cosecha_filtrado
             .groupby(
@@ -2495,23 +2499,170 @@ with tab_cosechadoras:
             )
         )
         
-        df_maquinas = df_maquinas.sort_values(
-            "Hectareas",
-            ascending=False
+        # ---------------------------------------------------
+        # ÚLTIMA SEMANA
+        # ---------------------------------------------------
+        
+        ultima_fecha = (
+            df_cosecha_filtrado["Fecha_fin_dt"]
+            .max()
         )
         
-        st.dataframe(
-            df_maquinas.style.format(
-                {
-                    "Hectareas": "{:,.0f}",
-                    "Ajustes": "{:.1f}%",
-                    "Velocidad": "{:.1f}%",
-                    "Productividad": "{:.1f}%"
-                }
-            ),
-            use_container_width=True
+        df_ultima_semana = (
+            df_cosecha_filtrado[
+                df_cosecha_filtrado["Fecha_fin_dt"]
+                == ultima_fecha
+            ]
+            .groupby(
+                [
+                    "Nombre de organización",
+                    "Nombre de máquina",
+                    "Número de serie"
+                ],
+                as_index=False
+            )
+            .agg(
+                Ajustes_Ult=(
+                    col_ajustes,
+                    "mean"
+                ),
+                Velocidad_Ult=(
+                    col_velocidad,
+                    "mean"
+                )
+            )
         )
-    
+        
+        # ---------------------------------------------------
+        # MERGE
+        # ---------------------------------------------------
+        
+        df_maquinas = pd.merge(
+        
+            df_maquinas,
+        
+            df_ultima_semana,
+        
+            on=[
+                "Nombre de organización",
+                "Nombre de máquina",
+                "Número de serie"
+            ],
+        
+            how="left"
+        
+        )
+        
+        # ---------------------------------------------------
+        # EVOLUCIÓN
+        # ---------------------------------------------------
+        
+        df_maquinas["Diff_Ajustes"] = (
+            df_maquinas["Ajustes_Ult"]
+            -
+            df_maquinas["Ajustes"]
+        )
+        
+        df_maquinas["Diff_Velocidad"] = (
+            df_maquinas["Velocidad_Ult"]
+            -
+            df_maquinas["Velocidad"]
+        )
+        
+        def formato_evolucion(x):
+        
+            if pd.isna(x):
+                return "⚪ Sin datos"
+        
+            if x > 0.5:
+                return f"🟢 +{x:.1f}%"
+        
+            if x < -0.5:
+                return f"🔴 {x:.1f}%"
+        
+            return "➡️ 0.0%"
+        
+        df_maquinas["Evolución Ajustes"] = (
+            df_maquinas["Diff_Ajustes"]
+            .apply(formato_evolucion)
+        )
+        
+        df_maquinas["Evolución Velocidad"] = (
+            df_maquinas["Diff_Velocidad"]
+            .apply(formato_evolucion)
+        )
+        
+        # ---------------------------------------------------
+        # RENOMBRAR COLUMNAS
+        # ---------------------------------------------------
+        
+        df_maquinas = df_maquinas.rename(
+        
+            columns={
+        
+                "Nombre de organización":
+                    "Organización",
+        
+                "Nombre de máquina":
+                    "Máquina",
+        
+                "Número de serie":
+                    "Serie",
+        
+                "Hectareas":
+                    "Superficie (ha)",
+        
+                "Ajustes":
+                    "Ajustes (%)",
+        
+                "Velocidad":
+                    "Velocidad (%)",
+        
+                "Productividad":
+                    "Productividad (%)"
+        
+            }
+        
+        )
+        
+        # ---------------------------------------------------
+        # ORDENAR
+        # ---------------------------------------------------
+        
+        df_maquinas = (
+            df_maquinas
+            .sort_values(
+                "Superficie (ha)",
+                ascending=False
+            )
+        )
+        
+        # ---------------------------------------------------
+        # MOSTRAR TABLA
+        # ---------------------------------------------------
+        
+        st.dataframe(
+        
+            df_maquinas.style.format(
+        
+                {
+        
+                    "Superficie (ha)": "{:,.0f}",
+        
+                    "Ajustes (%)": "{:.1f}%",
+        
+                    "Velocidad (%)": "{:.1f}%",
+        
+                    "Productividad (%)": "{:.1f}%"
+        
+                }
+        
+            ),
+        
+            use_container_width=True
+        
+        )
+
     
         #---------------------------------------
         #       TABLA POR CULTIVO
