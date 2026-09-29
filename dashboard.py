@@ -2640,30 +2640,33 @@ with tab_cosechadoras:
         # ---------------------------------------------------
         # MOSTRAR TABLA
         # ---------------------------------------------------
+        df_maquinas_view = df_maquinas[
+            [
+                "Organización",
+                "Máquina",
+                "Serie",
+                "Superficie (ha)",
+                "Ajustes (%)",
+                "Evolución Ajustes",
+                "Velocidad (%)",
+                "Evolución Velocidad",
+                "Productividad (%)"
+            ]
+        ].copy()
         
+                
         st.dataframe(
-        
-            df_maquinas.style.format(
-        
+            df_maquinas_view.style.format(
                 {
-        
                     "Superficie (ha)": "{:,.0f}",
-        
                     "Ajustes (%)": "{:.1f}%",
-        
                     "Velocidad (%)": "{:.1f}%",
-        
                     "Productividad (%)": "{:.1f}%"
-        
                 }
-        
             ),
-        
             use_container_width=True
-        
         )
-
-    
+        
         #---------------------------------------
         #       TABLA POR CULTIVO
         #---------------------------------------
