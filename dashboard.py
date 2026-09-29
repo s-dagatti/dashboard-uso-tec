@@ -631,7 +631,7 @@ with tab_autotrac:
                 st.info("No hay fechas de vencimiento válidas registradas para graficar.")
 
             # --- TABLA DETALLE DE PUKS ---
-            st.markdown("#####Detalle de Equipos con Licencia PUK")
+            st.markdown("##### Detalle de Equipos con Licencia PUK")
 
             df_puk["Vencimiento Licencia"] = df_puk["Fecha_venc_dt"].apply(
                 lambda x: x.strftime("%d/%m/%Y") if pd.notna(x) else "-"
