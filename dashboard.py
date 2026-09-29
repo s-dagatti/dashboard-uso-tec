@@ -3045,25 +3045,24 @@ with tab_pulverizadoras:
         # ---------------------------------------------------
 
         promedio_autotrac = (
-            df_pulv_actual[col_autotrac]
+            df_pulv[col_autotrac]
             .mean()
         )
 
         promedio_secciones = (
-            df_pulv_actual[col_secciones]
+            df_pulv[col_secciones]
             .mean()
         )
 
         promedio_pulsacion = (
-            df_pulv_actual[col_pulsacion]
+            df_pulv[col_pulsacion]
             .mean()
         )
 
         total_pulverizadoras = (
-            df_pulv_actual[
+            df_pulv[
                 "Número de serie de la máquina"
-            ]
-            .nunique()
+            ].nunique()
         )
 
         col1, col2, col3, col4 = st.columns(4)
@@ -3320,6 +3319,46 @@ with tab_pulverizadoras:
             fig_pulv,
             use_container_width=True
         )
+
+        #----------------
+        # PIE CHARTS
+        #----------------
+
+        df_pie_at = df_pulv_actual.copy()
+
+        df_pie_at["Estado"] = np.where(
+            df_pie_at[col_autotrac].fillna(0) >= 1,
+            "Con Uso",
+            "Sin Datos / Bajo Uso"
+        )
+        
+        fig_at = px.pie(
+            df_pie_at.groupby("Estado")
+            .size()
+            .reset_index(name="Cantidad"),
+            names="Estado",
+            values="Cantidad",
+            title="AutoTrac™",
+            hole=0.4,
+            color="Estado",
+            color_discrete_map={
+                "Con Uso": "#2ca02c",
+                "Sin Datos / Bajo Uso": "#d62728"
+            }
+        )
+
+        col_p1, col_p2, col_p3 = st.columns(3)
+        
+        with col_p1:
+            st.plotly_chart(fig_at)
+        
+        with col_p2:
+            st.plotly_chart(fig_sec)
+        
+        with col_p3:
+            st.plotly_chart(fig_puls)
+                
+
 
 
 with tab_picadoras:
