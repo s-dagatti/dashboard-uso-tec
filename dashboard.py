@@ -4404,97 +4404,466 @@ with tab_picadoras:
                 )
         
             # ---------------------------------------------------
-            # TABLA TÉCNICA
+            # SCORE DE CALIDAD
             # ---------------------------------------------------
-        
+            
+            def estado_materia_seca(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if 32 <= valor <= 36:
+                    return "Excelente"
+            
+                if 30 <= valor < 32 or 36 < valor <= 40:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_almidon(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if 32 <= valor <= 38:
+                    return "Excelente"
+            
+                if 28 <= valor < 32 or 38 < valor <= 42:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_fdn(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if 38 <= valor <= 45:
+                    return "Excelente"
+            
+                if 35 <= valor < 38 or 45 < valor <= 50:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_fda(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if 18 <= valor <= 23:
+                    return "Excelente"
+            
+                if 14 <= valor < 18 or 23 < valor <= 25:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_proteina(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if valor >= 7:
+                    return "Excelente"
+            
+                if 6 <= valor < 7:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_cenizas(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if valor <= 5:
+                    return "Excelente"
+            
+                if 5 < valor <= 7:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_corte(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if 12 <= valor <= 18:
+                    return "Excelente"
+            
+                if 10 <= valor < 12 or 18 < valor <= 21:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def calcular_score(fila):
+            
+                estados = [
+                    fila["Estado MS"],
+                    fila["Estado Almidón"],
+                    fila["Estado PB"],
+                    fila["Estado FDN"],
+                    fila["Estado FDA"],
+                    fila["Estado Cenizas"],
+                    fila["Estado Corte"]
+                ]
+            
+                estados_validos = [
+                    estado
+                    for estado in estados
+                    if estado != "Sin datos"
+                ]
+            
+                if not estados_validos:
+                    return np.nan
+            
+                descuentos = {
+                    "Excelente": 0,
+                    "Atención": 5,
+                    "Crítico": 10
+                }
+            
+                descuento_total = sum(
+                    descuentos.get(estado, 0)
+                    for estado in estados_validos
+                )
+            
+                return max(
+                    0,
+                    100 - descuento_total
+                )
+            
+            
+            def clasificar_score(score):
+            
+                if pd.isna(score):
+                    return "⚪ Sin datos"
+            
+                if score >= 80:
+                    return "🟢 Calidad Alta"
+            
+                if score >= 60:
+                    return "🟡 Calidad Moderada"
+            
+                return "🔴 Calidad Crítica"
+            
+            
+            # ---------------------------------------------------
+            # TABLA BASE
+            # ---------------------------------------------------
+            
             st.markdown("---")
             st.subheader(
-                "📋 Tabla Técnica HarvestLab"
+                "📋 Calidad de Forraje por Cliente, Granja y Campo"
             )
-        
-            df_tabla = (
-        
+            
+            df_tabla_hl = (
+            
                 df_hl[
                     mask_curva
                 ]
-        
+            
                 .groupby(
                     [
                         "Clientes",
+                        "Granjas",
                         "Campos",
                         "Variedades"
                     ],
-                    as_index=False
+                    as_index=False,
+                    dropna=False
                 )
-        
+            
                 .agg(
-        
+                    Superficie=(
+                        "Superficie cosechada",
+                        "sum"
+                    ),
+            
                     MateriaSeca=(
                         "Materia seca",
                         "mean"
                     ),
-        
+            
                     Almidon=(
                         "Almidón",
                         "mean"
                     ),
-        
+            
                     Proteina=(
                         "Proteína bruta",
                         "mean"
                     ),
-        
+            
                     FDN=(
                         "Fibra detergente neutro",
                         "mean"
                     ),
-        
+            
                     FDA=(
                         "Fibra detergente ácido",
                         "mean"
                     ),
-        
+            
                     Azucar=(
                         "Azúcar",
                         "mean"
                     ),
-        
+            
                     Ceniza=(
                         "Ceniza bruta",
                         "mean"
+                    ),
+            
+                    LargoCorte=(
+                        "Largo de corte",
+                        "mean"
                     )
-        
                 )
-        
+            
             )
-        
-            st.dataframe(
-        
-                df_tabla.style.format(
-        
-                    {
-        
-                        "MateriaSeca": "{:.1f}%",
-        
-                        "Almidon": "{:.1f}%",
-        
-                        "Proteina": "{:.1f}%",
-        
-                        "FDN": "{:.1f}%",
-        
-                        "FDA": "{:.1f}%",
-        
-                        "Azucar": "{:.1f}%",
-        
-                        "Ceniza": "{:.1f}%"
-        
+            
+            # ---------------------------------------------------
+            # ESTADOS
+            # ---------------------------------------------------
+            
+            df_tabla_hl["Estado MS"] = (
+                df_tabla_hl["MateriaSeca"]
+                .apply(estado_materia_seca)
+            )
+            
+            df_tabla_hl["Estado Almidón"] = (
+                df_tabla_hl["Almidon"]
+                .apply(estado_almidon)
+            )
+            
+            df_tabla_hl["Estado PB"] = (
+                df_tabla_hl["Proteina"]
+                .apply(estado_proteina)
+            )
+            
+            df_tabla_hl["Estado FDN"] = (
+                df_tabla_hl["FDN"]
+                .apply(estado_fdn)
+            )
+            
+            df_tabla_hl["Estado FDA"] = (
+                df_tabla_hl["FDA"]
+                .apply(estado_fda)
+            )
+            
+            df_tabla_hl["Estado Cenizas"] = (
+                df_tabla_hl["Ceniza"]
+                .apply(estado_cenizas)
+            )
+            
+            df_tabla_hl["Estado Corte"] = (
+                df_tabla_hl["LargoCorte"]
+                .apply(estado_corte)
+            )
+            
+            # ---------------------------------------------------
+            # SCORE
+            # ---------------------------------------------------
+            
+            df_tabla_hl["Score Calidad"] = (
+                df_tabla_hl.apply(
+                    calcular_score,
+                    axis=1
+                )
+            )
+            
+            df_tabla_hl["Clasificación"] = (
+                df_tabla_hl["Score Calidad"]
+                .apply(clasificar_score)
+            )
+            
+            # ---------------------------------------------------
+            # FILTROS TABLA
+            # ---------------------------------------------------
+            
+            col_f1, col_f2, col_f3 = st.columns(3)
+            
+            with col_f1:
+            
+                sel_clientes = st.multiselect(
+                    "👤 Cliente",
+                    sorted(
+                        df_tabla_hl["Clientes"]
+                        .dropna()
+                        .unique()
+                    )
+                )
+            
+            df_temp = df_tabla_hl.copy()
+            
+            if sel_clientes:
+            
+                df_temp = (
+                    df_temp[
+                        df_temp["Clientes"]
+                        .isin(sel_clientes)
+                    ]
+                )
+            
+            with col_f2:
+            
+                sel_granjas = st.multiselect(
+                    "🌾 Granja",
+                    sorted(
+                        df_temp["Granjas"]
+                        .dropna()
+                        .unique()
+                    )
+                )
+            
+            if sel_granjas:
+            
+                df_temp = (
+                    df_temp[
+                        df_temp["Granjas"]
+                        .isin(sel_granjas)
+                    ]
+                )
+            
+            with col_f3:
+            
+                sel_campos = st.multiselect(
+                    "📍 Campo",
+                    sorted(
+                        df_temp["Campos"]
+                        .dropna()
+                        .unique()
+                    )
+                )
+            
+            df_tabla_hl_filtrada = df_tabla_hl.copy()
+            
+            if sel_clientes:
+            
+                df_tabla_hl_filtrada = (
+                    df_tabla_hl_filtrada[
+                        df_tabla_hl_filtrada["Clientes"]
+                        .isin(sel_clientes)
+                    ]
+                )
+            
+            if sel_granjas:
+            
+                df_tabla_hl_filtrada = (
+                    df_tabla_hl_filtrada[
+                        df_tabla_hl_filtrada["Granjas"]
+                        .isin(sel_granjas)
+                    ]
+                )
+            
+            if sel_campos:
+            
+                df_tabla_hl_filtrada = (
+                    df_tabla_hl_filtrada[
+                        df_tabla_hl_filtrada["Campos"]
+                        .isin(sel_campos)
+                    ]
+                )
+            
+            # ---------------------------------------------------
+            # TABLA FINAL
+            # ---------------------------------------------------
+            
+            df_tabla_hl_filtrada = (
+            
+                df_tabla_hl_filtrada
+            
+                .rename(
+                    columns={
+                        "Clientes": "Cliente",
+                        "Granjas": "Granja",
+                        "Campos": "Campo",
+                        "Variedades": "Variedad",
+                        "Superficie": "Superficie (ha)",
+                        "MateriaSeca": "Materia Seca (%)",
+                        "Almidon": "Almidón (%)",
+                        "Proteina": "Proteína Bruta (%)",
+                        "Azucar": "Azúcar (%)",
+                        "Ceniza": "Ceniza Bruta (%)",
+                        "LargoCorte": "Largo de Corte"
                     }
-        
-                ),
-        
-                use_container_width=True
-        
+                )
+            
             )
+            
+            st.dataframe(
+            
+                df_tabla_hl_filtrada
+                .sort_values(
+                    "Score Calidad",
+                    ascending=False
+                )
+                .style.format(
+                    {
+                        "Superficie (ha)": "{:,.1f}",
+                        "Materia Seca (%)": "{:.1f}%",
+                        "Almidón (%)": "{:.1f}%",
+                        "Proteína Bruta (%)": "{:.1f}%",
+                        "FDN": "{:.1f}%",
+                        "FDA": "{:.1f}%",
+                        "Azúcar (%)": "{:.1f}%",
+                        "Ceniza Bruta (%)": "{:.1f}%",
+                        "Largo de Corte": "{:.1f}",
+                        "Score Calidad": "{:.0f}"
+                    },
+                    na_rep="N/D"
+                ),
+            
+                use_container_width=True
+            
+            )
+            
+            # ---------------------------------------------------
+            # REFERENCIA SCORE
+            # ---------------------------------------------------
+            
+            with st.expander(
+                "ℹ️ Cómo se calcula el Score de Calidad"
+            ):
+            
+                st.markdown(
+                    """
+                    **Score inicial: 100 puntos**
+            
+                    Evaluados:
+            
+                    - Materia seca
+                    - Almidón
+                    - Proteína bruta
+                    - FDN
+                    - FDA
+                    - Ceniza bruta
+                    - Largo de corte
+            
+                    Descuentos:
+            
+                    - Excelente: 0
+                    - Atención: -5
+                    - Crítico: -10
+            
+                    Clasificación Final:
+            
+                    - 🟢 80-100 → Calidad Alta
+                    - 🟡 60-79 → Calidad Moderada
+                    - 🔴 <60 → Calidad Crítica
+                    """
+                )
+
 
 
 
