@@ -2982,14 +2982,345 @@ with tab_cosechadoras:
 
 
 
+# ----------------------------------------------#
+#------- TAB PULVERIZADORAS --------------------#
+#----------------------------------------------#
+
 with tab_pulverizadoras:
 
-    st.title("💧 Uso de Tecnología en Pulverizadoras")
+    st.title("💧 Análisis CropCare")
 
-    st.info(
-        "Sección reservada para el análisis futuro "
-        "de pulverizadoras."
-    )
+    # ---------------------------------------------------
+    # BASE FILTRADA DEL DASHBOARD
+    # ---------------------------------------------------
+
+    df_pulv = df_filtrado_raw[
+        df_filtrado_raw["Tipo"]
+        .astype(str)
+        .str.upper()
+        .str.contains("PULVERIZADORA", na=False)
+    ].copy()
+
+    if df_pulv.empty:
+
+        st.warning(
+            "No se encontraron registros de pulverizadoras "
+            "para los filtros seleccionados."
+        )
+
+    else:
+
+        col_autotrac = "AutoTrac™ Activo"
+        col_pulsacion = "Pulsación Activo"
+        col_secciones = "Tiempo de control de secciones Activo"
+
+        # ---------------------------------------------------
+        # ÚLTIMA FOTO
+        # ---------------------------------------------------
+
+        ultima_fecha_pulv = (
+            df_pulv["Fecha_fin_dt"]
+            .max()
+        )
+
+        df_pulv_actual = (
+            df_pulv[
+                df_pulv["Fecha_fin_dt"]
+                == ultima_fecha_pulv
+            ]
+        )
+
+        fecha_formateada = (
+            ultima_fecha_pulv.strftime("%d/%m/%Y")
+            if pd.notna(ultima_fecha_pulv)
+            else "-"
+        )
+
+        st.subheader(
+            f"📊 Resumen Actual (Última Semana: {fecha_formateada})"
+        )
+
+        # ---------------------------------------------------
+        # KPIs
+        # ---------------------------------------------------
+
+        promedio_autotrac = (
+            df_pulv_actual[col_autotrac]
+            .mean()
+        )
+
+        promedio_secciones = (
+            df_pulv_actual[col_secciones]
+            .mean()
+        )
+
+        promedio_pulsacion = (
+            df_pulv_actual[col_pulsacion]
+            .mean()
+        )
+
+        total_pulverizadoras = (
+            df_pulv_actual[
+                "Número de serie de la máquina"
+            ]
+            .nunique()
+        )
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                "💧 Pulverizadoras",
+                total_pulverizadoras
+            )
+
+        with col2:
+            st.metric(
+                "🎯 AutoTrac™",
+                f"{promedio_autotrac:.1f}%"
+                if pd.notna(promedio_autotrac)
+                else "Sin datos"
+            )
+
+        with col3:
+            st.metric(
+                "✅ Control de Secciones",
+                f"{promedio_secciones:.1f}%"
+                if pd.notna(promedio_secciones)
+                else "Sin datos"
+            )
+
+        with col4:
+            st.metric(
+                "💧 Pulsación",
+                f"{promedio_pulsacion:.1f}%"
+                if pd.notna(promedio_pulsacion)
+                else "Sin datos"
+            )
+
+        # ---------------------------------------------------
+        # TABLA INDIVIDUAL
+        # ---------------------------------------------------
+
+        st.markdown("---")
+        st.subheader(
+            "🚜 Uso de Tecnología por Pulverizadora"
+        )
+
+        df_tabla = (
+            df_pulv_actual
+            .groupby(
+                [
+                    "Organización",
+                    "Modelo",
+                    "Número de serie de la máquina"
+                ],
+                as_index=False
+            )
+            .agg(
+                AutoTrac=(
+                    col_autotrac,
+                    "mean"
+                ),
+                Pulsacion=(
+                    col_pulsacion,
+                    "mean"
+                ),
+                Secciones=(
+                    col_secciones,
+                    "mean"
+                ),
+                Sucursal=(
+                    "Sucursal",
+                    "last"
+                ),
+                Licencia=(
+                    col_licencia,
+                    "last"
+                ),
+                Fin_Licencia=(
+                    "Fin Licencia",
+                    "last"
+                ),
+                Estado_Licencia=(
+                    col_estado_licencia,
+                    "last"
+                )
+            )
+        )
+
+        df_tabla = df_tabla.rename(
+            columns={
+                "Número de serie de la máquina":
+                    "Serie",
+                "AutoTrac":
+                    "AutoTrac (%)",
+                "Pulsacion":
+                    "Pulsación (%)",
+                "Secciones":
+                    "Control Secciones (%)",
+                "Fin_Licencia":
+                    "Fin Licencia",
+                "Estado_Licencia":
+                    "Estado Licencia"
+            }
+        )
+
+        st.dataframe(
+
+            df_tabla.style.format(
+                {
+                    "AutoTrac (%)": "{:.1f}%",
+                    "Pulsación (%)": "{:.1f}%",
+                    "Control Secciones (%)": "{:.1f}%"
+                }
+            ),
+
+            use_container_width=True
+
+        )
+
+        # ---------------------------------------------------
+        # HISTÓRICO DE ADOPCIÓN
+        # ---------------------------------------------------
+
+        st.markdown("---")
+        st.subheader(
+            "📈 Evolución Histórica del Uso de Tecnología"
+        )
+
+        df_pulv_activas = df_pulv[
+            (
+                df_pulv[col_autotrac].notna()
+            )
+            |
+            (
+                df_pulv[col_pulsacion].notna()
+            )
+            |
+            (
+                df_pulv[col_secciones].notna()
+            )
+        ].copy()
+
+        df_hist = (
+            df_pulv_activas
+            .groupby("Fecha_fin_dt")
+            .agg(
+                Prom_AutoTrac=(
+                    col_autotrac,
+                    "mean"
+                ),
+                Prom_Pulsacion=(
+                    col_pulsacion,
+                    "mean"
+                ),
+                Prom_Secciones=(
+                    col_secciones,
+                    "mean"
+                ),
+                Maquinas=(
+                    "Número de serie de la máquina",
+                    "nunique"
+                )
+            )
+            .reset_index()
+            .sort_values("Fecha_fin_dt")
+        )
+
+        from plotly.subplots import make_subplots
+        import plotly.graph_objects as go
+
+        fig_pulv = make_subplots(
+            specs=[[{"secondary_y": True}]]
+        )
+
+        # Barras
+        fig_pulv.add_trace(
+            go.Bar(
+                x=df_hist["Fecha_fin_dt"],
+                y=df_hist["Maquinas"],
+                name="Máquinas trabajando",
+                marker_color="rgba(120,120,120,0.4)",
+                text=df_hist["Maquinas"],
+                textposition="auto"
+            ),
+            secondary_y=False
+        )
+
+        # AutoTrac
+        fig_pulv.add_trace(
+            go.Scatter(
+                x=df_hist["Fecha_fin_dt"],
+                y=df_hist["Prom_AutoTrac"],
+                mode="lines+markers",
+                name="AutoTrac™",
+                line=dict(
+                    color="orange",
+                    width=3
+                )
+            ),
+            secondary_y=True
+        )
+
+        # Secciones
+        fig_pulv.add_trace(
+            go.Scatter(
+                x=df_hist["Fecha_fin_dt"],
+                y=df_hist["Prom_Secciones"],
+                mode="lines+markers",
+                name="Control de Secciones",
+                line=dict(
+                    color="#9467bd",
+                    width=3
+                )
+            ),
+            secondary_y=True
+        )
+
+        # Pulsación
+        fig_pulv.add_trace(
+            go.Scatter(
+                x=df_hist["Fecha_fin_dt"],
+                y=df_hist["Prom_Pulsacion"],
+                mode="lines+markers",
+                name="Pulsación",
+                line=dict(
+                    color="#2ca02c",
+                    width=3
+                )
+            ),
+            secondary_y=True
+        )
+
+        fig_pulv.update_yaxes(
+            title_text="Cantidad de Equipos",
+            secondary_y=False
+        )
+
+        fig_pulv.update_yaxes(
+            title_text="% Utilización",
+            range=[0, 110],
+            secondary_y=True
+        )
+
+        fig_pulv.update_layout(
+            title="Máquinas Trabajando y Uso de Tecnología",
+            hovermode="x unified",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+
+        st.plotly_chart(
+            fig_pulv,
+            use_container_width=True
+        )
+
 
 with tab_picadoras:
 
