@@ -17,7 +17,7 @@ def cargar_base_datos():
     repo = st.secrets.get("github", {}).get("repo", "s-dagatti/uso-tec-v2")
     path = st.secrets.get("github", {}).get("path", "datos_consolidados_conci.csv")
     token = st.secrets.get("github", {}).get("token", None)
-    <
+    
     # Lectura vía GitHub API con Token
     if token:
         url = f"https://api.github.com/repos/{repo}/contents/{path}"
