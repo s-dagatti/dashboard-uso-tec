@@ -754,7 +754,7 @@ with tab_renovaciones:
 
     with col_titulo:
         st.title(
-            "📈 Renovaciones de Licencias"
+            "Renovaciones de Licencias"
         )
 
     df_renov = df_licencias.copy()
@@ -884,7 +884,7 @@ with tab_renovaciones:
     # KPIs
     # -----------------------------------------
 
-    st.subheader("📊 Indicadores")
+    st.subheader("Indicadores")
 
     if not df_renovadas.empty:
 
@@ -942,17 +942,17 @@ with tab_renovaciones:
     k1, k2, k3 = st.columns(3)
 
     k1.metric(
-        "🔄 Componentes Renovados",
+        "Componentes Renovados",
         f"{componentes_renovados:,}"
     )
 
     k2.metric(
-        "📈 Tasa de Renovación",
+        "Tasa de Renovación",
         f"{tasa_renovacion:.1f}%"
     )
 
     k3.metric(
-        "⏳ Días Promedio",
+        "Días Promedio",
         f"{dias_promedio:.0f}"
     )
 
@@ -961,7 +961,7 @@ with tab_renovaciones:
     # -----------------------------------------
 
     st.markdown("---")
-    st.subheader("📅 Renovaciones por Mes")
+    st.subheader("Renovaciones por Mes")
 
     if not df_renovadas.empty:
 
@@ -1009,7 +1009,7 @@ with tab_renovaciones:
     # -----------------------------------------
 
     st.markdown("---")
-    st.subheader("📋 Detalle de Renovaciones")
+    st.subheader("Detalle de Renovaciones")
 
     if not df_renovadas.empty:
 
