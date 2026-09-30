@@ -4939,7 +4939,7 @@ with tab_picadoras:
             # ---------------------------------------------------
             st.markdown("---")
             st.subheader(
-                "📋 Calidad de Forraje por Cliente, Granja y Campo"
+                "Calidad de Forraje por Cliente, Granja y Campo"
             )
             
             col_f1, col_f2, col_f3, col_f4 = st.columns(4)
@@ -4947,7 +4947,7 @@ with tab_picadoras:
             with col_f1:
             
                 sel_clientes = st.multiselect(
-                    "👤 Cliente",
+                    "Cliente",
                     sorted(
                         df_tabla_hl["Clientes"]
                         .dropna()
