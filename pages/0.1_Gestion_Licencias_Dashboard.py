@@ -136,10 +136,26 @@ def preparar_foto_actual(df):
         foto["Clave Componente"]
         .fillna(foto["Serie Componente"])
         .fillna(foto["Serie Asignada Licencia"])
-        .fillna("SIN_COMPONENTE_" + foto.index.astype(str))
+    )
+    
+    # Para los que siguen vacíos
+    mask_sin_clave = foto["Clave Componente Dashboard"].isna()
+    
+    foto.loc[
+        mask_sin_clave,
+        "Clave Componente Dashboard"
+    ] = (
+        "SIN_COMPONENTE_"
+        + foto.loc[mask_sin_clave]
+        .index.astype(str)
+    )
+    
+    foto["Clave Componente Dashboard"] = (
+        foto["Clave Componente Dashboard"]
         .astype(str)
         .str.strip()
     )
+
 
     foto["Es activa"] = foto["Estado Licencia"].isin(ESTADOS_ACTIVOS)
 
