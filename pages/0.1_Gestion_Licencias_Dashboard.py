@@ -250,23 +250,6 @@ try:
 except Exception as error:
     error_carga = error
 
-# Permite probar la página aunque GitHub todavía no esté configurado.
-with st.sidebar:
-    st.markdown("## 🔑 Gestión de Licencias")
-
-    archivo_local = st.file_uploader(
-        "Base de licencias opcional",
-        type=["csv"],
-        help="Si se carga un CSV, reemplaza temporalmente la lectura desde GitHub."
-    )
-
-if archivo_local is not None:
-    df_licencias = pd.read_csv(
-        archivo_local,
-        low_memory=False
-    )
-    error_carga = None
-
 if error_carga is not None:
     st.error(f"No se pudo leer la base de licencias: {error_carga}")
     st.stop()
