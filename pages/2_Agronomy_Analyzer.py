@@ -1,5 +1,6 @@
 import streamlit as st
 
 st.image(
-  "homerpage.gif"
+  "homerpage.gif",
+    width=300
 )
