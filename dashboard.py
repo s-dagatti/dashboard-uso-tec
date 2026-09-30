@@ -4203,7 +4203,7 @@ with tab_picadoras:
 
             with col_logo:
                 st.image(
-                    "HL 3000",
+                    "HL_3000.png",
                     width=70
                 )
         
