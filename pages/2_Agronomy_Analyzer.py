@@ -74,9 +74,50 @@ def save_firestore_data(data):
 
 
 def load_client_scores_data():
-    """Carga los datos de clientes (scores) para obtener la lista de clientes."""
-    firestore_data = load_firestore_data()
-    return list(firestore_data.get(SCORES_COLLECTION_PATH, {}).values())
+    """
+    Obtiene la lista de clientes directamente desde
+    los proyectos cargados en el CSV.
+    """
+
+    projects = load_agronomy_projects()
+
+    clientes = {}
+
+    for proyecto in projects:
+
+        nombre = str(
+            proyecto.get(
+                "CLIENTE",
+                ""
+            )
+        ).strip()
+
+        if not nombre:
+            continue
+
+        clientes[nombre] = {
+
+            "Cliente":
+                nombre,
+
+            "Sucursal":
+                proyecto.get(
+                    "SUCURSAL",
+                    ""
+                ),
+
+            "Categoria_Evaluacion":
+                proyecto.get(
+                    "CATEGORÍA DE EVALUACIÓN",
+                    ""
+                )
+
+        }
+
+    return list(
+        clientes.values()
+    )
+
 
 
 @st.cache_data(ttl=60, show_spinner=False)
@@ -276,8 +317,13 @@ st.markdown("---")
 client_scores_data = load_client_scores_data()
 
 if not client_scores_data:
-    st.info("No hay clientes cargados. Por favor, registra clientes en la primera hoja.")
-    st.stop()
+
+    st.warning(
+        "Todavía no existen Agronomys cargados."
+    )
+
+    client_scores_data = []
+
 
 # Convertir los datos de clientes a DataFrame
 df_clients = pd.DataFrame(client_scores_data)
