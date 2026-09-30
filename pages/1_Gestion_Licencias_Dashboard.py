@@ -424,7 +424,11 @@ with tab_actual:
     col_icono, col_titulo = st.columns([1, 12])
 
     with col_icono:
-        st.markdown('antena.png')
+        st.image(
+            "antena.png",
+            width=80
+        )
+
 
     with col_titulo:
         st.title("Gestión de Licencias")
