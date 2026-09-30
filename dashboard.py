@@ -3513,8 +3513,8 @@ with tab_picadoras:
         )
 
     subtab_productividad, subtab_harvestlab = st.tabs([
-        "🚜 Productividad",
-        "🌿 HarvestLab"
+        "Productividad",
+        "HarvestLab"
     ])
 
     with subtab_productividad:
@@ -3667,22 +3667,22 @@ with tab_picadoras:
         )
         
         k2.metric(
-            "🌱 Superficie Total",
+            "Superficie Total",
             f"{superficie_total:,.0f} ha"
         )
         
         k3.metric(
-            "⛽ Combustible",
+            "Combustible",
             f"{combustible_ha:.1f} L/ha"
         )
         
         k4.metric(
-            "🚜 Producción Húmeda",
+            "Producción Húmeda",
             f"{toneladas_humedas:,.0f} t"
         )
         
         k5.metric(
-            "🧪 Ha con Constituyentes",
+            "Ha con Constituyentes",
             f"{porc_constituyentes:.1f}%"
         )
     
@@ -3692,7 +3692,7 @@ with tab_picadoras:
     
         st.markdown("---")
         st.subheader(
-            "📈 Evolución Semanal de Trabajo"
+            "Evolución Semanal de Trabajo"
         )
     
         df_hist = (
@@ -3882,7 +3882,7 @@ with tab_picadoras:
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("🚜 Uso de Tecnología por Picadora")
+        st.subheader("Uso de Tecnología por Picadora")
         
         df_maquinas = (
             df_pic
@@ -4128,7 +4128,7 @@ with tab_picadoras:
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("🎯 Estado HarvestLab")
+        st.subheader("Estado HarvestLab")
         
         col_p1, col_p2 = st.columns(2)
         
@@ -4199,9 +4199,18 @@ with tab_picadoras:
 
         with subtab_harvestlab:
 
-            st.subheader(
-                "🌿 Calidad de Forraje y Constituyentes"
-            )
+            col_logo, col_titulo = st.columns([1, 12])
+
+            with col_logo:
+                st.image(
+                    "Picadora.png",
+                    width=80
+                )
+        
+            with col_titulo:
+                st.suheader(
+                    "Calidad de Forraje y Constituyentes"
+                )
         
             # ---------------------------------------------------
             # BASE HARVESTLAB
@@ -4270,22 +4279,22 @@ with tab_picadoras:
             k1, k2, k3, k4 = st.columns(4)
         
             k1.metric(
-                "🌿 Materia Seca",
+                "Materia Seca",
                 f"{materia_seca:.1f}%"
             )
         
             k2.metric(
-                "🌽 Almidón",
+                "Almidón",
                 f"{almidon:.1f}%"
             )
         
             k3.metric(
-                "💪 Proteína Bruta",
+                "Proteína Bruta",
                 f"{proteina:.1f}%"
             )
         
             k4.metric(
-                "🧪 Curva Activa",
+                "Curva Activa",
                 f"{porc_curva:.1f}%"
             )
         
@@ -4295,7 +4304,7 @@ with tab_picadoras:
         
             st.markdown("---")
             st.subheader(
-                "📈 Evolución Semanal de Calidad"
+                "Evolución Semanal de Calidad"
             )
         
             df_hist = (
@@ -4644,7 +4653,7 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             st.markdown("---")
-            st.subheader("🏆 Resumen de Calidad del Forraje")
+            st.subheader("Resumen de Calidad del Forraje")
             
             col_res1, col_res2, col_res3 = st.columns(3)
             
@@ -4734,13 +4743,13 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             st.markdown("---")
-            st.subheader("🎯 Radar de Calidad")
+            st.subheader("Radar de Calidad")
             
             col_radar, col_tabla = st.columns([2,1])
             
             with col_tabla:
             
-                st.markdown("##### 📊 Perfil Promedio")
+                st.markdown("##### Perfil Promedio")
             
                 st.dataframe(
             
@@ -4837,7 +4846,7 @@ with tab_picadoras:
             
             st.markdown("---")
             st.subheader(
-                "🌿 Relación Materia Seca × Almidón"
+                "Relación Materia Seca × Almidón"
             )
             
             df_scatter = (
@@ -4960,7 +4969,7 @@ with tab_picadoras:
             with col_f2:
             
                 sel_granjas = st.multiselect(
-                    "🌾 Granja",
+                    "Granja",
                     sorted(
                         df_temp["Granjas"]
                         .dropna()
@@ -4980,7 +4989,7 @@ with tab_picadoras:
             with col_f3:
             
                 sel_campos = st.multiselect(
-                    "📍 Campo",
+                    "Campo",
                     sorted(
                         df_temp["Campos"]
                         .dropna()
@@ -4997,7 +5006,7 @@ with tab_picadoras:
                 )
             
                 sel_calidad = st.multiselect(
-                    "🏆 Calidad",
+                    "Calidad",
                     opciones_calidad
                 )
 
@@ -5100,7 +5109,7 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             with st.expander(
-                "ℹ️ Cómo se calcula el Score de Calidad"
+                "Cómo se calcula el Score de Calidad"
             ):
             
                 st.markdown(
