@@ -2803,12 +2803,22 @@ with tab_cosechadoras:
     
         # Filtrar únicamente cosechadoras S700
     
-        df_s700 = df_s700[
-            df_s700["Modelo"]
-            .astype(str)
-            .str.upper()
-            .str.contains("S7 ", na=False)
+        df_s700 = df_filtrado_raw[
+            (
+                df_filtrado_raw["Modelo"]
+                .astype(str)
+                .str.upper()
+                .str.startswith("S7")
+            )
+            &
+            (
+                ~df_filtrado_raw["Modelo"]
+                .astype(str)
+                .str.upper()
+                .str.startswith("S7 ")
+            )
         ].copy()
+
     
         # ---------------------------------------------------
         # KPIs
