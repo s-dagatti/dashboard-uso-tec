@@ -294,7 +294,6 @@ foto_actual, fecha_actualizacion = preparar_foto_actual(df_licencias)
 # =========================================================
 
 with st.sidebar:
-    st.markdown("---")
     st.markdown("### Filtros")
 
     excluir_conci = st.checkbox(
