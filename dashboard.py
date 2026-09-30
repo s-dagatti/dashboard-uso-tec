@@ -2807,7 +2807,7 @@ with tab_cosechadoras:
             df_s700["Modelo"]
             .astype(str)
             .str.upper()
-            .str.contains("S7", na=False)
+            .str.contains("S7 ", na=False)
         ].copy()
     
         # ---------------------------------------------------
