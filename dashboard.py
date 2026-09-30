@@ -9,7 +9,11 @@ import requests
 import streamlit as st
 
 # Configuración inicial de la página
-st.set_page_config(page_title="Dashboard Uso de Tecnología - Conci", layout="wide")
+st.set_page_config(
+    page_title="Dashboard Uso de Tecnología - Conci", 
+    page_icon="mtg.png",
+    layout="wide"
+)
 
 # --- 1. LECTURA DESDE GITHUB (s-dagatti/uso-tec-v2) ---
 @st.cache_data(ttl=60, show_spinner=False)
