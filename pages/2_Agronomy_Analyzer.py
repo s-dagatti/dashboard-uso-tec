@@ -1,1 +1,3 @@
-
+st.image(
+  "homerpage.gif"
+)
