@@ -4208,7 +4208,7 @@ with tab_picadoras:
                 )
         
             with col_titulo:
-                st.suheader(
+                st.subheader(
                     "Calidad de Forraje y Constituyentes"
                 )
         
