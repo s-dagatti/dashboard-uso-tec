@@ -472,7 +472,7 @@ with tab_actual:
     col_grafico_1, col_grafico_2 = st.columns([2, 1])
 
     with col_grafico_1:
-        st.subheader("📅 Vencimientos por mes")
+        st.subheader("Vencimientos por mes")
 
         df_vencimientos = df_filtrado[
             df_filtrado["Fecha Vencimiento"].notna()
@@ -537,7 +537,7 @@ with tab_actual:
             st.info("No hay fechas de vencimiento para los filtros seleccionados.")
 
     with col_grafico_2:
-        st.subheader("📊 Estado actual")
+        st.subheader("Estado actual")
 
         df_estado = (
             df_filtrado
@@ -585,7 +585,7 @@ with tab_actual:
     # =========================================================
 
     st.markdown("---")
-    st.subheader("💰 Oportunidades de renovación")
+    st.subheader("Oportunidades de renovación")
 
     estados_oportunidad = [
         "Vencida",
@@ -649,7 +649,7 @@ with tab_actual:
     # =========================================================
 
     st.markdown("---")
-    st.subheader("📋 Detalle de licencias")
+    st.subheader("Detalle de licencias")
 
     columnas_tabla = [
         "Sucursal",
@@ -744,7 +744,7 @@ with tab_renovaciones:
     # TAB RENOVACIONES
     # =========================================================
 
-    st.title("📈 Renovaciones de Licencias")
+    col_icono, col_titulo = st.columns([1, 12]) with col_icono: st.image( "pantalla.png", width=80 ) with col_titulo: st.title("Renovaciones de Licencias")
 
     df_renov = df_licencias.copy()
 
