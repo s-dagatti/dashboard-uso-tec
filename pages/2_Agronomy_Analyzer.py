@@ -76,10 +76,6 @@ def save_firestore_data(data):
 
 
 def load_client_scores_data():
-    """
-    Obtiene la lista de clientes directamente desde
-    los proyectos cargados en el CSV.
-    """
 
     projects = load_agronomy_projects()
 
@@ -89,7 +85,7 @@ def load_client_scores_data():
 
         nombre = str(
             proyecto.get(
-                "CLIENTE",
+                "Cliente",
                 ""
             )
         ).strip()
@@ -104,13 +100,19 @@ def load_client_scores_data():
 
             "Sucursal":
                 proyecto.get(
-                    "SUCURSAL",
+                    "Sucursal",
                     ""
                 ),
 
             "Categoria_Evaluacion":
                 proyecto.get(
-                    "CATEGORÍA DE EVALUACIÓN",
+                    "Categoria_Evaluacion",
+                    ""
+                ),
+
+            "ID CLIENTE":
+                proyecto.get(
+                    "ID_Cliente",
                     ""
                 )
 
@@ -122,10 +124,12 @@ def load_client_scores_data():
 
 
 
+
+@st.cache_data(ttl=60, show_spinner=False)
 @st.cache_data(ttl=60, show_spinner=False)
 def load_agronomy_projects():
 
-    repo = st.secrets["github"]["repo"]
+    repo = "s-dagatti/uso-tec-v2"
 
     token = st.secrets["github"]["token"]
 
@@ -152,16 +156,167 @@ def load_agronomy_projects():
 
     respuesta.raise_for_status()
 
-    df = pd.read_csv(
-        io.StringIO(
-            respuesta.text
-        ),
+    df_csv = pd.read_csv(
+        io.StringIO(respuesta.text),
         low_memory=False
     )
 
-    return df.to_dict(
-        orient="records"
-    )
+    proyectos = []
+
+    for indice, fila in df_csv.iterrows():
+
+        project_id = str(
+            fila.get(
+                "Clave Proyecto",
+                f"PROYECTO_{indice}"
+            )
+        )
+
+        plan_horas = pd.to_numeric(
+            fila.get(
+                "Planificación - Horas",
+                0
+            ),
+            errors="coerce"
+        )
+
+        reco_horas = pd.to_numeric(
+            fila.get(
+                "Recopilación de Datos - Horas",
+                0
+            ),
+            errors="coerce"
+        )
+
+        informe_horas = pd.to_numeric(
+            fila.get(
+                "Generación de informe - Horas",
+                0
+            ),
+            errors="coerce"
+        )
+
+        plan_horas = 0 if pd.isna(plan_horas) else float(plan_horas)
+        reco_horas = 0 if pd.isna(reco_horas) else float(reco_horas)
+        informe_horas = 0 if pd.isna(informe_horas) else float(informe_horas)
+
+        proyectos.append({
+
+            "id": project_id,
+
+            "Fecha_Registro":
+                fila.get(
+                    "FECHA Y HORA",
+                    ""
+                ),
+
+            "ID_Cliente":
+                fila.get(
+                    "ID CLIENTE",
+                    ""
+                ),
+
+            "Cliente":
+                fila.get(
+                    "CLIENTE",
+                    ""
+                ),
+
+            "Sucursal":
+                fila.get(
+                    "SUCURSAL",
+                    ""
+                ),
+
+            "Categoria_Evaluacion":
+                fila.get(
+                    "CATEGORÍA DE EVALUACIÓN",
+                    ""
+                ),
+
+            "Perfil_Tecnologico":
+                fila.get(
+                    "CATEGORÍA DE EVALUACIÓN",
+                    ""
+                ),
+
+            "Protocolo":
+                fila.get(
+                    "Tipo de Proyecto",
+                    ""
+                ),
+
+            "Nombre_Evaluacion":
+                fila.get(
+                    "NOMBRE",
+                    ""
+                ),
+
+            "Ubicacion_Evaluacion":
+                fila.get(
+                    "Ubicación",
+                    ""
+                ),
+
+            "Planificacion_Estado":
+                fila.get(
+                    "Planificación - Estado",
+                    "No Iniciado"
+                ),
+
+            "Planificacion_Horas":
+                plan_horas,
+
+            "Recopilacion_Estado":
+                fila.get(
+                    "Recopilación de Datos - Estado",
+                    "No Iniciado"
+                ),
+
+            "Recopilacion_Horas":
+                reco_horas,
+
+            "Informe_Estado":
+                fila.get(
+                    "Generación de informe - Estado",
+                    "No Iniciado"
+                ),
+
+            "Informe_Horas":
+                informe_horas,
+
+            "Total_Horas":
+                plan_horas
+                + reco_horas
+                + informe_horas,
+
+            "Q_Planteado":
+                fila.get(
+                    "Q PLANTEADO",
+                    ""
+                ),
+
+            "ID_Prueba":
+                fila.get(
+                    "ID PRUEBA",
+                    ""
+                ),
+
+            "Link_Acceso":
+                fila.get(
+                    "LINK ACCESO",
+                    ""
+                ),
+
+            "FY":
+                fila.get(
+                    "FY",
+                    ""
+                )
+        })
+
+    return proyectos
+
 
 
 
