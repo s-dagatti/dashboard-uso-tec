@@ -322,6 +322,21 @@ with st.sidebar:
             base_filtros["Sucursal"].isin(filtro_sucursal)
         ].copy()
 
+    filtro_organizacion = st.multiselect(
+        "Organización",
+        opciones_ordenadas(
+            base_filtros["Organización"]
+        )
+    )
+    
+    if filtro_organizacion:
+    
+        base_filtros = base_filtros[
+            base_filtros["Organización"]
+            .isin(filtro_organizacion)
+        ].copy()
+
+
     filtro_tipo_maquina = st.multiselect(
         "Tipo de máquina",
         opciones_ordenadas(base_filtros["Tipo Máquina"])
