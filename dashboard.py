@@ -3662,7 +3662,7 @@ with tab_picadoras:
         k1, k2, k3, k4, k5 = st.columns(5)
         
         k1.metric(
-            "🛰️ AutoTrac Promedio",
+            "AutoTrac Promedio",
             f"{autotrac_promedio:.1f}%"
         )
         
