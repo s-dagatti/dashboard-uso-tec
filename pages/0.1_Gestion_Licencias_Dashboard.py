@@ -368,6 +368,31 @@ with st.sidebar:
 # El dataframe ya quedó filtrado en cascada dentro del sidebar.
 df_filtrado = base_filtros.copy()
 
+# ---------------------------------------------------
+# EXCLUIR LICENCIAS VENCIDAS HACE MÁS DE 18 MESES
+# ---------------------------------------------------
+
+if "Fecha Vencimiento" in df_filtrado.columns:
+
+    fecha_venc = pd.to_datetime(
+        df_filtrado["Fecha Vencimiento"],
+        format="mixed",
+        errors="coerce"
+    )
+
+    dias_desde_vencimiento = (
+        pd.Timestamp.today().normalize()
+        - fecha_venc
+    ).dt.days
+
+    df_filtrado = df_filtrado[
+        ~(
+            (df_filtrado["Estado Licencia"] == "Vencida")
+            &
+            (dias_desde_vencimiento > 548)
+        )
+    ].copy()
+
 # =========================================================
 # ENCABEZADO
 # =========================================================
