@@ -4199,12 +4199,12 @@ with tab_picadoras:
 
         with subtab_harvestlab:
 
-            col_logo, col_titulo = st.columns([1, 12])
+            col_logo, col_titulo = st.columns([1, 14])
 
             with col_logo:
                 st.image(
-                    "Picadora.png",
-                    width=80
+                    "HL 3000",
+                    width=70
                 )
         
             with col_titulo:
