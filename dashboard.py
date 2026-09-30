@@ -3153,6 +3153,14 @@ with tab_pulverizadoras:
             .mean()
         )
 
+        total_pulverizadoras = (
+            df_pulv[
+                "Número de serie de la máquina"
+            ]
+            .nunique()
+        )
+
+
 
         col1, col2, col3, col4 = st.columns(4)
 
