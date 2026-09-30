@@ -412,8 +412,8 @@ if "Fecha Vencimiento" in df_filtrado.columns:
 # =========================================================
 
 tab_actual, tab_renovaciones = st.tabs([
-    "🔑 Estado Actual",
-    "📈 Renovaciones"
+    "Estado Actual",
+    "Renovaciones"
 ])
 
 with tab_actual:
@@ -424,7 +424,7 @@ with tab_actual:
     col_icono, col_titulo = st.columns([1, 12])
 
     with col_icono:
-        st.markdown("# 🔑")
+        st.markdown("# antena.png")
 
     with col_titulo:
         st.title("Gestión de Licencias")
@@ -448,12 +448,12 @@ with tab_actual:
 
     k1, k2, k3, k4, k5, k6 = st.columns(6)
 
-    k1.metric("🔑 Vigentes", f"{activas:,}")
-    k2.metric("⚠️ Vencen ≤ 30 días", f"{vence_30:,}")
-    k3.metric("🟠 Vencen 31–60 días", f"{vence_60:,}")
-    k4.metric("🟡 Vencen 61–90 días", f"{vence_90:,}")
-    k5.metric("🔴 Vencidas", f"{vencidas:,}")
-    k6.metric("⚪ No activadas", f"{no_activadas:,}")
+    k1.metric("Vigentes", f"{activas:,}")
+    k2.metric("Vencen ≤ 30 días", f"{vence_30:,}")
+    k3.metric("Vencen 31–60 días", f"{vence_60:,}")
+    k4.metric("Vencen 61–90 días", f"{vence_90:,}")
+    k5.metric("Vencidas", f"{vencidas:,}")
+    k6.metric("No activadas", f"{no_activadas:,}")
 
     st.caption(
         f"Registros mostrados: {len(df_filtrado):,} · "
