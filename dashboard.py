@@ -3087,6 +3087,26 @@ with tab_pulverizadoras:
         col_autotrac = "AutoTrac™ Activo"
         col_pulsacion = "Pulsación Activo"
         col_secciones = "Tiempo de control de secciones Activo"
+        
+        # ---------------------------------------------------
+        # FILTRO DE USO REAL (>= 1%)
+        # ---------------------------------------------------
+        
+        autotrac_filtrado = (
+            df_pulv[col_autotrac]
+            .where(df_pulv[col_autotrac] >= 1)
+        )
+        
+        pulsacion_filtrado = (
+            df_pulv[col_pulsacion]
+            .where(df_pulv[col_pulsacion] >= 1)
+        )
+        
+        secciones_filtrado = (
+            df_pulv[col_secciones]
+            .where(df_pulv[col_secciones] >= 1)
+        )
+
 
         # ---------------------------------------------------
         # ÚLTIMA FOTO
@@ -3119,25 +3139,20 @@ with tab_pulverizadoras:
         # ---------------------------------------------------
 
         promedio_autotrac = (
-            df_pulv[col_autotrac]
+            autotrac_filtrado
             .mean()
         )
-
+        
         promedio_secciones = (
-            df_pulv[col_secciones]
+            secciones_filtrado
             .mean()
         )
-
+        
         promedio_pulsacion = (
-            df_pulv[col_pulsacion]
+            pulsacion_filtrado
             .mean()
         )
 
-        total_pulverizadoras = (
-            df_pulv[
-                "Número de serie de la máquina"
-            ].nunique()
-        )
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -3280,26 +3295,32 @@ with tab_pulverizadoras:
             df_pulv_activas
             .groupby("Fecha_fin_dt")
             .agg(
+        
                 Prom_AutoTrac=(
                     col_autotrac,
-                    "mean"
+                    lambda x: x[x >= 1].mean()
                 ),
+        
                 Prom_Pulsacion=(
                     col_pulsacion,
-                    "mean"
+                    lambda x: x[x >= 1].mean()
                 ),
+        
                 Prom_Secciones=(
                     col_secciones,
-                    "mean"
+                    lambda x: x[x >= 1].mean()
                 ),
+        
                 Maquinas=(
                     "Número de serie de la máquina",
                     "nunique"
                 )
+        
             )
             .reset_index()
             .sort_values("Fecha_fin_dt")
         )
+
 
         from plotly.subplots import make_subplots
         import plotly.graph_objects as go
