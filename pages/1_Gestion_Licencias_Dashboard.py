@@ -292,6 +292,10 @@ foto_actual, fecha_actualizacion = preparar_foto_actual(df_licencias)
 # =========================================================
 # SIDEBAR DE FILTROS
 # =========================================================
+st.sidebar.image(
+    "isg.png",
+    use_container_width=True
+)
 
 with st.sidebar:
     st.markdown("### Filtros")
