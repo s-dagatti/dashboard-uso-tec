@@ -407,7 +407,16 @@ if "Fecha Vencimiento" in df_filtrado.columns:
             (dias_desde_vencimiento > 548)
         )
     ].copy()
+# =========================================================
+# TABS PRINCIPALES
+# =========================================================
 
+tab_actual, tab_renovaciones = st.tabs([
+    "🔑 Estado Actual",
+    "📈 Renovaciones"
+])
+
+with tab_actual:
 # =========================================================
 # ENCABEZADO
 # =========================================================
@@ -723,4 +732,285 @@ with st.expander("ℹ️ Criterio de la foto actual"):
         - Los registros no vinculados a una máquina se mantienen porque siguen siendo
           válidos para el seguimiento administrativo y comercial.
         """
+    )
+
+with tab_renovaciones:
+
+# =========================================================
+# TAB RENOVACIONES
+# =========================================================
+
+st.title("📈 Renovaciones de Licencias")
+
+df_renov = df_licencias.copy()
+
+# -----------------------------------------
+# Fechas
+# -----------------------------------------
+
+df_renov["Fecha Inicio Licencia"] = pd.to_datetime(
+    df_renov["Fecha Inicio Licencia"],
+    format="mixed",
+    errors="coerce"
+)
+
+df_renov["Fecha Vencimiento"] = pd.to_datetime(
+    df_renov["Fecha Vencimiento"],
+    format="mixed",
+    errors="coerce"
+)
+
+# -----------------------------------------
+# Normalización
+# -----------------------------------------
+
+df_renov["Licencia Normalizada"] = np.where(
+
+    df_renov["Fuente"] == "Control administrativo",
+
+    df_renov["Nombre Licencia"]
+    .astype(str)
+    .str.replace("Nuevo - ", "", regex=False)
+    .str.replace("Renovar - ", "", regex=False)
+    .str.replace("Actualización - ", "", regex=False),
+
+    df_renov["Nombre Licencia"]
+
+)
+
+# -----------------------------------------
+# Clave de renovación
+# -----------------------------------------
+
+df_renov["Clave Renovacion"] = (
+
+    df_renov["Clave Componente"]
+    .astype(str)
+
+    + "|"
+
+    + df_renov["Licencia Normalizada"]
+    .astype(str)
+
+)
+
+# -----------------------------------------
+# Búsqueda renovaciones
+# -----------------------------------------
+
+renovaciones = []
+
+for clave, grupo in df_renov.groupby("Clave Renovacion"):
+
+    grupo = grupo.sort_values(
+        "Fecha Inicio Licencia"
+    )
+
+    if len(grupo) < 2:
+        continue
+
+    grupo = grupo.reset_index(drop=True)
+
+    for i in range(1, len(grupo)):
+
+        anterior = grupo.iloc[i - 1]
+        actual = grupo.iloc[i]
+
+        fecha_vto_ant = anterior["Fecha Vencimiento"]
+        fecha_ini_nueva = actual["Fecha Inicio Licencia"]
+
+        if (
+            pd.notna(fecha_vto_ant)
+            and
+            pd.notna(fecha_ini_nueva)
+            and
+            fecha_ini_nueva > fecha_vto_ant
+        ):
+
+            dias = (
+                fecha_ini_nueva -
+                fecha_vto_ant
+            ).days
+
+            renovaciones.append({
+
+                "Organización":
+                    actual["Organización"],
+
+                "Sucursal":
+                    actual["Sucursal"],
+
+                "Componente":
+                    actual["Modelo Componente"],
+
+                "Serie":
+                    actual["Serie Componente"],
+
+                "Licencia":
+                    actual["Licencia Normalizada"],
+
+                "Fecha Vencimiento":
+                    fecha_vto_ant,
+
+                "Fecha Renovación":
+                    fecha_ini_nueva,
+
+                "Días para Renovar":
+                    dias
+
+            })
+
+df_renovadas = pd.DataFrame(
+    renovaciones
+)
+
+# -----------------------------------------
+# KPIs
+# -----------------------------------------
+
+st.subheader("📊 Indicadores")
+
+if not df_renovadas.empty:
+
+    componentes_renovados = (
+        df_renovadas["Serie"]
+        .nunique()
+    )
+
+    dias_promedio = (
+        df_renovadas["Días para Renovar"]
+        .mean()
+    )
+
+else:
+
+    componentes_renovados = 0
+    dias_promedio = 0
+
+# Componentes que vencieron alguna vez
+
+componentes_vencidos = (
+
+    df_renov[
+        df_renov["Estado Licencia"]
+        .isin(
+            [
+                "Vencida",
+                "Vence en 30 días",
+                "Vence en 60 días",
+                "Vence en 90 días"
+            ]
+        )
+    ]["Clave Componente"]
+
+    .nunique()
+
+)
+
+tasa_renovacion = (
+
+    componentes_renovados
+
+    /
+
+    componentes_vencidos
+
+    * 100
+
+    if componentes_vencidos > 0
+
+    else 0
+
+)
+
+k1, k2, k3 = st.columns(3)
+
+k1.metric(
+    "🔄 Componentes Renovados",
+    f"{componentes_renovados:,}"
+)
+
+k2.metric(
+    "📈 Tasa de Renovación",
+    f"{tasa_renovacion:.1f}%"
+)
+
+k3.metric(
+    "⏳ Días Promedio",
+    f"{dias_promedio:.0f}"
+)
+
+# -----------------------------------------
+# HISTÓRICO
+# -----------------------------------------
+
+st.markdown("---")
+st.subheader("📅 Renovaciones por Mes")
+
+if not df_renovadas.empty:
+
+    df_mes = (
+
+        df_renovadas
+
+        .assign(
+            Mes=lambda x:
+            x["Fecha Renovación"]
+            .dt.to_period("M")
+            .astype(str)
+        )
+
+        .groupby("Mes")
+        .size()
+
+        .reset_index(
+            name="Renovaciones"
+        )
+
+    )
+
+    fig_mes = px.bar(
+
+        df_mes,
+
+        x="Mes",
+
+        y="Renovaciones",
+
+        text_auto=True,
+
+        title="Renovaciones por Mes"
+
+    )
+
+    st.plotly_chart(
+        fig_mes,
+        use_container_width=True
+    )
+
+# -----------------------------------------
+# TABLA
+# -----------------------------------------
+
+st.markdown("---")
+st.subheader("📋 Detalle de Renovaciones")
+
+if not df_renovadas.empty:
+
+    st.dataframe(
+
+        df_renovadas
+        .sort_values(
+            "Fecha Renovación",
+            ascending=False
+        ),
+
+        use_container_width=True
+
+    )
+
+else:
+
+    st.info(
+        "Todavía no se detectaron renovaciones."
     )
