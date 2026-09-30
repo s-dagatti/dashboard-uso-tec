@@ -744,7 +744,18 @@ with tab_renovaciones:
     # TAB RENOVACIONES
     # =========================================================
 
-    col_icono, col_titulo = st.columns([1, 12]) with col_icono: st.image( "pantalla.png", width=80 ) with col_titulo: st.title("Renovaciones de Licencias")
+    col_icono, col_titulo = st.columns([1, 12])
+
+    with col_icono:
+        st.image(
+            "pantalla.png",
+            width=80
+        )
+
+    with col_titulo:
+        st.title(
+            "📈 Renovaciones de Licencias"
+        )
 
     df_renov = df_licencias.copy()
 
@@ -763,6 +774,7 @@ with tab_renovaciones:
         format="mixed",
         errors="coerce"
     )
+
 
     # -----------------------------------------
     # Normalización
