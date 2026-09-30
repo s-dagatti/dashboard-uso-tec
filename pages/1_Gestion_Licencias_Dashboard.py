@@ -417,105 +417,213 @@ tab_actual, tab_renovaciones = st.tabs([
 ])
 
 with tab_actual:
-# =========================================================
-# ENCABEZADO
-# =========================================================
+    # =========================================================
+    # ENCABEZADO
+    # =========================================================
 
-col_icono, col_titulo = st.columns([1, 12])
+    col_icono, col_titulo = st.columns([1, 12])
 
-with col_icono:
-    st.markdown("# 🔑")
+    with col_icono:
+        st.markdown("# 🔑")
 
-with col_titulo:
-    st.title("Gestión de Licencias")
-    fecha_texto = (
-        fecha_actualizacion.strftime("%d/%m/%Y")
-        if pd.notna(fecha_actualizacion)
-        else "Sin fecha"
+    with col_titulo:
+        st.title("Gestión de Licencias")
+        fecha_texto = (
+            fecha_actualizacion.strftime("%d/%m/%Y")
+            if pd.notna(fecha_actualizacion)
+            else "Sin fecha"
+        )
+        st.caption(f"Foto actual de licencias · Última actualización: {fecha_texto}")
+
+    # =========================================================
+    # KPIs
+    # =========================================================
+
+    activas = df_filtrado["Estado Licencia"].eq("Vigente").sum()
+    vence_30 = df_filtrado["Estado Licencia"].eq("Vence en 30 días").sum()
+    vence_60 = df_filtrado["Estado Licencia"].eq("Vence en 60 días").sum()
+    vence_90 = df_filtrado["Estado Licencia"].eq("Vence en 90 días").sum()
+    vencidas = df_filtrado["Estado Licencia"].eq("Vencida").sum()
+    no_activadas = df_filtrado["Estado Licencia"].eq("No activada").sum()
+
+    k1, k2, k3, k4, k5, k6 = st.columns(6)
+
+    k1.metric("🔑 Vigentes", f"{activas:,}")
+    k2.metric("⚠️ Vencen ≤ 30 días", f"{vence_30:,}")
+    k3.metric("🟠 Vencen 31–60 días", f"{vence_60:,}")
+    k4.metric("🟡 Vencen 61–90 días", f"{vence_90:,}")
+    k5.metric("🔴 Vencidas", f"{vencidas:,}")
+    k6.metric("⚪ No activadas", f"{no_activadas:,}")
+
+    st.caption(
+        f"Registros mostrados: {len(df_filtrado):,} · "
+        f"Componentes: {df_filtrado['Clave Componente Dashboard'].nunique():,}"
     )
-    st.caption(f"Foto actual de licencias · Última actualización: {fecha_texto}")
 
-# =========================================================
-# KPIs
-# =========================================================
+    # =========================================================
+    # GRÁFICOS
+    # =========================================================
 
-activas = df_filtrado["Estado Licencia"].eq("Vigente").sum()
-vence_30 = df_filtrado["Estado Licencia"].eq("Vence en 30 días").sum()
-vence_60 = df_filtrado["Estado Licencia"].eq("Vence en 60 días").sum()
-vence_90 = df_filtrado["Estado Licencia"].eq("Vence en 90 días").sum()
-vencidas = df_filtrado["Estado Licencia"].eq("Vencida").sum()
-no_activadas = df_filtrado["Estado Licencia"].eq("No activada").sum()
+    st.markdown("---")
+    col_grafico_1, col_grafico_2 = st.columns([2, 1])
 
-k1, k2, k3, k4, k5, k6 = st.columns(6)
+    with col_grafico_1:
+        st.subheader("📅 Vencimientos por mes")
 
-k1.metric("🔑 Vigentes", f"{activas:,}")
-k2.metric("⚠️ Vencen ≤ 30 días", f"{vence_30:,}")
-k3.metric("🟠 Vencen 31–60 días", f"{vence_60:,}")
-k4.metric("🟡 Vencen 61–90 días", f"{vence_90:,}")
-k5.metric("🔴 Vencidas", f"{vencidas:,}")
-k6.metric("⚪ No activadas", f"{no_activadas:,}")
+        df_vencimientos = df_filtrado[
+            df_filtrado["Fecha Vencimiento"].notna()
+        ].copy()
 
-st.caption(
-    f"Registros mostrados: {len(df_filtrado):,} · "
-    f"Componentes: {df_filtrado['Clave Componente Dashboard'].nunique():,}"
-)
+        df_vencimientos["Mes Vencimiento"] = (
+            df_vencimientos["Fecha Vencimiento"]
+            .dt.to_period("M")
+            .dt.to_timestamp()
+        )
 
-# =========================================================
-# GRÁFICOS
-# =========================================================
+        df_vencimientos = (
+            df_vencimientos
+            .groupby(
+                ["Mes Vencimiento", "Estado Licencia"],
+                as_index=False
+            )
+            .size()
+            .rename(columns={"size": "Licencias"})
+            .sort_values("Mes Vencimiento")
+        )
 
-st.markdown("---")
-col_grafico_1, col_grafico_2 = st.columns([2, 1])
+        if not df_vencimientos.empty:
+            fig_vencimientos = px.bar(
+                df_vencimientos,
+                x="Mes Vencimiento",
+                y="Licencias",
+                color="Estado Licencia",
+                barmode="stack",
+                labels={
+                    "Mes Vencimiento": "Mes de vencimiento",
+                    "Licencias": "Cantidad de licencias"
+                },
+                color_discrete_map={
+                    "Vigente": "#2ca02c",
+                    "Vence en 30 días": "#ff7f0e",
+                    "Vence en 60 días": "#f2b134",
+                    "Vence en 90 días": "#e6c84f",
+                    "Vencida": "#d62728",
+                    "No activada": "#7f7f7f",
+                    "Cancelada": "#9467bd",
+                    "Sin fecha": "#bdbdbd"
+                }
+            )
 
-with col_grafico_1:
-    st.subheader("📅 Vencimientos por mes")
+            fig_vencimientos.update_layout(
+                hovermode="x unified",
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1
+                )
+            )
 
-    df_vencimientos = df_filtrado[
-        df_filtrado["Fecha Vencimiento"].notna()
+            st.plotly_chart(
+                fig_vencimientos,
+                use_container_width=True
+            )
+        else:
+            st.info("No hay fechas de vencimiento para los filtros seleccionados.")
+
+    with col_grafico_2:
+        st.subheader("📊 Estado actual")
+
+        df_estado = (
+            df_filtrado
+            .groupby("Estado Licencia", as_index=False)
+            .size()
+            .rename(columns={"size": "Licencias"})
+        )
+
+        if not df_estado.empty:
+            fig_estado = px.pie(
+                df_estado,
+                names="Estado Licencia",
+                values="Licencias",
+                hole=0.55,
+                color="Estado Licencia",
+                color_discrete_map={
+                    "Vigente": "#2ca02c",
+                    "Vence en 30 días": "#ff7f0e",
+                    "Vence en 60 días": "#f2b134",
+                    "Vence en 90 días": "#e6c84f",
+                    "Vencida": "#d62728",
+                    "No activada": "#7f7f7f",
+                    "Cancelada": "#9467bd",
+                    "Sin fecha": "#bdbdbd"
+                }
+            )
+
+            fig_estado.update_traces(
+                textinfo="percent+label"
+            )
+
+            fig_estado.update_layout(
+                showlegend=False
+            )
+
+            st.plotly_chart(
+                fig_estado,
+                use_container_width=True
+            )
+        else:
+            st.info("No hay licencias para los filtros seleccionados.")
+
+    # =========================================================
+    # OPORTUNIDADES COMERCIALES
+    # =========================================================
+
+    st.markdown("---")
+    st.subheader("💰 Oportunidades de renovación")
+
+    estados_oportunidad = [
+        "Vencida",
+        "Vence en 30 días",
+        "Vence en 60 días",
+        "Vence en 90 días",
+        "No activada"
+    ]
+
+    df_oportunidades = df_filtrado[
+        df_filtrado["Estado Licencia"].isin(estados_oportunidad)
     ].copy()
 
-    df_vencimientos["Mes Vencimiento"] = (
-        df_vencimientos["Fecha Vencimiento"]
-        .dt.to_period("M")
-        .dt.to_timestamp()
-    )
-
-    df_vencimientos = (
-        df_vencimientos
+    resumen_oportunidades = (
+        df_oportunidades
         .groupby(
-            ["Mes Vencimiento", "Estado Licencia"],
+            ["Sucursal", "Estado Licencia"],
+            dropna=False,
             as_index=False
         )
         .size()
         .rename(columns={"size": "Licencias"})
-        .sort_values("Mes Vencimiento")
     )
 
-    if not df_vencimientos.empty:
-        fig_vencimientos = px.bar(
-            df_vencimientos,
-            x="Mes Vencimiento",
+    if not resumen_oportunidades.empty:
+        fig_oportunidades = px.bar(
+            resumen_oportunidades,
+            x="Sucursal",
             y="Licencias",
             color="Estado Licencia",
             barmode="stack",
-            labels={
-                "Mes Vencimiento": "Mes de vencimiento",
-                "Licencias": "Cantidad de licencias"
-            },
+            labels={"Licencias": "Cantidad de licencias"},
             color_discrete_map={
-                "Vigente": "#2ca02c",
                 "Vence en 30 días": "#ff7f0e",
                 "Vence en 60 días": "#f2b134",
                 "Vence en 90 días": "#e6c84f",
                 "Vencida": "#d62728",
-                "No activada": "#7f7f7f",
-                "Cancelada": "#9467bd",
-                "Sin fecha": "#bdbdbd"
+                "No activada": "#7f7f7f"
             }
         )
 
-        fig_vencimientos.update_layout(
-            hovermode="x unified",
+        fig_oportunidades.update_layout(
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
@@ -526,491 +634,383 @@ with col_grafico_1:
         )
 
         st.plotly_chart(
-            fig_vencimientos,
+            fig_oportunidades,
             use_container_width=True
         )
     else:
-        st.info("No hay fechas de vencimiento para los filtros seleccionados.")
+        st.success("No hay oportunidades pendientes para los filtros seleccionados.")
 
-with col_grafico_2:
-    st.subheader("📊 Estado actual")
+    # =========================================================
+    # TABLA DETALLADA
+    # =========================================================
 
-    df_estado = (
-        df_filtrado
-        .groupby("Estado Licencia", as_index=False)
-        .size()
-        .rename(columns={"size": "Licencias"})
-    )
+    st.markdown("---")
+    st.subheader("📋 Detalle de licencias")
 
-    if not df_estado.empty:
-        fig_estado = px.pie(
-            df_estado,
-            names="Estado Licencia",
-            values="Licencias",
-            hole=0.55,
-            color="Estado Licencia",
-            color_discrete_map={
-                "Vigente": "#2ca02c",
-                "Vence en 30 días": "#ff7f0e",
-                "Vence en 60 días": "#f2b134",
-                "Vence en 90 días": "#e6c84f",
-                "Vencida": "#d62728",
-                "No activada": "#7f7f7f",
-                "Cancelada": "#9467bd",
-                "Sin fecha": "#bdbdbd"
+    columnas_tabla = [
+        "Sucursal",
+        "Organización",
+        "Alias Máquina",
+        "Tipo Máquina",
+        "Modelo Máquina",
+        "Tipo Componente",
+        "Modelo Componente",
+        "Serie Componente",
+        "Licencia Normalizada",
+        "Fecha Vencimiento",
+        "Días para Vencer",
+        "Estado Licencia",
+        "Fuente",
+        "Método Vinculación"
+    ]
+
+    columnas_tabla = [
+        columna
+        for columna in columnas_tabla
+        if columna in df_filtrado.columns
+    ]
+
+    df_tabla = (
+        df_filtrado[columnas_tabla]
+        .copy()
+        .rename(
+            columns={
+                "Alias Máquina": "Máquina",
+                "Tipo Máquina": "Tipo de Máquina",
+                "Modelo Máquina": "Modelo",
+                "Tipo Componente": "Tipo de Componente",
+                "Modelo Componente": "Componente",
+                "Serie Componente": "Serie de Componente",
+                "Licencia Normalizada": "Licencia",
+                "Fecha Vencimiento": "Fecha de Vencimiento",
+                "Días para Vencer": "Días para Vencer",
+                "Estado Licencia": "Estado",
+                "Método Vinculación": "Método de Vinculación"
             }
         )
-
-        fig_estado.update_traces(
-            textinfo="percent+label"
-        )
-
-        fig_estado.update_layout(
-            showlegend=False
-        )
-
-        st.plotly_chart(
-            fig_estado,
-            use_container_width=True
-        )
-    else:
-        st.info("No hay licencias para los filtros seleccionados.")
-
-# =========================================================
-# OPORTUNIDADES COMERCIALES
-# =========================================================
-
-st.markdown("---")
-st.subheader("💰 Oportunidades de renovación")
-
-estados_oportunidad = [
-    "Vencida",
-    "Vence en 30 días",
-    "Vence en 60 días",
-    "Vence en 90 días",
-    "No activada"
-]
-
-df_oportunidades = df_filtrado[
-    df_filtrado["Estado Licencia"].isin(estados_oportunidad)
-].copy()
-
-resumen_oportunidades = (
-    df_oportunidades
-    .groupby(
-        ["Sucursal", "Estado Licencia"],
-        dropna=False,
-        as_index=False
-    )
-    .size()
-    .rename(columns={"size": "Licencias"})
-)
-
-if not resumen_oportunidades.empty:
-    fig_oportunidades = px.bar(
-        resumen_oportunidades,
-        x="Sucursal",
-        y="Licencias",
-        color="Estado Licencia",
-        barmode="stack",
-        labels={"Licencias": "Cantidad de licencias"},
-        color_discrete_map={
-            "Vence en 30 días": "#ff7f0e",
-            "Vence en 60 días": "#f2b134",
-            "Vence en 90 días": "#e6c84f",
-            "Vencida": "#d62728",
-            "No activada": "#7f7f7f"
-        }
-    )
-
-    fig_oportunidades.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
+        .sort_values(
+            ["Días para Vencer", "Organización"],
+            ascending=[True, True],
+            na_position="last"
         )
     )
 
-    st.plotly_chart(
-        fig_oportunidades,
-        use_container_width=True
+    st.dataframe(
+        df_tabla.style.format(
+            {
+                "Fecha de Vencimiento": lambda x: x.strftime("%d/%m/%Y") if pd.notna(x) else "N/D",
+                "Días para Vencer": "{:.0f}"
+            },
+            na_rep="N/D"
+        ),
+        use_container_width=True,
+        hide_index=True
     )
-else:
-    st.success("No hay oportunidades pendientes para los filtros seleccionados.")
 
-# =========================================================
-# TABLA DETALLADA
-# =========================================================
+    csv_filtrado = df_tabla.to_csv(index=False).encode("utf-8-sig")
 
-st.markdown("---")
-st.subheader("📋 Detalle de licencias")
-
-columnas_tabla = [
-    "Sucursal",
-    "Organización",
-    "Alias Máquina",
-    "Tipo Máquina",
-    "Modelo Máquina",
-    "Tipo Componente",
-    "Modelo Componente",
-    "Serie Componente",
-    "Licencia Normalizada",
-    "Fecha Vencimiento",
-    "Días para Vencer",
-    "Estado Licencia",
-    "Fuente",
-    "Método Vinculación"
-]
-
-columnas_tabla = [
-    columna
-    for columna in columnas_tabla
-    if columna in df_filtrado.columns
-]
-
-df_tabla = (
-    df_filtrado[columnas_tabla]
-    .copy()
-    .rename(
-        columns={
-            "Alias Máquina": "Máquina",
-            "Tipo Máquina": "Tipo de Máquina",
-            "Modelo Máquina": "Modelo",
-            "Tipo Componente": "Tipo de Componente",
-            "Modelo Componente": "Componente",
-            "Serie Componente": "Serie de Componente",
-            "Licencia Normalizada": "Licencia",
-            "Fecha Vencimiento": "Fecha de Vencimiento",
-            "Días para Vencer": "Días para Vencer",
-            "Estado Licencia": "Estado",
-            "Método Vinculación": "Método de Vinculación"
-        }
+    st.download_button(
+        "📥 Descargar detalle filtrado",
+        data=csv_filtrado,
+        file_name="detalle_licencias_filtrado.csv",
+        mime="text/csv"
     )
-    .sort_values(
-        ["Días para Vencer", "Organización"],
-        ascending=[True, True],
-        na_position="last"
-    )
-)
 
-st.dataframe(
-    df_tabla.style.format(
-        {
-            "Fecha de Vencimiento": lambda x: x.strftime("%d/%m/%Y") if pd.notna(x) else "N/D",
-            "Días para Vencer": "{:.0f}"
-        },
-        na_rep="N/D"
-    ),
-    use_container_width=True,
-    hide_index=True
-)
+    # =========================================================
+    # NOTA METODOLÓGICA
+    # =========================================================
 
-csv_filtrado = df_tabla.to_csv(index=False).encode("utf-8-sig")
-
-st.download_button(
-    "📥 Descargar detalle filtrado",
-    data=csv_filtrado,
-    file_name="detalle_licencias_filtrado.csv",
-    mime="text/csv"
-)
-
-# =========================================================
-# NOTA METODOLÓGICA
-# =========================================================
-
-with st.expander("ℹ️ Criterio de la foto actual"):
-    st.markdown(
-        """
-        - El tablero utiliza únicamente la **última Fecha de Actualización** disponible.
-        - Para **Gen4 y SF6000**, se normaliza el nombre del producto quitando los
-          prefijos `Nuevo`, `Renovar` y `Actualización`.
-        - Si un mismo componente y licencia tiene un registro vigente y registros
-          históricos vencidos, se conserva el vigente y se desestiman los vencidos.
-        - Si no existe un registro activo, se conserva el vencimiento más reciente.
-        - Los registros no vinculados a una máquina se mantienen porque siguen siendo
-          válidos para el seguimiento administrativo y comercial.
-        """
-    )
+    with st.expander("ℹ️ Criterio de la foto actual"):
+        st.markdown(
+            """
+            - El tablero utiliza únicamente la **última Fecha de Actualización** disponible.
+            - Para **Gen4 y SF6000**, se normaliza el nombre del producto quitando los
+              prefijos `Nuevo`, `Renovar` y `Actualización`.
+            - Si un mismo componente y licencia tiene un registro vigente y registros
+              históricos vencidos, se conserva el vigente y se desestiman los vencidos.
+            - Si no existe un registro activo, se conserva el vencimiento más reciente.
+            - Los registros no vinculados a una máquina se mantienen porque siguen siendo
+              válidos para el seguimiento administrativo y comercial.
+            """
+        )
 
 with tab_renovaciones:
 
-# =========================================================
-# TAB RENOVACIONES
-# =========================================================
+    # =========================================================
+    # TAB RENOVACIONES
+    # =========================================================
 
-st.title("📈 Renovaciones de Licencias")
+    st.title("📈 Renovaciones de Licencias")
 
-df_renov = df_licencias.copy()
+    df_renov = df_licencias.copy()
 
-# -----------------------------------------
-# Fechas
-# -----------------------------------------
+    # -----------------------------------------
+    # Fechas
+    # -----------------------------------------
 
-df_renov["Fecha Inicio Licencia"] = pd.to_datetime(
-    df_renov["Fecha Inicio Licencia"],
-    format="mixed",
-    errors="coerce"
-)
-
-df_renov["Fecha Vencimiento"] = pd.to_datetime(
-    df_renov["Fecha Vencimiento"],
-    format="mixed",
-    errors="coerce"
-)
-
-# -----------------------------------------
-# Normalización
-# -----------------------------------------
-
-df_renov["Licencia Normalizada"] = np.where(
-
-    df_renov["Fuente"] == "Control administrativo",
-
-    df_renov["Nombre Licencia"]
-    .astype(str)
-    .str.replace("Nuevo - ", "", regex=False)
-    .str.replace("Renovar - ", "", regex=False)
-    .str.replace("Actualización - ", "", regex=False),
-
-    df_renov["Nombre Licencia"]
-
-)
-
-# -----------------------------------------
-# Clave de renovación
-# -----------------------------------------
-
-df_renov["Clave Renovacion"] = (
-
-    df_renov["Clave Componente"]
-    .astype(str)
-
-    + "|"
-
-    + df_renov["Licencia Normalizada"]
-    .astype(str)
-
-)
-
-# -----------------------------------------
-# Búsqueda renovaciones
-# -----------------------------------------
-
-renovaciones = []
-
-for clave, grupo in df_renov.groupby("Clave Renovacion"):
-
-    grupo = grupo.sort_values(
-        "Fecha Inicio Licencia"
+    df_renov["Fecha Inicio Licencia"] = pd.to_datetime(
+        df_renov["Fecha Inicio Licencia"],
+        format="mixed",
+        errors="coerce"
     )
 
-    if len(grupo) < 2:
-        continue
+    df_renov["Fecha Vencimiento"] = pd.to_datetime(
+        df_renov["Fecha Vencimiento"],
+        format="mixed",
+        errors="coerce"
+    )
 
-    grupo = grupo.reset_index(drop=True)
+    # -----------------------------------------
+    # Normalización
+    # -----------------------------------------
 
-    for i in range(1, len(grupo)):
+    df_renov["Licencia Normalizada"] = np.where(
 
-        anterior = grupo.iloc[i - 1]
-        actual = grupo.iloc[i]
+        df_renov["Fuente"] == "Control administrativo",
 
-        fecha_vto_ant = anterior["Fecha Vencimiento"]
-        fecha_ini_nueva = actual["Fecha Inicio Licencia"]
+        df_renov["Nombre Licencia"]
+        .astype(str)
+        .str.replace("Nuevo - ", "", regex=False)
+        .str.replace("Renovar - ", "", regex=False)
+        .str.replace("Actualización - ", "", regex=False),
 
-        if (
-            pd.notna(fecha_vto_ant)
-            and
-            pd.notna(fecha_ini_nueva)
-            and
-            fecha_ini_nueva > fecha_vto_ant
-        ):
+        df_renov["Nombre Licencia"]
 
-            dias = (
-                fecha_ini_nueva -
-                fecha_vto_ant
-            ).days
+    )
 
-            renovaciones.append({
+    # -----------------------------------------
+    # Clave de renovación
+    # -----------------------------------------
 
-                "Organización":
-                    actual["Organización"],
+    df_renov["Clave Renovacion"] = (
 
-                "Sucursal":
-                    actual["Sucursal"],
+        df_renov["Clave Componente"]
+        .astype(str)
 
-                "Componente":
-                    actual["Modelo Componente"],
+        + "|"
 
-                "Serie":
-                    actual["Serie Componente"],
+        + df_renov["Licencia Normalizada"]
+        .astype(str)
 
-                "Licencia":
-                    actual["Licencia Normalizada"],
+    )
 
-                "Fecha Vencimiento":
-                    fecha_vto_ant,
+    # -----------------------------------------
+    # Búsqueda renovaciones
+    # -----------------------------------------
 
-                "Fecha Renovación":
-                    fecha_ini_nueva,
+    renovaciones = []
 
-                "Días para Renovar":
-                    dias
+    for clave, grupo in df_renov.groupby("Clave Renovacion"):
 
-            })
+        grupo = grupo.sort_values(
+            "Fecha Inicio Licencia"
+        )
 
-df_renovadas = pd.DataFrame(
-    renovaciones
-)
+        if len(grupo) < 2:
+            continue
 
-# -----------------------------------------
-# KPIs
-# -----------------------------------------
+        grupo = grupo.reset_index(drop=True)
 
-st.subheader("📊 Indicadores")
+        for i in range(1, len(grupo)):
 
-if not df_renovadas.empty:
+            anterior = grupo.iloc[i - 1]
+            actual = grupo.iloc[i]
 
-    componentes_renovados = (
-        df_renovadas["Serie"]
+            fecha_vto_ant = anterior["Fecha Vencimiento"]
+            fecha_ini_nueva = actual["Fecha Inicio Licencia"]
+
+            if (
+                pd.notna(fecha_vto_ant)
+                and
+                pd.notna(fecha_ini_nueva)
+                and
+                fecha_ini_nueva > fecha_vto_ant
+            ):
+
+                dias = (
+                    fecha_ini_nueva -
+                    fecha_vto_ant
+                ).days
+
+                renovaciones.append({
+
+                    "Organización":
+                        actual["Organización"],
+
+                    "Sucursal":
+                        actual["Sucursal"],
+
+                    "Componente":
+                        actual["Modelo Componente"],
+
+                    "Serie":
+                        actual["Serie Componente"],
+
+                    "Licencia":
+                        actual["Licencia Normalizada"],
+
+                    "Fecha Vencimiento":
+                        fecha_vto_ant,
+
+                    "Fecha Renovación":
+                        fecha_ini_nueva,
+
+                    "Días para Renovar":
+                        dias
+
+                })
+
+    df_renovadas = pd.DataFrame(
+        renovaciones
+    )
+
+    # -----------------------------------------
+    # KPIs
+    # -----------------------------------------
+
+    st.subheader("📊 Indicadores")
+
+    if not df_renovadas.empty:
+
+        componentes_renovados = (
+            df_renovadas["Serie"]
+            .nunique()
+        )
+
+        dias_promedio = (
+            df_renovadas["Días para Renovar"]
+            .mean()
+        )
+
+    else:
+
+        componentes_renovados = 0
+        dias_promedio = 0
+
+    # Componentes que vencieron alguna vez
+
+    componentes_vencidos = (
+
+        df_renov[
+            df_renov["Estado Licencia"]
+            .isin(
+                [
+                    "Vencida",
+                    "Vence en 30 días",
+                    "Vence en 60 días",
+                    "Vence en 90 días"
+                ]
+            )
+        ]["Clave Componente"]
+
         .nunique()
+
     )
 
-    dias_promedio = (
-        df_renovadas["Días para Renovar"]
-        .mean()
+    tasa_renovacion = (
+
+        componentes_renovados
+
+        /
+
+        componentes_vencidos
+
+        * 100
+
+        if componentes_vencidos > 0
+
+        else 0
+
     )
 
-else:
+    k1, k2, k3 = st.columns(3)
 
-    componentes_renovados = 0
-    dias_promedio = 0
+    k1.metric(
+        "🔄 Componentes Renovados",
+        f"{componentes_renovados:,}"
+    )
 
-# Componentes que vencieron alguna vez
+    k2.metric(
+        "📈 Tasa de Renovación",
+        f"{tasa_renovacion:.1f}%"
+    )
 
-componentes_vencidos = (
+    k3.metric(
+        "⏳ Días Promedio",
+        f"{dias_promedio:.0f}"
+    )
 
-    df_renov[
-        df_renov["Estado Licencia"]
-        .isin(
-            [
-                "Vencida",
-                "Vence en 30 días",
-                "Vence en 60 días",
-                "Vence en 90 días"
-            ]
-        )
-    ]["Clave Componente"]
+    # -----------------------------------------
+    # HISTÓRICO
+    # -----------------------------------------
 
-    .nunique()
+    st.markdown("---")
+    st.subheader("📅 Renovaciones por Mes")
 
-)
+    if not df_renovadas.empty:
 
-tasa_renovacion = (
+        df_mes = (
 
-    componentes_renovados
+            df_renovadas
 
-    /
+            .assign(
+                Mes=lambda x:
+                x["Fecha Renovación"]
+                .dt.to_period("M")
+                .astype(str)
+            )
 
-    componentes_vencidos
+            .groupby("Mes")
+            .size()
 
-    * 100
+            .reset_index(
+                name="Renovaciones"
+            )
 
-    if componentes_vencidos > 0
-
-    else 0
-
-)
-
-k1, k2, k3 = st.columns(3)
-
-k1.metric(
-    "🔄 Componentes Renovados",
-    f"{componentes_renovados:,}"
-)
-
-k2.metric(
-    "📈 Tasa de Renovación",
-    f"{tasa_renovacion:.1f}%"
-)
-
-k3.metric(
-    "⏳ Días Promedio",
-    f"{dias_promedio:.0f}"
-)
-
-# -----------------------------------------
-# HISTÓRICO
-# -----------------------------------------
-
-st.markdown("---")
-st.subheader("📅 Renovaciones por Mes")
-
-if not df_renovadas.empty:
-
-    df_mes = (
-
-        df_renovadas
-
-        .assign(
-            Mes=lambda x:
-            x["Fecha Renovación"]
-            .dt.to_period("M")
-            .astype(str)
         )
 
-        .groupby("Mes")
-        .size()
+        fig_mes = px.bar(
 
-        .reset_index(
-            name="Renovaciones"
+            df_mes,
+
+            x="Mes",
+
+            y="Renovaciones",
+
+            text_auto=True,
+
+            title="Renovaciones por Mes"
+
         )
 
-    )
+        st.plotly_chart(
+            fig_mes,
+            use_container_width=True
+        )
 
-    fig_mes = px.bar(
+    # -----------------------------------------
+    # TABLA
+    # -----------------------------------------
 
-        df_mes,
+    st.markdown("---")
+    st.subheader("📋 Detalle de Renovaciones")
 
-        x="Mes",
+    if not df_renovadas.empty:
 
-        y="Renovaciones",
+        st.dataframe(
 
-        text_auto=True,
+            df_renovadas
+            .sort_values(
+                "Fecha Renovación",
+                ascending=False
+            ),
 
-        title="Renovaciones por Mes"
+            use_container_width=True
 
-    )
+        )
 
-    st.plotly_chart(
-        fig_mes,
-        use_container_width=True
-    )
+    else:
 
-# -----------------------------------------
-# TABLA
-# -----------------------------------------
-
-st.markdown("---")
-st.subheader("📋 Detalle de Renovaciones")
-
-if not df_renovadas.empty:
-
-    st.dataframe(
-
-        df_renovadas
-        .sort_values(
-            "Fecha Renovación",
-            ascending=False
-        ),
-
-        use_container_width=True
-
-    )
-
-else:
-
-    st.info(
-        "Todavía no se detectaron renovaciones."
-    )
+        st.info(
+            "Todavía no se detectaron renovaciones."
+        )
