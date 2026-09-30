@@ -13,7 +13,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Gestión de Licencias",
-    page_icon="logo_pag.png",
+    page_icon="mtg.png",
     layout="wide"
 )
 
