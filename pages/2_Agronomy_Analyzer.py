@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import streamlit as st
 import uuid
+import requests
+import io
 import plotly.express as px
 
 st.set_page_config(
