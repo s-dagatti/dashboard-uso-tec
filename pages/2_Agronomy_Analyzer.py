@@ -176,7 +176,12 @@ def get_latest_project_for_client(client_name):
     # Ordenar por fecha de registro descendente para obtener el último
     try:
         df_projects = pd.DataFrame(client_projects)
-        df_projects['Fecha_Registro_dt'] = pd.to_datetime(df_projects['Fecha_Registro'], errors='coerce')
+        df_projects['Fecha_Registro_dt'] = pd.to_datetime(
+            df_projects['FECHA Y HORA'],
+            dayfirst=True,
+            errors='coerce'
+        )
+
         # Filtra Nulos antes de ordenar
         df_projects = df_projects.dropna(subset=['Fecha_Registro_dt'])
         latest_project = df_projects.sort_values(by='Fecha_Registro_dt', ascending=False).iloc[0].to_dict()
