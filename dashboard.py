@@ -3567,68 +3567,6 @@ with tab_picadoras:
         # ---------------------------------------------------
     
         df_pic = cargar_base_picadoras()
-
-        # ---------------------------------------------------
-        # APLICAR FILTROS DEL SIDEBAR
-        # ---------------------------------------------------
-        
-        if sel_sucursal != "Todas":
-        
-            df_pic = df_pic[
-                df_pic["Sucursal"]
-                == sel_sucursal
-            ]
-        
-        if sel_razon != "Todas":
-        
-            df_pic = df_pic[
-                df_pic["Organizaciones"]
-                == sel_razon
-            ]
-        
-        if sel_tipo != "Todos":
-        
-            df_pic = df_pic[
-                df_pic["Tipo"]
-                == sel_tipo
-            ]
-        
-        if sel_modelos:
-        
-            df_pic = df_pic[
-                df_pic["Modelo"]
-                .isin(sel_modelos)
-            ]
-        
-        # -----------------------------------------
-        # FILTRO FECHAS
-        # -----------------------------------------
-        
-        if rango_fechas:
-        
-            fecha_ini = pd.Timestamp(
-                rango_fechas[0]
-            )
-        
-            fecha_fin = pd.Timestamp(
-                rango_fechas[1]
-            )
-        
-            df_pic = df_pic[
-        
-                (
-                    df_pic["Fecha_fin_dt"]
-                    >= fecha_ini
-                )
-        
-                &
-        
-                (
-                    df_pic["Fecha_fin_dt"]
-                    <= fecha_fin
-                )
-        
-            ]
     
         df_pic["Fecha_inicio_dt"] = pd.to_datetime(
             df_pic["Fecha de inicio"],
@@ -5244,8 +5182,3 @@ with tab_picadoras:
                     - 🔴 <60 → Calidad Crítica
                     """
                 )
-
-
-
-
-
