@@ -3579,6 +3579,136 @@ with tab_picadoras:
             format="mixed",
             errors="coerce"
         )
+
+        # ---------------------------------------------------
+        # APLICAR FILTROS DEL SIDEBAR
+        # ---------------------------------------------------
+        
+        # Excluir CONCI SA
+        
+        if excluir_conci:
+        
+            if "Organizaciones" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    ~df_pic["Organizaciones"]
+                    .fillna("")
+                    .astype(str)
+                    .str.upper()
+                    .str.contains("CONCI SA")
+                ]
+        
+        # -----------------------------------------
+        # SUCURSAL
+        # -----------------------------------------
+        
+        if sel_sucursal != "Todas":
+        
+            if "Sucursal" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Sucursal"]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .str.upper()
+                    ==
+                    str(sel_sucursal)
+                    .strip()
+                    .upper()
+                ]
+        
+        # -----------------------------------------
+        # RAZÓN SOCIAL
+        # -----------------------------------------
+        
+        if sel_razon != "Todas":
+        
+            if "Organizaciones" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Organizaciones"]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .str.upper()
+                    ==
+                    str(sel_razon)
+                    .strip()
+                    .upper()
+                ]
+        
+        # -----------------------------------------
+        # TIPO DE MÁQUINA
+        # -----------------------------------------
+        
+        if sel_tipo != "Todos":
+        
+            if "Tipo" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Tipo"]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .str.upper()
+                    ==
+                    str(sel_tipo)
+                    .strip()
+                    .upper()
+                ]
+        
+        # -----------------------------------------
+        # MODELOS
+        # -----------------------------------------
+        
+        if sel_modelos:
+        
+            if "Modelo" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Modelo"]
+                    .isin(sel_modelos)
+                ]
+        
+        # -----------------------------------------
+        # FECHAS
+        # -----------------------------------------
+        
+        if rango_fechas:
+        
+            fecha_ini = pd.Timestamp(
+                rango_fechas[0]
+            )
+        
+            fecha_fin = pd.Timestamp(
+                rango_fechas[1]
+            )
+        
+            df_pic = df_pic[
+                (
+                    df_pic["Fecha_fin_dt"]
+                    >= fecha_ini
+                )
+                &
+                (
+                    df_pic["Fecha_fin_dt"]
+                    <= fecha_fin
+                )
+            ]
+        
+        # ---------------------------------------------------
+        # CONTROL DE DATOS VACÍOS
+        # ---------------------------------------------------
+        
+        if df_pic.empty:
+        
+            st.warning(
+                "No hay registros de picadoras para los filtros seleccionados."
+            )
+        
+            st.stop()
+
     
         # ---------------------------------------------------
         # KPI 1 - AUTOTRAC
