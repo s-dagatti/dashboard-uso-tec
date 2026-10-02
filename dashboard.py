@@ -3579,6 +3579,70 @@ with tab_picadoras:
             format="mixed",
             errors="coerce"
         )
+
+        # ---------------------------------------------------
+        # APLICAR FILTROS DEL SIDEBAR
+        # ---------------------------------------------------
+        
+        if sel_sucursal != "Todas":
+        
+            if "Sucursal" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Sucursal"] == sel_sucursal
+                ]
+        
+        
+        if sel_razon != "Todas":
+        
+            if "Organizaciones" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Organizaciones"] == sel_razon
+                ]
+        
+        
+        if sel_tipo != "Todos":
+        
+            if "Tipo" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Tipo"] == sel_tipo
+                ]
+        
+        
+        if sel_modelos:
+        
+            if "Modelo" in df_pic.columns:
+        
+                df_pic = df_pic[
+                    df_pic["Modelo"]
+                    .isin(sel_modelos)
+                ]
+        
+        
+        if rango_fechas:
+        
+            fecha_ini = pd.Timestamp(
+                rango_fechas[0]
+            )
+        
+            fecha_fin = pd.Timestamp(
+                rango_fechas[1]
+            )
+        
+            df_pic = df_pic[
+                (
+                    df_pic["Fecha_fin_dt"]
+                    >= fecha_ini
+                )
+                &
+                (
+                    df_pic["Fecha_fin_dt"]
+                    <= fecha_fin
+                )
+            ]
+
     
         # ---------------------------------------------------
         # KPI 1 - AUTOTRAC
