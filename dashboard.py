@@ -5720,36 +5720,84 @@ with tab_picadoras:
             )
     
         # ---------------------------------------------------
-        # BASE
+        # BASE HARVESTLAB ALFALFA
         # ---------------------------------------------------
-    
+        
         df_hl = df_alfalfa.copy()
-    
-        if df_hl.empty:
-    
-            st.warning(
-                "No existen registros de Alfalfa para los filtros seleccionados."
-            )
-    
-            st.stop()
-    
-        mask_curva = (
-    
-            df_hl["Proteína bruta"].notna()
-    
-            |
-    
-            df_hl["Fibra detergente neutro"].notna()
-    
-            |
-    
-            df_hl["Fibra detergente ácido"].notna()
-    
-            |
-    
-            df_hl["Ceniza bruta"].notna()
-    
+        
+        columnas_constituyentes_alfalfa = [
+        
+            "Proteína bruta",
+        
+            "Fibra detergente neutro",
+        
+            "Fibra detergente ácido",
+        
+            "Ceniza bruta"
+        
+        ]
+        
+        mask_harvestlab_alfalfa = (
+        
+            df_hl[columnas_constituyentes_alfalfa]
+        
+            .notna()
+        
+            .any(axis=1)
+        
         )
+        
+        # Cobertura
+        
+        registros_totales_alfalfa = len(df_hl)
+        
+        registros_harvestlab_alfalfa = int(
+            mask_harvestlab_alfalfa.sum()
+        )
+        
+        registros_sin_harvestlab_alfalfa = int(
+            (~mask_harvestlab_alfalfa).sum()
+        )
+        
+        porc_harvestlab_alfalfa = (
+        
+            registros_harvestlab_alfalfa
+        
+            /
+        
+            registros_totales_alfalfa
+        
+            *
+        
+            100
+        
+            if registros_totales_alfalfa > 0
+        
+            else 0
+        
+        )
+        
+        # Mantener únicamente registros
+        # con datos reales de HarvestLab
+        
+        df_hl = (
+        
+            df_hl[
+                mask_harvestlab_alfalfa
+            ]
+        
+            .copy()
+        
+        )
+        
+        if df_hl.empty:
+        
+            st.warning(
+                "No existen registros de Alfalfa con constituyentes de HarvestLab para los filtros seleccionados."
+            )
+        
+            st.stop()
+
     
         # ---------------------------------------------------
         # KPIs
