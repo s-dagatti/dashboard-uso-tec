@@ -3939,14 +3939,14 @@ with tab_picadoras:
         # ---------------------------------------------------
         # HISTÓRICO
         # ---------------------------------------------------
-    
+        
         st.markdown("---")
         st.subheader(
             "Evolución Semanal de Trabajo"
         )
-    
+        
         df_hist = (
-
+        
             df_pic
         
             .groupby(
@@ -3957,17 +3957,10 @@ with tab_picadoras:
             )
         
             .agg(
-        
                 Superficie=(
                     "Superficie cosechada",
                     "sum"
-                ),
-        
-                Maquinas=(
-                    "Equipo",
-                    "nunique"
                 )
-        
             )
         
             .reset_index()
@@ -3977,65 +3970,40 @@ with tab_picadoras:
             )
         
         )
-
-    
-        # porcentaje de autotrac semanal
-    
-        superficie_semana = (
-    
+        
+        # ---------------------------------------------------
+        # MAQUINAS POR SEMANA
+        # ---------------------------------------------------
+        
+        df_maq_hist = (
+        
             df_pic
-    
+        
             .groupby("Fecha_fin_dt")
-    
-            [
-                "Superficie cosechada"
-            ]
-    
-            .sum()
-    
+        
+            ["Equipo"]
+        
+            .nunique()
+        
             .reset_index()
-    
-            .rename(
-                columns={
-                    "Superficie cosechada":
-                        "Sup_Total"
-                }
-            )
-    
+        
         )
-    
-        df_hist = pd.merge(
-            df_hist,
-            superficie_semana,
-            on="Fecha_fin_dt",
-            how="left"
-        )
-    
-        df_hist["AutoTrac_Porc"] = np.where(
-    
-            df_hist["Sup_Total"] > 0,
-    
-            df_hist["AutoTrac"]
-            /
-            df_hist["Sup_Total"]
-            *
-            100,
-    
-            np.nan
-    
-        )
-    
+        
         # ---------------------------------------------------
         # GRAFICO
         # ---------------------------------------------------
-    
+        
         from plotly.subplots import make_subplots
         import plotly.graph_objects as go
-    
+        
         fig_pic = make_subplots(
             specs=[[{"secondary_y": True}]]
         )
-    
+        
+        # ---------------------------------------------------
+        # BARRAS POR CULTIVO
+        # ---------------------------------------------------
+        
         colores_cultivo = {
         
             "Maíz para ensilado":
@@ -4047,16 +4015,22 @@ with tab_picadoras:
         }
         
         for cultivo in (
+        
             df_hist["Tipo de cultivo"]
+        
             .dropna()
+        
             .unique()
+        
         ):
         
             df_temp = (
+        
                 df_hist[
                     df_hist["Tipo de cultivo"]
                     == cultivo
                 ]
+        
             )
         
             fig_pic.add_trace(
@@ -4080,107 +4054,82 @@ with tab_picadoras:
                 secondary_y=False
         
             )
-
-    
-        # Línea total máquinas
-    
+        
+        # ---------------------------------------------------
+        # LINEA DE MAQUINAS
+        # ---------------------------------------------------
+        
         fig_pic.add_trace(
-    
+        
             go.Scatter(
-    
-                x=df_hist["Fecha_fin_dt"],
-    
-                df_maq_hist = (
-
-                    df_pic
-                
-                    .groupby("Fecha_fin_dt")
-                
-                    ["Equipo"]
-                
-                    .nunique()
-                
-                    .reset_index()
-                
-                )
-                
-                fig_pic.add_trace(
-                
-                    go.Scatter(
-                
-                        x=df_maq_hist["Fecha_fin_dt"],
-                
-                        y=df_maq_hist["Equipo"],
-                
-                        mode="lines+markers",
-                
-                        name="Máquinas",
-                
-                        line=dict(
-                            color="#2b5c8f",
-                            width=3
-                        )
-                
-                    ),
-                
-                    secondary_y=True
-                
-                ),
-    
+        
+                x=df_maq_hist["Fecha_fin_dt"],
+        
+                y=df_maq_hist["Equipo"],
+        
                 mode="lines+markers",
-    
-                name="Superficie Cosechada",
-    
+        
+                name="Máquinas",
+        
                 line=dict(
-                    color="#367c2b",
+                    color="#2b5c8f",
                     width=3
                 )
-    
+        
             ),
-    
+        
             secondary_y=True
-    
+        
         )
-    
-        fig_pic.update_yaxes(
-            title_text="Cantidad de Máquinas",
-            secondary_y=False
-        )
-    
+        
+        # ---------------------------------------------------
+        # EJES
+        # ---------------------------------------------------
+        
         fig_pic.update_yaxes(
             title_text="Superficie (ha)",
+            secondary_y=False
+        )
+        
+        fig_pic.update_yaxes(
+            title_text="Cantidad de Máquinas",
             secondary_y=True
         )
-    
+        
+        # ---------------------------------------------------
+        # LAYOUT
+        # ---------------------------------------------------
+        
         fig_pic.update_layout(
-    
-            title=(
-                "Máquinas Trabajando "
-                "y Superficie Cosechada"
-            ),
-    
+        
+            title=
+                "Superficie por Cultivo y Máquinas Trabajando",
+        
+            barmode="stack",
+        
             hovermode="x unified",
-    
+        
             legend=dict(
-    
+        
                 orientation="h",
-    
+        
                 yanchor="bottom",
-    
+        
                 y=1.02,
-    
+        
                 xanchor="right",
-    
+        
                 x=1
-    
+        
             )
-    
+        
         )
-    
+        
         st.plotly_chart(
             fig_pic,
             use_container_width=True
         )
+
 
 
         
