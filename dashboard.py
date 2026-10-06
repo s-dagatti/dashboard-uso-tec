@@ -4840,11 +4840,13 @@ with tab_picadoras:
             
                 .groupby(
                     [
+                        "Organizaciones",
                         "Clientes",
                         "Granjas",
                         "Campos",
                         "Variedades"
                     ],
+
                     as_index=False,
                     dropna=False
                 )
@@ -5417,168 +5419,232 @@ with tab_picadoras:
             )
 
             # ---------------------------------------------------
-            # RANKING ORGANIZACIONES
+            # RANKINGS DE CALIDAD
             # ---------------------------------------------------
             
             st.markdown("---")
-            st.subheader(
-                "🏢 Ranking de Organizaciones"
+            st.subheader("🏆 Rankings de Calidad de Forraje")
+            
+            df_rank_base = (
+                df_tabla_hl
+                .dropna(
+                    subset=[
+                        "Score Calidad",
+                        "Superficie"
+                    ]
+                )
+                .copy()
             )
             
-            df_rank_org = (
+            df_rank_base["Puntos ponderados"] = (
+                df_rank_base["Score Calidad"]
+                *
+                df_rank_base["Superficie"]
+            )
             
-                df_hl[
-                    mask_curva
-                ]
+            col_rank_org, col_rank_cli = st.columns(2)
             
-                .groupby(
-                    "Organizaciones",
-                    as_index=False
+            # ---------------------------------------------------
+            # ORGANIZACIONES
+            # ---------------------------------------------------
+            
+            with col_rank_org:
+            
+                st.markdown(
+                    "#### 🏢 Organizaciones"
                 )
             
-                .agg(
+                df_rank_org = (
             
-                    Score=(
-                        "Score Calidad",
-                        "mean"
-                    ),
+                    df_rank_base
             
-                    Superficie=(
-                        "Superficie cosechada",
-                        "sum"
+                    .dropna(
+                        subset=["Organizaciones"]
+                    )
+            
+                    .groupby(
+                        "Organizaciones",
+                        as_index=False
+                    )
+            
+                    .agg(
+            
+                        PuntosPonderados=(
+                            "Puntos ponderados",
+                            "sum"
+                        ),
+            
+                        Superficie=(
+                            "Superficie",
+                            "sum"
+                        )
+            
                     )
             
                 )
             
-                .dropna(
-                    subset=["Score"]
+                df_rank_org["Score"] = np.where(
+            
+                    df_rank_org["Superficie"] > 0,
+            
+                    df_rank_org["PuntosPonderados"]
+                    /
+                    df_rank_org["Superficie"],
+            
+                    np.nan
+            
                 )
             
-                .sort_values(
-                    "Score",
-                    ascending=False
+                df_rank_org = (
+            
+                    df_rank_org
+            
+                    .sort_values(
+                        "Score",
+                        ascending=False
+                    )
+            
+                    .head(15)
+            
                 )
             
-            )
+                fig_rank_org = px.bar(
             
-            fig_rank_org = px.bar(
+                    df_rank_org,
             
-                df_rank_org.head(15),
+                    x="Score",
             
-                x="Score",
+                    y="Organizaciones",
             
-                y="Organizaciones",
+                    orientation="h",
             
-                orientation="h",
+                    color="Score",
             
-                color="Score",
+                    text="Score",
             
-                text="Score",
+                    color_continuous_scale=[
+                        "#d62728",
+                        "#f2b134",
+                        "#2ca02c"
+                    ],
             
-                color_continuous_scale=[
-                    "#d62728",
-                    "#f2b134",
-                    "#2ca02c"
-                ],
+                    title="Organizaciones con Mejor Calidad"
             
-                title="Top Organizaciones por Calidad de Forraje"
-            
-            )
-            
-            fig_rank_org.update_layout(
-            
-                yaxis=dict(
-                    categoryorder="total ascending"
                 )
             
-            )
+                fig_rank_org.update_layout(
             
-            st.plotly_chart(
-                fig_rank_org,
-                use_container_width=True
-            )
-
-            # ---------------------------------------------------
-            # RANKING CLIENTES
-            # ---------------------------------------------------
-            
-            st.markdown("---")
-            st.subheader(
-                "👤 Ranking de Clientes"
-            )
-            
-            df_rank_cli = (
-            
-                df_hl[
-                    mask_curva
-                ]
-            
-                .groupby(
-                    "Clientes",
-                    as_index=False
-                )
-            
-                .agg(
-            
-                    Score=(
-                        "Score Calidad",
-                        "mean"
-                    ),
-            
-                    Superficie=(
-                        "Superficie cosechada",
-                        "sum"
+                    yaxis=dict(
+                        categoryorder="total ascending"
                     )
             
                 )
             
-                .dropna(
-                    subset=["Score"]
+                st.plotly_chart(
+                    fig_rank_org,
+                    use_container_width=True
                 )
             
-                .sort_values(
-                    "Score",
-                    ascending=False
+            # ---------------------------------------------------
+            # CLIENTES
+            # ---------------------------------------------------
+            
+            with col_rank_cli:
+            
+                st.markdown(
+                    "#### 👤 Clientes"
                 )
             
-            )
+                df_rank_cli = (
             
-            fig_rank_cli = px.bar(
+                    df_rank_base
             
-                df_rank_cli.head(20),
+                    .dropna(
+                        subset=["Clientes"]
+                    )
             
-                x="Score",
+                    .groupby(
+                        "Clientes",
+                        as_index=False
+                    )
             
-                y="Clientes",
+                    .agg(
             
-                orientation="h",
+                        PuntosPonderados=(
+                            "Puntos ponderados",
+                            "sum"
+                        ),
             
-                color="Score",
+                        Superficie=(
+                            "Superficie",
+                            "sum"
+                        )
             
-                text="Score",
+                    )
             
-                color_continuous_scale=[
-                    "#d62728",
-                    "#f2b134",
-                    "#2ca02c"
-                ],
-            
-                title="Top Clientes por Calidad de Forraje"
-            
-            )
-            
-            fig_rank_cli.update_layout(
-            
-                yaxis=dict(
-                    categoryorder="total ascending"
                 )
             
-            )
+                df_rank_cli["Score"] = np.where(
             
-            st.plotly_chart(
-                fig_rank_cli,
-                use_container_width=True
-            )
+                    df_rank_cli["Superficie"] > 0,
+            
+                    df_rank_cli["PuntosPonderados"]
+                    /
+                    df_rank_cli["Superficie"],
+            
+                    np.nan
+            
+                )
+            
+                df_rank_cli = (
+            
+                    df_rank_cli
+            
+                    .sort_values(
+                        "Score",
+                        ascending=False
+                    )
+            
+                    .head(15)
+            
+                )
+            
+                fig_rank_cli = px.bar(
+            
+                    df_rank_cli,
+            
+                    x="Score",
+            
+                    y="Clientes",
+            
+                    orientation="h",
+            
+                    color="Score",
+            
+                    text="Score",
+            
+                    color_continuous_scale=[
+                        "#d62728",
+                        "#f2b134",
+                        "#2ca02c"
+                    ],
+            
+                    title="Clientes con Mejor Calidad"
+            
+                )
+            
+                fig_rank_cli.update_layout(
+            
+                    yaxis=dict(
+                        categoryorder="total ascending"
+                    )
+            
+                )
+            
+                st.plotly_chart(
+                    fig_rank_cli,
+                    use_container_width=True
+                )
 
 
             # ---------------------------------------------------
