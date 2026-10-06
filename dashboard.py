@@ -6127,13 +6127,13 @@ with tab_picadoras:
             df_tabla_hl["Score Calidad"]
             .apply(clasificar_score_alfalfa)
         )
-        
+
         # ---------------------------------------------------
-        # RESUMEN
+        # RESUMEN DE CALIDAD
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("Resumen de Calidad de Alfalfa")
+        st.subheader("🌿 Resumen de Calidad de Alfalfa")
         
         score_promedio = (
             df_tabla_hl["Score Calidad"]
@@ -6172,11 +6172,17 @@ with tab_picadoras:
         perfil = pd.DataFrame({
         
             "Indicador": [
+        
                 "Materia seca",
+        
                 "Proteína",
+        
                 "FDN",
+        
                 "FDA",
+        
                 "Cenizas"
+        
             ],
         
             "Actual": [
@@ -6194,27 +6200,37 @@ with tab_picadoras:
             ],
         
             "Mínimo": [
+        
                 35,
                 23,
                 0,
                 0,
                 0
+        
             ],
         
             "Máximo": [
+        
                 45,
                 40,
                 40,
                 30,
                 10
+        
             ],
         
             "Objetivo": [
+        
                 "35 - 45",
+        
                 "> 23",
+        
                 "< 40",
+        
                 "< 30",
+        
                 "< 10"
+        
             ]
         
         })
@@ -6229,6 +6245,8 @@ with tab_picadoras:
         col_radar, col_tabla = st.columns([2,1])
         
         with col_tabla:
+        
+            st.markdown("##### 📋 Rango Objetivo")
         
             st.dataframe(
         
@@ -6248,91 +6266,78 @@ with tab_picadoras:
         with col_radar:
         
             fig_radar = go.Figure()
-
-            # ---------------------------------------------------
-            # MAXIMO RECOMENDADO
-            # ---------------------------------------------------
-            
+        
             fig_radar.add_trace(
-            
+        
                 go.Scatterpolar(
-            
+        
                     r=perfil["Máximo"],
-            
+        
                     theta=perfil["Indicador"],
-            
+        
                     fill="toself",
-            
+        
                     fillcolor="rgba(44,160,44,0.12)",
-            
+        
                     line=dict(
                         color="rgba(44,160,44,0.25)",
                         width=1
                     ),
-            
+        
                     name="Límite Superior"
-            
+        
                 )
-            
+        
             )
-            
-            # ---------------------------------------------------
-            # MINIMO RECOMENDADO
-            # ---------------------------------------------------
-            
+        
             fig_radar.add_trace(
-            
+        
                 go.Scatterpolar(
-            
+        
                     r=perfil["Mínimo"],
-            
+        
                     theta=perfil["Indicador"],
-            
+        
                     fill="toself",
-            
+        
                     fillcolor="rgba(44,160,44,0.30)",
-            
+        
                     line=dict(
                         color="rgba(44,160,44,0.5)",
                         width=1
                     ),
-            
+        
                     name="Límite Inferior"
-            
+        
                 )
-            
+        
             )
-            
-            # ---------------------------------------------------
-            # ACTUAL
-            # ---------------------------------------------------
-            
+        
             fig_radar.add_trace(
-            
+        
                 go.Scatterpolar(
-            
+        
                     r=perfil["Actual"],
-            
+        
                     theta=perfil["Indicador"],
-            
+        
                     mode="lines+markers",
-            
+        
                     line=dict(
                         color="#1f77b4",
                         width=4
                     ),
-            
+        
                     marker=dict(
                         size=8,
                         color="#1f77b4"
                     ),
-            
+        
                     name="Actual"
-            
+        
                 )
-            
+        
             )
-
         
             fig_radar.update_layout(
         
@@ -6352,6 +6357,173 @@ with tab_picadoras:
                 fig_radar,
                 use_container_width=True
             )
+        
+        # ---------------------------------------------------
+        # FILTROS TABLA
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader(
+            "Calidad de Alfalfa por Cliente, Granja y Campo"
+        )
+        
+        col_f1, col_f2, col_f3, col_f4 = st.columns(4)
+        
+        with col_f1:
+        
+            sel_clientes = st.multiselect(
+                "Cliente",
+                sorted(
+                    df_tabla_hl["Clientes"]
+                    .dropna()
+                    .unique()
+                )
+            )
+        
+        df_temp = df_tabla_hl.copy()
+        
+        if sel_clientes:
+        
+            df_temp = (
+                df_temp[
+                    df_temp["Clientes"]
+                    .isin(sel_clientes)
+                ]
+            )
+        
+        with col_f2:
+        
+            sel_granjas = st.multiselect(
+                "Granja",
+                sorted(
+                    df_temp["Granjas"]
+                    .dropna()
+                    .unique()
+                )
+            )
+        
+        if sel_granjas:
+        
+            df_temp = (
+                df_temp[
+                    df_temp["Granjas"]
+                    .isin(sel_granjas)
+                ]
+            )
+        
+        with col_f3:
+        
+            sel_campos = st.multiselect(
+                "Campo",
+                sorted(
+                    df_temp["Campos"]
+                    .dropna()
+                    .unique()
+                )
+            )
+        
+        with col_f4:
+        
+            opciones_calidad = sorted(
+                df_tabla_hl["Clasificación"]
+                .dropna()
+                .unique()
+            )
+        
+            sel_calidad = st.multiselect(
+                "Calidad",
+                opciones_calidad
+            )
+        
+        df_tabla_hl_filtrada = df_tabla_hl.copy()
+        
+        if sel_clientes:
+        
+            df_tabla_hl_filtrada = (
+                df_tabla_hl_filtrada[
+                    df_tabla_hl_filtrada["Clientes"]
+                    .isin(sel_clientes)
+                ]
+            )
+        
+        if sel_granjas:
+        
+            df_tabla_hl_filtrada = (
+                df_tabla_hl_filtrada[
+                    df_tabla_hl_filtrada["Granjas"]
+                    .isin(sel_granjas)
+                ]
+            )
+        
+        if sel_campos:
+        
+            df_tabla_hl_filtrada = (
+                df_tabla_hl_filtrada[
+                    df_tabla_hl_filtrada["Campos"]
+                    .isin(sel_campos)
+                ]
+            )
+        
+        if sel_calidad:
+        
+            df_tabla_hl_filtrada = (
+                df_tabla_hl_filtrada[
+                    df_tabla_hl_filtrada["Clasificación"]
+                    .isin(sel_calidad)
+                ]
+            )
+        
+        # ---------------------------------------------------
+        # TABLA FINAL
+        # ---------------------------------------------------
+        
+        df_tabla_hl_filtrada = (
+        
+            df_tabla_hl_filtrada
+        
+            .rename(
+                columns={
+                    "Organizaciones": "Organización",
+                    "Clientes": "Cliente",
+                    "Granjas": "Granja",
+                    "Campos": "Campo",
+                    "Variedades": "Variedad",
+                    "Superficie": "Superficie (ha)",
+                    "MateriaSeca": "Materia Seca (%)",
+                    "Proteina": "Proteína Bruta (%)",
+                    "Ceniza": "Ceniza Bruta (%)"
+                }
+            )
+        
+        )
+        
+        st.dataframe(
+        
+            df_tabla_hl_filtrada
+        
+            .sort_values(
+                "Score Calidad",
+                ascending=False
+            )
+        
+            .style.format(
+                {
+                    "Superficie (ha)": "{:,.1f}",
+                    "Materia Seca (%)": "{:.1f}%",
+                    "Proteína Bruta (%)": "{:.1f}%",
+                    "FDN": "{:.1f}%",
+                    "FDA": "{:.1f}%",
+                    "Ceniza Bruta (%)": "{:.1f}%",
+                    "Score Calidad": "{:.1f}"
+                },
+                na_rep="N/D"
+            ),
+        
+            use_container_width=True
+        
+        )
+
+    
 
 
 
