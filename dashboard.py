@@ -5398,5 +5398,8 @@ with tab_picadoras:
 
     with subtab_hl_alfalfa:
 
-    df_hl = df_alfalfa.copy()
+        st.info(
+            "Próximamente análisis específico de calidad de alfalfa."
+        )
+
 
