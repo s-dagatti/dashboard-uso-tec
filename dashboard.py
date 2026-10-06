@@ -3846,7 +3846,7 @@ with tab_picadoras:
         # KPI 5 - HECTÁREAS CON CONSTITUYENTES
         # ---------------------------------------------------
         
-        df_hl = (
+        mask_curva = (
         
             df_pic["Almidón"].notna()
         
@@ -3875,7 +3875,7 @@ with tab_picadoras:
         ha_constituyentes = (
         
             df_pic.loc[
-                df_hl,
+                mask_curva,
                 "Superficie cosechada"
             ]
         
@@ -4188,7 +4188,7 @@ with tab_picadoras:
         
         df_constit = (
             df_pic.assign(
-                Tiene_Constituyentes=df_hl
+                Tiene_Constituyentes=mask_curva
             )
             .groupby(
                 [
@@ -4206,7 +4206,7 @@ with tab_picadoras:
                 Hectareas_Const=(
                     "Superficie cosechada",
                     lambda x: x[
-                        df_hl.loc[x.index]
+                        mask_curva.loc[x.index]
                     ].sum()
                 )
             )
@@ -4525,7 +4525,7 @@ with tab_picadoras:
             # CURVA DE CONSTITUYENTES
             # ---------------------------------------------------
         
-            df_hl = (
+            mask_curva = (
         
                 df_hl["Almidón"].notna()
         
@@ -4571,7 +4571,7 @@ with tab_picadoras:
             )
         
             porc_curva = (
-                df_hl.sum()
+                mask_curva.sum()
                 /
                 len(df_hl)
                 * 100
@@ -6979,7 +6979,3 @@ with tab_picadoras:
 
 
     
-
-
-
-
