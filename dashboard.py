@@ -4531,8 +4531,10 @@ with tab_picadoras:
                 if len(df_hl) > 0
                 else 0
             )
+
+            score_promedio = df_tabla_hl["Score Calidad"].mean()
         
-            k1, k2, k3, k4 = st.columns(4)
+            k1, k2, k3, k4, k5 = st.columns(5)
         
             k1.metric(
                 "Materia Seca",
@@ -4552,6 +4554,11 @@ with tab_picadoras:
             k4.metric(
                 "Curva Activa",
                 f"{porc_curva:.1f}%"
+            )
+
+            k5.metric(
+                "Score Calidad",
+                f"{score_promedio:.0f}"
             )
         
             # ---------------------------------------------------
@@ -4629,14 +4636,14 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             def estado_materia_seca(valor):
-            
+
                 if pd.isna(valor):
                     return "Sin datos"
             
-                if 32 <= valor <= 36:
+                if 35 <= valor <= 40:
                     return "Excelente"
             
-                if 30 <= valor < 32 or 36 < valor <= 40:
+                if 32 <= valor < 35 or 40 < valor <= 43:
                     return "Atención"
             
                 return "Crítico"
@@ -4647,38 +4654,10 @@ with tab_picadoras:
                 if pd.isna(valor):
                     return "Sin datos"
             
-                if 32 <= valor <= 38:
+                if valor > 34:
                     return "Excelente"
             
-                if 28 <= valor < 32 or 38 < valor <= 42:
-                    return "Atención"
-            
-                return "Crítico"
-            
-            
-            def estado_fdn(valor):
-            
-                if pd.isna(valor):
-                    return "Sin datos"
-            
-                if 38 <= valor <= 45:
-                    return "Excelente"
-            
-                if 35 <= valor < 38 or 45 < valor <= 50:
-                    return "Atención"
-            
-                return "Crítico"
-            
-            
-            def estado_fda(valor):
-            
-                if pd.isna(valor):
-                    return "Sin datos"
-            
-                if 18 <= valor <= 23:
-                    return "Excelente"
-            
-                if 14 <= valor < 18 or 23 < valor <= 25:
+                if 30 <= valor <= 34:
                     return "Atención"
             
                 return "Crítico"
@@ -4689,10 +4668,38 @@ with tab_picadoras:
                 if pd.isna(valor):
                     return "Sin datos"
             
-                if valor >= 7:
+                if valor > 8:
                     return "Excelente"
             
-                if 6 <= valor < 7:
+                if 7 <= valor <= 8:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_fdn(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if valor < 36:
+                    return "Excelente"
+            
+                if 36 <= valor <= 40:
+                    return "Atención"
+            
+                return "Crítico"
+            
+            
+            def estado_fda(valor):
+            
+                if pd.isna(valor):
+                    return "Sin datos"
+            
+                if valor < 21:
+                    return "Excelente"
+            
+                if 21 <= valor <= 24:
                     return "Atención"
             
                 return "Crítico"
@@ -4703,10 +4710,10 @@ with tab_picadoras:
                 if pd.isna(valor):
                     return "Sin datos"
             
-                if valor <= 5:
+                if valor < 4.5:
                     return "Excelente"
             
-                if 5 < valor <= 7:
+                if 4.5 <= valor <= 6:
                     return "Atención"
             
                 return "Crítico"
@@ -4720,62 +4727,79 @@ with tab_picadoras:
                 if 12 <= valor <= 18:
                     return "Excelente"
             
-                if 10 <= valor < 12 or 18 < valor <= 21:
+                if 10 <= valor < 12 or 18 < valor <= 22:
                     return "Atención"
             
                 return "Crítico"
             
+                        
             
             def calcular_score(fila):
+
+                pesos = {
             
-                estados = [
-                    fila["Estado MS"],
-                    fila["Estado Almidón"],
-                    fila["Estado PB"],
-                    fila["Estado FDN"],
-                    fila["Estado FDA"],
-                    fila["Estado Cenizas"],
-                    fila["Estado Corte"]
-                ]
+                    "Estado MS": 25,
             
-                estados_validos = [
-                    estado
-                    for estado in estados
-                    if estado != "Sin datos"
-                ]
+                    "Estado Almidón": 25,
             
-                if not estados_validos:
-                    return np.nan
+                    "Estado FDN": 15,
             
-                descuentos = {
-                    "Excelente": 0,
-                    "Atención": 5,
-                    "Crítico": 10
+                    "Estado FDA": 15,
+            
+                    "Estado PB": 10,
+            
+                    "Estado Cenizas": 10
+            
                 }
             
-                descuento_total = sum(
-                    descuentos.get(estado, 0)
-                    for estado in estados_validos
-                )
+                score = 0
+                peso_utilizado = 0
             
-                return max(
-                    0,
-                    100 - descuento_total
+                for variable, peso in pesos.items():
+            
+                    estado = fila[variable]
+            
+                    if estado == "Sin datos":
+                        continue
+            
+                    peso_utilizado += peso
+            
+                    if estado == "Excelente":
+            
+                        score += peso
+            
+                    elif estado == "Atención":
+            
+                        score += peso * 0.5
+            
+                    elif estado == "Crítico":
+            
+                        score += 0
+            
+                if peso_utilizado == 0:
+            
+                    return np.nan
+            
+                return round(
+                    score / peso_utilizado * 100,
+                    0
                 )
+
             
             
             def clasificar_score(score):
-            
+
                 if pd.isna(score):
                     return "⚪ Sin datos"
             
-                if score >= 80:
+                if score >= 85:
                     return "🟢 Calidad Alta"
             
-                if score >= 60:
+                if score >= 70:
                     return "🟡 Calidad Moderada"
             
                 return "🔴 Calidad Crítica"
+
             
         
             
@@ -4981,17 +5005,22 @@ with tab_picadoras:
                 ],
             
                 "Objetivo": [
-            
-                    34,   # Materia seca
-                    35,   # Almidón
-                    7,    # Proteína
-                    42,   # FDN
-                    20,   # FDA
-                    4,    # Cenizas
-                    15    # Largo corte
-            
+
+                    37.5,   # Materia seca
+                
+                    34,     # Almidón
+                
+                    8,      # Proteína
+                
+                    36,     # FDN
+                
+                    21,     # FDA
+                
+                    4.5,    # Cenizas
+                
+                    15      # Largo corte
+                
                 ]
-            
             })
             
             # ---------------------------------------------------
