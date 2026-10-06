@@ -3555,10 +3555,59 @@ with tab_picadoras:
             "Análisis de Calidad de Picado"
         )
 
-    subtab_productividad, subtab_harvestlab = st.tabs([
+    subtab_productividad, subtab_hl_maiz, subtab_hl_alfalfa = st.tabs([
         "Productividad",
-        "HarvestLab"
+        "HarvestLab Maíz",
+        "HarvestLab Alfalfa"
     ])
+
+    # ---------------------------------------------------
+    # FILTROS GLOBALES PICADORAS
+    # ---------------------------------------------------
+    
+    st.markdown("---")
+    
+    f1, f2 = st.columns(2)
+    
+    with f1:
+    
+        min_hectareas = st.number_input(
+            "Superficie mínima a considerar (ha)",
+            min_value=0.0,
+            value=1.0,
+            step=0.5
+        )
+    
+    with f2:
+    
+        cultivos_disponibles = sorted(
+            df_pic["Tipo de cultivo"]
+            .dropna()
+            .unique()
+        )
+    
+        cultivo_seleccionado = st.multiselect(
+            "Cultivo",
+            cultivos_disponibles,
+            default=cultivos_disponibles
+        )
+    
+    # ---------------------------------------------------
+    # FILTROS
+    # ---------------------------------------------------
+    
+    df_pic = df_pic[
+        df_pic["Superficie cosechada"]
+        >= min_hectareas
+    ]
+    
+    if cultivo_seleccionado:
+    
+        df_pic = df_pic[
+            df_pic["Tipo de cultivo"]
+            .isin(cultivo_seleccionado)
+        ]
+
 
     with subtab_productividad:
 
@@ -4370,7 +4419,7 @@ with tab_picadoras:
                 use_container_width=True
             )
 
-        with subtab_harvestlab:
+        with subtab_hl_maiz:
 
             col_logo, col_titulo = st.columns([1, 14])
 
