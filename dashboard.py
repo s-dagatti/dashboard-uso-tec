@@ -6589,6 +6589,273 @@ with tab_picadoras:
         
         )
 
+        # ---------------------------------------------------
+        # RANKINGS DE CALIDAD
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader("🏆 Rankings de Calidad de Alfalfa")
+        
+        df_rank_base = (
+        
+            df_tabla_hl
+        
+            .dropna(
+                subset=[
+                    "Score Calidad",
+                    "Superficie"
+                ]
+            )
+        
+            .copy()
+        
+        )
+        
+        df_rank_base["Puntos ponderados"] = (
+        
+            df_rank_base["Score Calidad"]
+        
+            *
+        
+            df_rank_base["Superficie"]
+        
+        )
+        
+        col_rank_org, col_rank_cli = st.columns(2)
+        
+        # ---------------------------------------------------
+        # ORGANIZACIONES
+        # ---------------------------------------------------
+        
+        with col_rank_org:
+        
+            st.markdown(
+                "#### 🏢 Organizaciones"
+            )
+        
+            df_rank_org = (
+        
+                df_rank_base
+        
+                .dropna(
+                    subset=["Organizaciones"]
+                )
+        
+                .groupby(
+                    "Organizaciones",
+                    as_index=False
+                )
+        
+                .agg(
+        
+                    PuntosPonderados=(
+                        "Puntos ponderados",
+                        "sum"
+                    ),
+        
+                    Superficie=(
+                        "Superficie",
+                        "sum"
+                    ),
+        
+                    Registros=(
+                        "Score Calidad",
+                        "count"
+                    )
+        
+                )
+        
+            )
+        
+            df_rank_org["Score"] = np.where(
+        
+                df_rank_org["Superficie"] > 0,
+        
+                df_rank_org["PuntosPonderados"]
+        
+                /
+        
+                df_rank_org["Superficie"],
+        
+                np.nan
+        
+            )
+        
+            df_rank_org = (
+        
+                df_rank_org
+        
+                .sort_values(
+                    "Score",
+                    ascending=False
+                )
+        
+                .head(15)
+        
+            )
+        
+            fig_rank_org = px.bar(
+        
+                df_rank_org,
+        
+                x="Score",
+        
+                y="Organizaciones",
+        
+                orientation="h",
+        
+                color="Score",
+        
+                text="Score",
+        
+                color_continuous_scale=[
+                    "#d62728",
+                    "#f2b134",
+                    "#2ca02c"
+                ],
+        
+                title="Organizaciones con Mejor Calidad"
+        
+            )
+        
+            fig_rank_org.update_traces(
+        
+                texttemplate="%{text:.1f}",
+        
+                textposition="outside"
+        
+            )
+        
+            fig_rank_org.update_layout(
+        
+                yaxis=dict(
+                    categoryorder="total ascending"
+                )
+        
+            )
+        
+            st.plotly_chart(
+                fig_rank_org,
+                use_container_width=True
+            )
+        
+        # ---------------------------------------------------
+        # CLIENTES
+        # ---------------------------------------------------
+        
+        with col_rank_cli:
+        
+            st.markdown(
+                "#### 👤 Clientes"
+            )
+        
+            df_rank_cli = (
+        
+                df_rank_base
+        
+                .dropna(
+                    subset=["Clientes"]
+                )
+        
+                .groupby(
+                    "Clientes",
+                    as_index=False
+                )
+        
+                .agg(
+        
+                    PuntosPonderados=(
+                        "Puntos ponderados",
+                        "sum"
+                    ),
+        
+                    Superficie=(
+                        "Superficie",
+                        "sum"
+                    ),
+        
+                    Registros=(
+                        "Score Calidad",
+                        "count"
+                    )
+        
+                )
+        
+            )
+        
+            df_rank_cli["Score"] = np.where(
+        
+                df_rank_cli["Superficie"] > 0,
+        
+                df_rank_cli["PuntosPonderados"]
+        
+                /
+        
+                df_rank_cli["Superficie"],
+        
+                np.nan
+        
+            )
+        
+            df_rank_cli = (
+        
+                df_rank_cli
+        
+                .sort_values(
+                    "Score",
+                    ascending=False
+                )
+        
+                .head(15)
+        
+            )
+        
+            fig_rank_cli = px.bar(
+        
+                df_rank_cli,
+        
+                x="Score",
+        
+                y="Clientes",
+        
+                orientation="h",
+        
+                color="Score",
+        
+                text="Score",
+        
+                color_continuous_scale=[
+                    "#d62728",
+                    "#f2b134",
+                    "#2ca02c"
+                ],
+        
+                title="Clientes con Mejor Calidad"
+        
+            )
+        
+            fig_rank_cli.update_traces(
+        
+                texttemplate="%{text:.1f}",
+        
+                textposition="outside"
+        
+            )
+        
+            fig_rank_cli.update_layout(
+        
+                yaxis=dict(
+                    categoryorder="total ascending"
+                )
+        
+            )
+        
+            st.plotly_chart(
+                fig_rank_cli,
+                use_container_width=True
+            )
+
+
 
     
 
