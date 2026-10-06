@@ -4758,20 +4758,6 @@ with tab_picadoras:
             
                 return "Crítico"
             
-            
-            def estado_corte(valor):
-            
-                if pd.isna(valor):
-                    return "Sin datos"
-            
-                if 12 <= valor <= 18:
-                    return "Excelente"
-            
-                if 10 <= valor < 12 or 18 < valor <= 22:
-                    return "Atención"
-            
-                return "Crítico"
-            
                         
             
             def calcular_score(fila):
@@ -4975,11 +4961,6 @@ with tab_picadoras:
             df_tabla_hl["Estado Cenizas"] = (
                 df_tabla_hl["Ceniza"]
                 .apply(estado_cenizas)
-            )
-            
-            df_tabla_hl["Estado Corte"] = (
-                df_tabla_hl["LargoCorte"]
-                .apply(estado_corte)
             )
             
             # ---------------------------------------------------
@@ -5504,9 +5485,7 @@ with tab_picadoras:
                         "MateriaSeca": "Materia Seca (%)",
                         "Almidon": "Almidón (%)",
                         "Proteina": "Proteína Bruta (%)",
-                        "Azucar": "Azúcar (%)",
-                        "Ceniza": "Ceniza Bruta (%)",
-                        "LargoCorte": "Largo de Corte"
+                        "Ceniza": "Ceniza Bruta (%)"
                     }
                 )
             
@@ -5527,9 +5506,7 @@ with tab_picadoras:
                         "Proteína Bruta (%)": "{:.1f}%",
                         "FDN": "{:.1f}%",
                         "FDA": "{:.1f}%",
-                        "Azúcar (%)": "{:.1f}%",
                         "Ceniza Bruta (%)": "{:.1f}%",
-                        "Largo de Corte": "{:.1f}",
                         "Score Calidad": "{:.0f}"
                     },
                     na_rep="N/D"
