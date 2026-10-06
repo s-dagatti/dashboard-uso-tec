@@ -4879,9 +4879,7 @@ with tab_picadoras:
             
             df_tabla_hl = (
             
-                df_hl[
-                    mask_curva
-                ]
+                df_hl
             
                 .groupby(
                     [
