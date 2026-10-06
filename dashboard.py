@@ -4471,11 +4471,56 @@ with tab_picadoras:
                 )
         
             # ---------------------------------------------------
-            # BASE HARVESTLAB
+            # BASE HARVESTLAB MAIZ
             # ---------------------------------------------------
-        
+            
             df_hl = df_maiz.copy()
-        
+            
+            columnas_constituyentes_maiz = [
+            
+                "Almidón",
+            
+                "Proteína bruta",
+            
+                "Fibra detergente neutro",
+            
+                "Fibra detergente ácido",
+            
+                "Ceniza bruta"
+            
+            ]
+            
+            mask_harvestlab_maiz = (
+            
+                df_hl[columnas_constituyentes_maiz]
+            
+                .notna()
+            
+                .any(axis=1)
+            
+            )
+            
+            # Mantener solamente registros con HarvestLab
+            
+            df_hl = (
+            
+                df_hl[
+                    mask_harvestlab_maiz
+                ]
+            
+                .copy()
+            
+            )
+            
+            if df_hl.empty:
+            
+                st.warning(
+                    "No existen registros de Maíz con constituyentes de HarvestLab para los filtros seleccionados."
+                )
+            
+                st.stop()
+            
+                    
             # ---------------------------------------------------
             # CURVA DE CONSTITUYENTES
             # ---------------------------------------------------
@@ -5004,7 +5049,7 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             perfil = pd.DataFrame({
-            
+
                 "Indicador": [
             
                     "Materia seca",
@@ -5057,7 +5102,7 @@ with tab_picadoras:
             
                     40,
             
-                    45,
+                    50,
             
                     12,
             
@@ -5087,6 +5132,7 @@ with tab_picadoras:
             
             })
             
+                        
             # ---------------------------------------------------
             # RADAR
             # ---------------------------------------------------
