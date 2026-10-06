@@ -5883,6 +5883,10 @@ with tab_picadoras:
         )
 
 
+        # ---------------------------------------------------
+        # ESTADOS DE CALIDAD ALFALFA
+        # ---------------------------------------------------
+        
         def estado_materia_seca_alfalfa(valor):
         
             if pd.isna(valor):
@@ -5951,9 +5955,99 @@ with tab_picadoras:
                 return "Atención"
         
             return "Crítico"
-
+        
+        
+        # ---------------------------------------------------
+        # TABLA BASE
+        # ---------------------------------------------------
+        
+        df_tabla_hl = (
+        
+            df_hl
+        
+            .groupby(
+                [
+                    "Organizaciones",
+                    "Clientes",
+                    "Granjas",
+                    "Campos",
+                    "Variedades"
+                ],
+                as_index=False,
+                dropna=False
+            )
+        
+            .agg(
+        
+                Superficie=(
+                    "Superficie cosechada",
+                    "sum"
+                ),
+        
+                MateriaSeca=(
+                    "Materia seca",
+                    "mean"
+                ),
+        
+                Proteina=(
+                    "Proteína bruta",
+                    "mean"
+                ),
+        
+                FDN=(
+                    "Fibra detergente neutro",
+                    "mean"
+                ),
+        
+                FDA=(
+                    "Fibra detergente ácido",
+                    "mean"
+                ),
+        
+                Ceniza=(
+                    "Ceniza bruta",
+                    "mean"
+                )
+        
+            )
+        
+        )
+        
+        # ---------------------------------------------------
+        # ESTADOS
+        # ---------------------------------------------------
+        
+        df_tabla_hl["Estado MS"] = (
+            df_tabla_hl["MateriaSeca"]
+            .apply(estado_materia_seca_alfalfa)
+        )
+        
+        df_tabla_hl["Estado PB"] = (
+            df_tabla_hl["Proteina"]
+            .apply(estado_proteina_alfalfa)
+        )
+        
+        df_tabla_hl["Estado FDN"] = (
+            df_tabla_hl["FDN"]
+            .apply(estado_fdn_alfalfa)
+        )
+        
+        df_tabla_hl["Estado FDA"] = (
+            df_tabla_hl["FDA"]
+            .apply(estado_fda_alfalfa)
+        )
+        
+        df_tabla_hl["Estado Cenizas"] = (
+            df_tabla_hl["Ceniza"]
+            .apply(estado_cenizas_alfalfa)
+        )
+        
+        # ---------------------------------------------------
+        # SCORE ALFALFA
+        # ---------------------------------------------------
+        
         def calcular_score_alfalfa(fila):
-
+        
             pesos = {
         
                 "Estado MS": 25,
@@ -6003,12 +6097,235 @@ with tab_picadoras:
                 puntos
                 /
                 pesos_usados
-                *
-                100,
+                * 100,
                 1
             )
+        
+        
+        def clasificar_score_alfalfa(score):
+        
+            if pd.isna(score):
+                return "⚪ Sin datos"
+        
+            if score >= 75:
+                return "🟢 Calidad Alta"
+        
+            if score >= 55:
+                return "🟡 Calidad Moderada"
+        
+            return "🔴 Calidad Crítica"
+        
+        
+        df_tabla_hl["Score Calidad"] = (
+            df_tabla_hl.apply(
+                calcular_score_alfalfa,
+                axis=1
+            )
+        )
+        
+        df_tabla_hl["Clasificación"] = (
+            df_tabla_hl["Score Calidad"]
+            .apply(clasificar_score_alfalfa)
+        )
+        
+        # ---------------------------------------------------
+        # RESUMEN
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader("Resumen de Calidad de Alfalfa")
+        
+        score_promedio = (
+            df_tabla_hl["Score Calidad"]
+            .mean()
+        )
+        
+        cant_alta = (
+            df_tabla_hl["Clasificación"]
+            .str.contains("Alta", na=False)
+            .sum()
+        )
+        
+        cant_media = (
+            df_tabla_hl["Clasificación"]
+            .str.contains("Moderada", na=False)
+            .sum()
+        )
+        
+        cant_baja = (
+            df_tabla_hl["Clasificación"]
+            .str.contains("Crítica", na=False)
+            .sum()
+        )
+        
+        c1, c2, c3, c4 = st.columns(4)
+        
+        c1.metric("🟢 Calidad Alta", cant_alta)
+        c2.metric("🟡 Calidad Moderada", cant_media)
+        c3.metric("🔴 Calidad Crítica", cant_baja)
+        c4.metric("🎯 Score Promedio", f"{score_promedio:.1f}")
+        
+        # ---------------------------------------------------
+        # PERFIL ALFALFA
+        # ---------------------------------------------------
+        
+        perfil = pd.DataFrame({
+        
+            "Indicador": [
+                "Materia seca",
+                "Proteína",
+                "FDN",
+                "FDA",
+                "Cenizas"
+            ],
+        
+            "Actual": [
+        
+                df_tabla_hl["MateriaSeca"].mean(),
+        
+                df_tabla_hl["Proteina"].mean(),
+        
+                df_tabla_hl["FDN"].mean(),
+        
+                df_tabla_hl["FDA"].mean(),
+        
+                df_tabla_hl["Ceniza"].mean()
+        
+            ],
+        
+            "Mínimo": [
+                35,
+                23,
+                0,
+                0,
+                0
+            ],
+        
+            "Máximo": [
+                45,
+                40,
+                40,
+                30,
+                10
+            ],
+        
+            "Objetivo": [
+                "35 - 45",
+                "> 23",
+                "< 40",
+                "< 30",
+                "< 10"
+            ]
+        
+        })
+        
+        # ---------------------------------------------------
+        # RADAR
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader("🎯 Radar de Calidad de Alfalfa")
+        
+        col_radar, col_tabla = st.columns([2,1])
+        
+        with col_tabla:
+        
+            st.dataframe(
+        
+                perfil[
+                    [
+                        "Indicador",
+                        "Actual",
+                        "Objetivo"
+                    ]
+                ],
+        
+                use_container_width=True,
+                hide_index=True
+        
+            )
+        
+        with col_radar:
+        
+            fig_radar = go.Figure()
+        
+            # Limite máximo recomendado
+        
+            fig_radar.add_trace(
+        
+                go.Scatterpolar(
+        
+                    r=perfil["Máximo"],
+        
+                    theta=perfil["Indicador"],
+        
+                    fill="toself",
+        
+                    opacity=0.15,
+        
+                    name="Rango Máximo"
+        
+                )
+        
+            )
+        
+            # Limite mínimo recomendado
+        
+            fig_radar.add_trace(
+        
+                go.Scatterpolar(
+        
+                    r=perfil["Mínimo"],
+        
+                    theta=perfil["Indicador"],
+        
+                    fill="toself",
+        
+                    opacity=0.35,
+        
+                    name="Rango Mínimo"
+        
+                )
+        
+            )
+        
+            # Actual
+        
+            fig_radar.add_trace(
+        
+                go.Scatterpolar(
+        
+                    r=perfil["Actual"],
+        
+                    theta=perfil["Indicador"],
+        
+                    fill="toself",
+        
+                    name="Actual"
+        
+                )
+        
+            )
+        
+            fig_radar.update_layout(
+        
+                polar=dict(
+                    bgcolor="rgba(0,0,0,0)"
+                ),
+        
+                paper_bgcolor="rgba(0,0,0,0)",
+        
+                plot_bgcolor="rgba(0,0,0,0)",
+        
+                showlegend=True
+        
+            )
+        
+            st.plotly_chart(
+                fig_radar,
+                use_container_width=True
+            )
 
-            
 
 
 
