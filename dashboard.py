@@ -3545,79 +3545,100 @@ with tab_picadoras:
     col_logo, col_titulo = st.columns([1, 12])
 
     with col_logo:
+
         st.image(
             "Picadora.png",
             width=80
         )
 
     with col_titulo:
+
         st.title(
             "Análisis de Calidad de Picado"
         )
 
-    df_maiz = df_pic[
-        df_pic["Tipo de cultivo"]
-        == "Maíz para ensilado"
-    ].copy()
-    
-    df_alfalfa = df_pic[
-        df_pic["Tipo de cultivo"]
-        == "Alfalfa"
-    ].copy()
+    # ---------------------------------------------------
+    # CARGA BASE
+    # ---------------------------------------------------
 
-
-    subtab_productividad, subtab_hl_maiz, subtab_hl_alfalfa = st.tabs([
-        "Productividad",
-        "HarvestLab Maíz",
-        "HarvestLab Alfalfa"
-    ])
+    df_pic = cargar_base_picadoras()
 
     # ---------------------------------------------------
-    # FILTROS GLOBALES PICADORAS
+    # FILTROS NUEVOS
     # ---------------------------------------------------
-    
+
     st.markdown("---")
-    
+
     f1, f2 = st.columns(2)
-    
+
     with f1:
-    
+
         min_hectareas = st.number_input(
             "Superficie mínima a considerar (ha)",
             min_value=0.0,
             value=1.0,
             step=0.5
         )
-    
+
     with f2:
-    
+
         cultivos_disponibles = sorted(
             df_pic["Tipo de cultivo"]
             .dropna()
             .unique()
         )
-    
+
         cultivo_seleccionado = st.multiselect(
             "Cultivo",
             cultivos_disponibles,
             default=cultivos_disponibles
         )
-    
+
     # ---------------------------------------------------
-    # FILTROS
+    # FILTRO HECTAREAS
     # ---------------------------------------------------
-    
+
     df_pic = df_pic[
         df_pic["Superficie cosechada"]
         >= min_hectareas
     ]
-    
+
+    # ---------------------------------------------------
+    # FILTRO CULTIVO
+    # ---------------------------------------------------
+
     if cultivo_seleccionado:
-    
+
         df_pic = df_pic[
             df_pic["Tipo de cultivo"]
             .isin(cultivo_seleccionado)
         ]
+
+    # ---------------------------------------------------
+    # DATASETS ESPECIFICOS
+    # ---------------------------------------------------
+
+    df_maiz = df_pic[
+        df_pic["Tipo de cultivo"]
+        == "Maíz para ensilado"
+    ].copy()
+
+    df_alfalfa = df_pic[
+        df_pic["Tipo de cultivo"]
+        == "Alfalfa"
+    ].copy()
+
+    # ---------------------------------------------------
+    # TABS
+    # ---------------------------------------------------
+
+    subtab_productividad, subtab_hl_maiz, subtab_hl_alfalfa = st.tabs(
+        [
+            "Productividad",
+            "HarvestLab Maíz",
+            "HarvestLab Alfalfa"
+        ]
+    )
 
     
     with subtab_productividad:
