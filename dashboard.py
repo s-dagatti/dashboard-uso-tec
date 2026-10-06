@@ -5770,7 +5770,7 @@ with tab_picadoras:
             st.markdown("---")
             
             st.subheader(
-                "🚜 Ranking de Equipos (Serie)"
+                "Ranking de Equipos (Serie)"
             )
             
             df_rank_equipo = (
@@ -7074,7 +7074,7 @@ with tab_picadoras:
         st.markdown("---")
         
         st.subheader(
-            "🚜 Ranking de Equipos (Serie)"
+            "Ranking de Equipos (Serie)"
         )
         
         df_rank_equipo = (
