@@ -4745,56 +4745,86 @@ with tab_picadoras:
             
                 }
             
-                score = 0
-                peso_utilizado = 0
+                factores = {
+            
+                    "Excelente": 1.00,
+            
+                    "Atención": 0.70,
+            
+                    "Crítico": 0.30
+            
+                }
+            
+                puntos_obtenidos = 0
+            
+                peso_disponible = 0
             
                 for variable, peso in pesos.items():
             
-                    estado = fila[variable]
+                    estado = fila.get(
+                        variable,
+                        "Sin datos"
+                    )
             
                     if estado == "Sin datos":
                         continue
             
-                    peso_utilizado += peso
+                    peso_disponible += peso
             
-                    if estado == "Excelente":
+                    puntos_obtenidos += (
             
-                        score += peso
+                        peso
             
-                    elif estado == "Atención":
+                        *
             
-                        score += peso * 0.5
+                        factores.get(
+                            estado,
+                            0
+                        )
             
-                    elif estado == "Crítico":
+                    )
             
-                        score += 0
-            
-                if peso_utilizado == 0:
+                if peso_disponible == 0:
             
                     return np.nan
             
-                return round(
-                    score / peso_utilizado * 100,
-                    0
+                score = (
+            
+                    puntos_obtenidos
+            
+                    /
+            
+                    peso_disponible
+            
+                    *
+            
+                    100
+            
                 )
+            
+                return round(
+                    score,
+                    1
+                )
+
 
             
             
             def clasificar_score(score):
 
                 if pd.isna(score):
+            
                     return "⚪ Sin datos"
             
-                if score >= 85:
+                if score >= 75:
+            
                     return "🟢 Calidad Alta"
             
-                if score >= 70:
+                if score >= 55:
+            
                     return "🟡 Calidad Moderada"
             
                 return "🔴 Calidad Crítica"
-
-            
-        
             
             # ---------------------------------------------------
             # TABLA BASE
@@ -5394,31 +5424,32 @@ with tab_picadoras:
             
                 st.markdown(
                     """
-                    **Score inicial: 100 puntos**
+                    **Score ponderado de calidad de silaje de maíz**
             
-                    Evaluados:
+                    Pesos:
             
-                    - Materia seca
-                    - Almidón
-                    - Proteína bruta
-                    - FDN
-                    - FDA
-                    - Ceniza bruta
-                    - Largo de corte
+                    - Materia seca: 25%
+                    - Almidón: 25%
+                    - FDN: 15%
+                    - FDA: 15%
+                    - Proteína bruta: 10%
+                    - Cenizas: 10%
             
-                    Descuentos:
+                    Aporte según estado:
             
-                    - Excelente: 0
-                    - Atención: -5
-                    - Crítico: -10
+                    - Excelente: 100% del peso
+                    - Atención: 70% del peso
+                    - Crítico: 30% del peso
+                    - Sin datos: el parámetro se excluye
             
-                    Clasificación Final:
+                    Clasificación final:
             
-                    - 🟢 80-100 → Calidad Alta
-                    - 🟡 60-79 → Calidad Moderada
-                    - 🔴 <60 → Calidad Crítica
+                    - 🟢 75 a 100 → Calidad Alta
+                    - 🟡 55 a 74,9 → Calidad Moderada
+                    - 🔴 Menos de 55 → Calidad Crítica
                     """
                 )
+
 
     with subtab_hl_alfalfa:
 
