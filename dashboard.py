@@ -4531,10 +4531,8 @@ with tab_picadoras:
                 if len(df_hl) > 0
                 else 0
             )
-
-            score_promedio = df_tabla_hl["Score Calidad"].mean()
         
-            k1, k2, k3, k4, k5 = st.columns(5)
+            k1, k2, k3, k4 = st.columns(4)
         
             k1.metric(
                 "Materia Seca",
@@ -4554,11 +4552,6 @@ with tab_picadoras:
             k4.metric(
                 "Curva Activa",
                 f"{porc_curva:.1f}%"
-            )
-
-            k5.metric(
-                "Score Calidad",
-                f"{score_promedio:.0f}"
             )
         
             # ---------------------------------------------------
@@ -4927,6 +4920,8 @@ with tab_picadoras:
                 df_tabla_hl["Score Calidad"]
                 .apply(clasificar_score)
             )
+
+            score_promedio = df_tabla_hl["Score Calidad"].mean()
 
             # ---------------------------------------------------
             # RESUMEN DE CALIDAD
