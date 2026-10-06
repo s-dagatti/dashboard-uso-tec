@@ -5509,28 +5509,37 @@ with tab_picadoras:
                 )
             
                 fig_rank_org = px.bar(
-            
+
                     df_rank_org,
-            
+                
                     x="Score",
-            
+                
                     y="Organizaciones",
-            
+                
                     orientation="h",
-            
+                
                     color="Score",
-            
+                
                     text="Score",
-            
+                
                     color_continuous_scale=[
                         "#d62728",
                         "#f2b134",
                         "#2ca02c"
                     ],
-            
+                
                     title="Organizaciones con Mejor Calidad"
-            
+                
                 )
+                
+                fig_rank_org.update_traces(
+                
+                    texttemplate="%{text:.1f}",
+                
+                    textposition="outside"
+                
+                )
+
             
                 fig_rank_org.update_layout(
             
@@ -5610,28 +5619,37 @@ with tab_picadoras:
                 )
             
                 fig_rank_cli = px.bar(
-            
+
                     df_rank_cli,
-            
+                
                     x="Score",
-            
+                
                     y="Clientes",
-            
+                
                     orientation="h",
-            
+                
                     color="Score",
-            
+                
                     text="Score",
-            
+                
                     color_continuous_scale=[
                         "#d62728",
                         "#f2b134",
                         "#2ca02c"
                     ],
-            
+                
                     title="Clientes con Mejor Calidad"
-            
+                
                 )
+                
+                fig_rank_cli.update_traces(
+                
+                    texttemplate="%{text:.1f}",
+                
+                    textposition="outside"
+                
+                )
+
             
                 fig_rank_cli.update_layout(
             
