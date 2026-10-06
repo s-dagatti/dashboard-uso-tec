@@ -5423,7 +5423,7 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             st.markdown("---")
-            st.subheader("🏆 Rankings de Calidad de Forraje")
+            st.subheader("Rankings de Calidad de Forraje")
             
             df_rank_base = (
                 df_tabla_hl
@@ -5451,7 +5451,7 @@ with tab_picadoras:
             with col_rank_org:
             
                 st.markdown(
-                    "#### 🏢 Organizaciones"
+                    "#### Organizaciones"
                 )
             
                 df_rank_org = (
@@ -5561,7 +5561,7 @@ with tab_picadoras:
             with col_rank_cli:
             
                 st.markdown(
-                    "#### 👤 Clientes"
+                    "#### Clientes"
                 )
             
                 df_rank_cli = (
