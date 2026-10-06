@@ -5000,19 +5000,25 @@ with tab_picadoras:
             )
             
             # ---------------------------------------------------
-            # PERFIL PROMEDIO DE CALIDAD
+            # PERFIL DE CALIDAD MAÍZ
             # ---------------------------------------------------
             
             perfil = pd.DataFrame({
             
                 "Indicador": [
+            
                     "Materia seca",
+            
                     "Almidón",
+            
                     "Proteína",
+            
                     "FDN",
+            
                     "FDA",
-                    "Cenizas",
-                    "Largo corte"
+            
+                    "Cenizas"
+            
                 ],
             
                 "Actual": [
@@ -5027,52 +5033,82 @@ with tab_picadoras:
             
                     df_tabla_hl["FDA"].mean(),
             
-                    df_tabla_hl["Ceniza"].mean(),
+                    df_tabla_hl["Ceniza"].mean()
             
-                    df_tabla_hl["LargoCorte"].mean()
+                ],
+            
+                "Mínimo": [
+            
+                    35,
+            
+                    34,
+            
+                    8,
+            
+                    0,
+            
+                    0,
+            
+                    0
+            
+                ],
+            
+                "Máximo": [
+            
+                    40,
+            
+                    45,
+            
+                    12,
+            
+                    36,
+            
+                    21,
+            
+                    4.5
             
                 ],
             
                 "Objetivo": [
-
-                    37.5,   # Materia seca
-                
-                    34,     # Almidón
-                
-                    8,      # Proteína
-                
-                    36,     # FDN
-                
-                    21,     # FDA
-                
-                    4.5,    # Cenizas
-                
-                    15      # Largo corte
-                
+            
+                    "35 - 40",
+            
+                    "> 34",
+            
+                    "> 8",
+            
+                    "< 36",
+            
+                    "< 21",
+            
+                    "< 4.5"
+            
                 ]
+            
             })
             
             # ---------------------------------------------------
-            # RADAR + PERFIL LATERAL
+            # RADAR
             # ---------------------------------------------------
             
             st.markdown("---")
-            st.subheader("Radar de Calidad")
+            st.subheader("🎯 Radar de Calidad de Maíz")
             
             col_radar, col_tabla = st.columns([2,1])
             
             with col_tabla:
             
-                st.markdown("##### Perfil Promedio")
+                st.markdown("##### 📋 Rango Objetivo")
             
                 st.dataframe(
             
-                    perfil.style.format(
-                        {
-                            "Actual": "{:.1f}",
-                            "Objetivo": "{:.1f}"
-                        }
-                    ),
+                    perfil[
+                        [
+                            "Indicador",
+                            "Actual",
+                            "Objetivo"
+                        ]
+                    ],
             
                     use_container_width=True,
                     hide_index=True
@@ -5083,21 +5119,63 @@ with tab_picadoras:
             
                 fig_radar = go.Figure()
             
+                # -----------------------------------------
+                # LIMITE SUPERIOR
+                # -----------------------------------------
+            
                 fig_radar.add_trace(
             
                     go.Scatterpolar(
             
-                        r=perfil["Objetivo"],
+                        r=perfil["Máximo"],
             
                         theta=perfil["Indicador"],
             
                         fill="toself",
             
-                        name="Objetivo"
+                        fillcolor="rgba(44,160,44,0.12)",
+            
+                        line=dict(
+                            color="rgba(44,160,44,0.25)",
+                            width=1
+                        ),
+            
+                        name="Límite Superior"
             
                     )
             
                 )
+            
+                # -----------------------------------------
+                # LIMITE INFERIOR
+                # -----------------------------------------
+            
+                fig_radar.add_trace(
+            
+                    go.Scatterpolar(
+            
+                        r=perfil["Mínimo"],
+            
+                        theta=perfil["Indicador"],
+            
+                        fill="toself",
+            
+                        fillcolor="rgba(44,160,44,0.30)",
+            
+                        line=dict(
+                            color="rgba(44,160,44,0.50)",
+                            width=1
+                        ),
+            
+                        name="Límite Inferior"
+            
+                    )
+            
+                )
+            
+                # -----------------------------------------
+                # VALOR ACTUAL
+                # -----------------------------------------
             
                 fig_radar.add_trace(
             
@@ -5107,7 +5185,17 @@ with tab_picadoras:
             
                         theta=perfil["Indicador"],
             
-                        fill="toself",
+                        mode="lines+markers",
+            
+                        line=dict(
+                            color="#1f77b4",
+                            width=4
+                        ),
+            
+                        marker=dict(
+                            size=8,
+                            color="#1f77b4"
+                        ),
             
                         name="Actual"
             
@@ -5118,19 +5206,7 @@ with tab_picadoras:
                 fig_radar.update_layout(
             
                     polar=dict(
-            
-                        bgcolor="rgba(0,0,0,0)",
-            
-                        radialaxis=dict(
-                            visible=True,
-                            showline=True,
-                            gridcolor="rgba(150,150,150,0.3)"
-                        ),
-            
-                        angularaxis=dict(
-                            gridcolor="rgba(150,150,150,0.3)"
-                        )
-            
+                        bgcolor="rgba(0,0,0,0)"
                     ),
             
                     paper_bgcolor="rgba(0,0,0,0)",
@@ -5153,6 +5229,7 @@ with tab_picadoras:
                     fig_radar,
                     use_container_width=True
                 )
+
 
             # ---------------------------------------------------
             # SCATTER MATERIA SECA x ALMIDÓN
