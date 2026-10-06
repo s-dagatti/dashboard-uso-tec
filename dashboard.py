@@ -6364,112 +6364,120 @@ with tab_picadoras:
         
         st.markdown("---")
         st.subheader(
-            "Calidad de Alfalfa por Cliente, Granja y Campo"
+            "🌿 Calidad de Alfalfa por Cliente, Granja y Campo"
         )
         
         col_f1, col_f2, col_f3, col_f4 = st.columns(4)
         
         with col_f1:
         
-            sel_clientes = st.multiselect(
+            sel_clientes_alf = st.multiselect(
                 "Cliente",
                 sorted(
                     df_tabla_hl["Clientes"]
                     .dropna()
                     .unique()
-                )
+                ),
+                key="alfalfa_cliente"
             )
         
         df_temp = df_tabla_hl.copy()
         
-        if sel_clientes:
+        if sel_clientes_alf:
         
             df_temp = (
                 df_temp[
                     df_temp["Clientes"]
-                    .isin(sel_clientes)
+                    .isin(sel_clientes_alf)
                 ]
             )
         
         with col_f2:
         
-            sel_granjas = st.multiselect(
+            sel_granjas_alf = st.multiselect(
                 "Granja",
                 sorted(
                     df_temp["Granjas"]
                     .dropna()
                     .unique()
-                )
+                ),
+                key="alfalfa_granja"
             )
         
-        if sel_granjas:
+        if sel_granjas_alf:
         
             df_temp = (
                 df_temp[
                     df_temp["Granjas"]
-                    .isin(sel_granjas)
+                    .isin(sel_granjas_alf)
                 ]
             )
         
         with col_f3:
         
-            sel_campos = st.multiselect(
+            sel_campos_alf = st.multiselect(
                 "Campo",
                 sorted(
                     df_temp["Campos"]
                     .dropna()
                     .unique()
-                )
+                ),
+                key="alfalfa_campo"
             )
         
         with col_f4:
         
-            opciones_calidad = sorted(
+            opciones_calidad_alf = sorted(
                 df_tabla_hl["Clasificación"]
                 .dropna()
                 .unique()
             )
         
-            sel_calidad = st.multiselect(
+            sel_calidad_alf = st.multiselect(
                 "Calidad",
-                opciones_calidad
+                opciones_calidad_alf,
+                key="alfalfa_calidad"
             )
+        
+        # ---------------------------------------------------
+        # APLICAR FILTROS
+        # ---------------------------------------------------
         
         df_tabla_hl_filtrada = df_tabla_hl.copy()
         
-        if sel_clientes:
+        if sel_clientes_alf:
         
             df_tabla_hl_filtrada = (
                 df_tabla_hl_filtrada[
                     df_tabla_hl_filtrada["Clientes"]
-                    .isin(sel_clientes)
+                    .isin(sel_clientes_alf)
                 ]
             )
         
-        if sel_granjas:
+        if sel_granjas_alf:
         
             df_tabla_hl_filtrada = (
                 df_tabla_hl_filtrada[
                     df_tabla_hl_filtrada["Granjas"]
-                    .isin(sel_granjas)
+                    .isin(sel_granjas_alf)
                 ]
             )
         
-        if sel_campos:
+        if sel_campos_alf:
         
             df_tabla_hl_filtrada = (
                 df_tabla_hl_filtrada[
                     df_tabla_hl_filtrada["Campos"]
-                    .isin(sel_campos)
+                    .isin(sel_campos_alf)
                 ]
             )
         
-        if sel_calidad:
+        if sel_calidad_alf:
         
             df_tabla_hl_filtrada = (
                 df_tabla_hl_filtrada[
                     df_tabla_hl_filtrada["Clasificación"]
-                    .isin(sel_calidad)
+                    .isin(sel_calidad_alf)
                 ]
             )
         
@@ -6491,6 +6499,8 @@ with tab_picadoras:
                     "Superficie": "Superficie (ha)",
                     "MateriaSeca": "Materia Seca (%)",
                     "Proteina": "Proteína Bruta (%)",
+                    "FDN": "FDN (%)",
+                    "FDA": "FDA (%)",
                     "Ceniza": "Ceniza Bruta (%)"
                 }
             )
@@ -6508,13 +6518,21 @@ with tab_picadoras:
         
             .style.format(
                 {
+        
                     "Superficie (ha)": "{:,.1f}",
+        
                     "Materia Seca (%)": "{:.1f}%",
+        
                     "Proteína Bruta (%)": "{:.1f}%",
-                    "FDN": "{:.1f}%",
-                    "FDA": "{:.1f}%",
+        
+                    "FDN (%)": "{:.1f}%",
+        
+                    "FDA (%)": "{:.1f}%",
+        
                     "Ceniza Bruta (%)": "{:.1f}%",
+        
                     "Score Calidad": "{:.1f}"
+        
                 },
                 na_rep="N/D"
             ),
@@ -6522,6 +6540,7 @@ with tab_picadoras:
             use_container_width=True
         
         )
+
 
     
 
