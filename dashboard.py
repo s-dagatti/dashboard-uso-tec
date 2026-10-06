@@ -4873,7 +4873,8 @@ with tab_picadoras:
                         "Clientes",
                         "Granjas",
                         "Campos",
-                        "Variedades"
+                        "Variedades",
+                        "Equipo"
                     ],
 
                     as_index=False,
