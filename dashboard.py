@@ -5762,6 +5762,118 @@ with tab_picadoras:
                     use_container_width=True
                 )
 
+            # ---------------------------------------------------
+            # EQUIPOS (NÚMERO DE SERIE)
+            # ---------------------------------------------------
+            
+            st.markdown("---")
+            
+            st.subheader(
+                "🚜 Ranking de Equipos (Serie)"
+            )
+            
+            df_rank_equipo = (
+            
+                df_rank_base
+            
+                .dropna(
+                    subset=["Equipo"]
+                )
+            
+                .groupby(
+                    "Equipo",
+                    as_index=False
+                )
+            
+                .agg(
+            
+                    PuntosPonderados=(
+                        "Puntos ponderados",
+                        "sum"
+                    ),
+            
+                    Superficie=(
+                        "Superficie",
+                        "sum"
+                    )
+            
+                )
+            
+            )
+            
+            df_rank_equipo["Score"] = np.where(
+            
+                df_rank_equipo["Superficie"] > 0,
+            
+                df_rank_equipo["PuntosPonderados"]
+            
+                /
+            
+                df_rank_equipo["Superficie"],
+            
+                np.nan
+            
+            )
+            
+            df_rank_equipo = (
+            
+                df_rank_equipo
+            
+                .sort_values(
+                    "Score",
+                    ascending=False
+                )
+            
+                .head(20)
+            
+            )
+            
+            fig_rank_equipo = px.bar(
+            
+                df_rank_equipo,
+            
+                x="Score",
+            
+                y="Equipo",
+            
+                orientation="h",
+            
+                color="Score",
+            
+                text="Score",
+            
+                color_continuous_scale=[
+                    "#d62728",
+                    "#f2b134",
+                    "#2ca02c"
+                ],
+            
+                title="Equipos con Mejor Calidad de Forraje"
+            
+            )
+            
+            fig_rank_equipo.update_traces(
+            
+                texttemplate="%{text:.1f}",
+            
+                textposition="outside"
+            
+            )
+            
+            fig_rank_equipo.update_layout(
+            
+                yaxis=dict(
+                    categoryorder="total ascending"
+                )
+            
+            )
+            
+            st.plotly_chart(
+                fig_rank_equipo,
+                use_container_width=True
+            )
+
+
 
             # ---------------------------------------------------
             # REFERENCIA SCORE
@@ -6200,11 +6312,11 @@ with tab_picadoras:
         
                 "Estado PB": 30,
         
-                "Estado FDN": 20,
+                "Estado FDN": 10,
         
                 "Estado FDA": 15,
         
-                "Estado Cenizas": 10
+                "Estado Cenizas": 20
         
             }
         
