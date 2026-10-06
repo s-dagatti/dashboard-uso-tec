@@ -5807,6 +5807,82 @@ with tab_picadoras:
             f"{cenizas:.1f}%"
         )
 
+        # ---------------------------------------------------
+        # EVOLUCIÓN HISTÓRICA
+        # ---------------------------------------------------
+        
+        st.markdown("---")
+        st.subheader(
+            "Evolución Semanal de Calidad"
+        )
+        
+        df_hist = (
+        
+            df_hl
+        
+            .groupby("Fecha_fin_dt")
+        
+            .agg(
+        
+                MateriaSeca=(
+                    "Materia seca",
+                    "mean"
+                ),
+        
+                Proteina=(
+                    "Proteína bruta",
+                    "mean"
+                ),
+        
+                FDN=(
+                    "Fibra detergente neutro",
+                    "mean"
+                ),
+        
+                FDA=(
+                    "Fibra detergente ácido",
+                    "mean"
+                )
+        
+            )
+        
+            .reset_index()
+        
+            .sort_values(
+                "Fecha_fin_dt"
+            )
+        
+        )
+        
+        fig_hist = px.line(
+        
+            df_hist,
+        
+            x="Fecha_fin_dt",
+        
+            y=[
+                "MateriaSeca",
+                "Proteina",
+                "FDN",
+                "FDA"
+            ],
+        
+            markers=True,
+        
+            title="Evolución de Calidad de Alfalfa"
+        
+        )
+        
+        fig_hist.update_layout(
+            hovermode="x unified"
+        )
+        
+        st.plotly_chart(
+            fig_hist,
+            use_container_width=True
+        )
+
+
         def estado_materia_seca_alfalfa(valor):
         
             if pd.isna(valor):
@@ -5932,6 +6008,7 @@ with tab_picadoras:
                 1
             )
 
+            
 
 
 
