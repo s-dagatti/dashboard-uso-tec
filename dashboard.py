@@ -5704,8 +5704,234 @@ with tab_picadoras:
 
     with subtab_hl_alfalfa:
 
-        st.info(
-            "Próximamente análisis específico de calidad de alfalfa."
+        col_logo, col_titulo = st.columns([1, 14])
+    
+        with col_logo:
+    
+            st.image(
+                "HL_3000.png",
+                width=70
+            )
+    
+        with col_titulo:
+    
+            st.subheader(
+                "Calidad de Forraje - Alfalfa"
+            )
+    
+        # ---------------------------------------------------
+        # BASE
+        # ---------------------------------------------------
+    
+        df_hl = df_alfalfa.copy()
+    
+        if df_hl.empty:
+    
+            st.warning(
+                "No existen registros de Alfalfa para los filtros seleccionados."
+            )
+    
+            st.stop()
+    
+        mask_curva = (
+    
+            df_hl["Proteína bruta"].notna()
+    
+            |
+    
+            df_hl["Fibra detergente neutro"].notna()
+    
+            |
+    
+            df_hl["Fibra detergente ácido"].notna()
+    
+            |
+    
+            df_hl["Ceniza bruta"].notna()
+    
         )
+    
+        # ---------------------------------------------------
+        # KPIs
+        # ---------------------------------------------------
+    
+        materia_seca = (
+            df_hl["Materia seca"]
+            .mean()
+        )
+    
+        proteina = (
+            df_hl["Proteína bruta"]
+            .mean()
+        )
+    
+        fdn = (
+            df_hl["Fibra detergente neutro"]
+            .mean()
+        )
+    
+        fda = (
+            df_hl["Fibra detergente ácido"]
+            .mean()
+        )
+    
+        cenizas = (
+            df_hl["Ceniza bruta"]
+            .mean()
+        )
+    
+        k1, k2, k3, k4, k5 = st.columns(5)
+    
+        k1.metric(
+            "Materia Seca",
+            f"{materia_seca:.1f}%"
+        )
+    
+        k2.metric(
+            "Proteína Bruta",
+            f"{proteina:.1f}%"
+        )
+    
+        k3.metric(
+            "FDN",
+            f"{fdn:.1f}%"
+        )
+    
+        k4.metric(
+            "FDA",
+            f"{fda:.1f}%"
+        )
+    
+        k5.metric(
+            "Cenizas",
+            f"{cenizas:.1f}%"
+        )
+
+        def estado_materia_seca_alfalfa(valor):
+        
+            if pd.isna(valor):
+                return "Sin datos"
+        
+            if 35 <= valor <= 45:
+                return "Excelente"
+        
+            if 30 <= valor < 35 or 45 < valor <= 50:
+                return "Atención"
+        
+            return "Crítico"
+        
+        
+        def estado_proteina_alfalfa(valor):
+        
+            if pd.isna(valor):
+                return "Sin datos"
+        
+            if valor > 23:
+                return "Excelente"
+        
+            if 20 <= valor <= 23:
+                return "Atención"
+        
+            return "Crítico"
+        
+        
+        def estado_fdn_alfalfa(valor):
+        
+            if pd.isna(valor):
+                return "Sin datos"
+        
+            if valor < 40:
+                return "Excelente"
+        
+            if 40 <= valor <= 45:
+                return "Atención"
+        
+            return "Crítico"
+        
+        
+        def estado_fda_alfalfa(valor):
+        
+            if pd.isna(valor):
+                return "Sin datos"
+        
+            if valor < 30:
+                return "Excelente"
+        
+            if 30 <= valor <= 35:
+                return "Atención"
+        
+            return "Crítico"
+        
+        
+        def estado_cenizas_alfalfa(valor):
+        
+            if pd.isna(valor):
+                return "Sin datos"
+        
+            if valor < 10:
+                return "Excelente"
+        
+            if 10 <= valor <= 12:
+                return "Atención"
+        
+            return "Crítico"
+
+        def calcular_score_alfalfa(fila):
+
+            pesos = {
+        
+                "Estado MS": 25,
+        
+                "Estado PB": 30,
+        
+                "Estado FDN": 20,
+        
+                "Estado FDA": 15,
+        
+                "Estado Cenizas": 10
+        
+            }
+        
+            factores = {
+        
+                "Excelente": 1.00,
+        
+                "Atención": 0.70,
+        
+                "Crítico": 0.30
+        
+            }
+        
+            puntos = 0
+            pesos_usados = 0
+        
+            for variable, peso in pesos.items():
+        
+                estado = fila.get(variable)
+        
+                if estado == "Sin datos":
+                    continue
+        
+                pesos_usados += peso
+        
+                puntos += (
+                    peso
+                    *
+                    factores.get(estado, 0)
+                )
+        
+            if pesos_usados == 0:
+                return np.nan
+        
+            return round(
+                puntos
+                /
+                pesos_usados
+                *
+                100,
+                1
+            )
+
+
 
 
