@@ -5136,7 +5136,7 @@ with tab_picadoras:
             # ---------------------------------------------------
             
             st.markdown("---")
-            st.subheader("🎯 Radar de Calidad de Maíz")
+            st.subheader("Radar de Calidad de Maíz")
             
             col_radar, col_tabla = st.columns([2,1])
             
@@ -6302,7 +6302,7 @@ with tab_picadoras:
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("🌿 Resumen de Calidad de Alfalfa")
+        st.subheader("Resumen de Calidad de Alfalfa")
         
         score_promedio = (
             df_tabla_hl["Score Calidad"]
@@ -6409,13 +6409,13 @@ with tab_picadoras:
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("🎯 Radar de Calidad de Alfalfa")
+        st.subheader("Radar de Calidad de Alfalfa")
         
         col_radar, col_tabla = st.columns([2,1])
         
         with col_tabla:
         
-            st.markdown("##### 📋 Rango Objetivo")
+            st.markdown("##### Rango Objetivo")
         
             st.dataframe(
         
@@ -6533,7 +6533,7 @@ with tab_picadoras:
         
         st.markdown("---")
         st.subheader(
-            "🌿 Calidad de Alfalfa por Cliente, Granja y Campo"
+            "Calidad de Alfalfa por Cliente, Granja y Campo"
         )
         
         col_f1, col_f2, col_f3, col_f4 = st.columns(4)
@@ -6715,7 +6715,7 @@ with tab_picadoras:
         # ---------------------------------------------------
         
         st.markdown("---")
-        st.subheader("🏆 Rankings de Calidad de Alfalfa")
+        st.subheader("Rankings de Calidad de Alfalfa")
         
         df_rank_base = (
         
@@ -6751,7 +6751,7 @@ with tab_picadoras:
         with col_rank_org:
         
             st.markdown(
-                "#### 🏢 Organizaciones"
+                "#### Organizaciones"
             )
         
             df_rank_org = (
@@ -6867,7 +6867,7 @@ with tab_picadoras:
         with col_rank_cli:
         
             st.markdown(
-                "#### 👤 Clientes"
+                "#### Clientes"
             )
         
             df_rank_cli = (
