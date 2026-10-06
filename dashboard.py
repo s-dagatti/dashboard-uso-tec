@@ -3555,6 +3555,17 @@ with tab_picadoras:
             "Análisis de Calidad de Picado"
         )
 
+    df_maiz = df_pic[
+        df_pic["Tipo de cultivo"]
+        == "Maíz para ensilado"
+    ].copy()
+    
+    df_alfalfa = df_pic[
+        df_pic["Tipo de cultivo"]
+        == "Alfalfa"
+    ].copy()
+
+
     subtab_productividad, subtab_hl_maiz, subtab_hl_alfalfa = st.tabs([
         "Productividad",
         "HarvestLab Maíz",
@@ -3608,7 +3619,7 @@ with tab_picadoras:
             .isin(cultivo_seleccionado)
         ]
 
-
+    
     with subtab_productividad:
 
         # ---------------------------------------------------
