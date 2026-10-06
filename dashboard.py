@@ -3541,6 +3541,7 @@ with tab_pulverizadoras:
 
 
 with tab_picadoras:
+    
 
     col_logo, col_titulo = st.columns([1, 12])
 
@@ -3562,6 +3563,19 @@ with tab_picadoras:
     # ---------------------------------------------------
 
     df_pic = cargar_base_picadoras()
+
+    df_pic["Fecha_inicio_dt"] = pd.to_datetime(
+        df_pic["Fecha de inicio"],
+        format="mixed",
+        errors="coerce"
+    )
+    
+    df_pic["Fecha_fin_dt"] = pd.to_datetime(
+        df_pic["Fecha de terminación"],
+        format="mixed",
+        errors="coerce"
+    )
+
 
     # ---------------------------------------------------
     # FILTROS NUEVOS
@@ -3642,24 +3656,6 @@ with tab_picadoras:
 
     
     with subtab_productividad:
-
-        # ---------------------------------------------------
-        # CARGA BASE
-        # ---------------------------------------------------
-    
-        df_pic = cargar_base_picadoras()
-    
-        df_pic["Fecha_inicio_dt"] = pd.to_datetime(
-            df_pic["Fecha de inicio"],
-            format="mixed",
-            errors="coerce"
-        )
-    
-        df_pic["Fecha_fin_dt"] = pd.to_datetime(
-            df_pic["Fecha de terminación"],
-            format="mixed",
-            errors="coerce"
-        )
 
         # ---------------------------------------------------
         # APLICAR FILTROS DEL SIDEBAR
@@ -3950,39 +3946,38 @@ with tab_picadoras:
         )
     
         df_hist = (
-    
+
             df_pic
-    
-            .groupby("Fecha_fin_dt")
-    
+        
+            .groupby(
+                [
+                    "Fecha_fin_dt",
+                    "Tipo de cultivo"
+                ]
+            )
+        
             .agg(
-    
+        
                 Superficie=(
                     "Superficie cosechada",
                     "sum"
                 ),
-    
-                AutoTrac=(
-                    "AutoTrac™",
-                    lambda x: (
-                        x.fillna(0).sum()
-                    )
-                ),
-    
+        
                 Maquinas=(
                     "Equipo",
                     "nunique"
                 )
-    
+        
             )
-    
+        
             .reset_index()
-    
+        
             .sort_values(
                 "Fecha_fin_dt"
             )
-    
+        
         )
+
     
         # porcentaje de autotrac semanal
     
@@ -4041,30 +4036,53 @@ with tab_picadoras:
             specs=[[{"secondary_y": True}]]
         )
     
-        # Barras
-        fig_pic.add_trace(
+        colores_cultivo = {
+        
+            "Maíz para ensilado":
+                "#f2c230",
+        
+            "Alfalfa":
+                "#2ca02c"
+        
+        }
+        
+        for cultivo in (
+            df_hist["Tipo de cultivo"]
+            .dropna()
+            .unique()
+        ):
+        
+            df_temp = (
+                df_hist[
+                    df_hist["Tipo de cultivo"]
+                    == cultivo
+                ]
+            )
+        
+            fig_pic.add_trace(
+        
+                go.Bar(
+        
+                    x=df_temp["Fecha_fin_dt"],
+        
+                    y=df_temp["Superficie"],
+        
+                    name=cultivo,
+        
+                    marker_color=
+                        colores_cultivo.get(
+                            cultivo,
+                            "#999999"
+                        )
+        
+                ),
+        
+                secondary_y=False
+        
+            )
+
     
-            go.Bar(
-    
-                x=df_hist["Fecha_fin_dt"],
-    
-                y=df_hist["Maquinas"],
-    
-                name="Máquinas Trabajando",
-    
-                marker_color="#2b5c8f",
-    
-                text=df_hist["Maquinas"],
-    
-                textposition="auto"
-    
-            ),
-    
-            secondary_y=False
-    
-        )
-    
-        # Línea superficie
+        # Línea total máquinas
     
         fig_pic.add_trace(
     
@@ -4072,7 +4090,42 @@ with tab_picadoras:
     
                 x=df_hist["Fecha_fin_dt"],
     
-                y=df_hist["Superficie"],
+                df_maq_hist = (
+
+                    df_pic
+                
+                    .groupby("Fecha_fin_dt")
+                
+                    ["Equipo"]
+                
+                    .nunique()
+                
+                    .reset_index()
+                
+                )
+                
+                fig_pic.add_trace(
+                
+                    go.Scatter(
+                
+                        x=df_maq_hist["Fecha_fin_dt"],
+                
+                        y=df_maq_hist["Equipo"],
+                
+                        mode="lines+markers",
+                
+                        name="Máquinas",
+                
+                        line=dict(
+                            color="#2b5c8f",
+                            width=3
+                        )
+                
+                    ),
+                
+                    secondary_y=True
+                
+                ),
     
                 mode="lines+markers",
     
@@ -4470,7 +4523,7 @@ with tab_picadoras:
             # BASE HARVESTLAB
             # ---------------------------------------------------
         
-            df_hl = df_pic.copy()
+            df_hl = df_maiz.copy()
         
             # ---------------------------------------------------
             # CURVA DE CONSTITUYENTES
@@ -5393,3 +5446,8 @@ with tab_picadoras:
                     - 🔴 <60 → Calidad Crítica
                     """
                 )
+
+    with subtab_hl_alfalfa:
+
+    df_hl = df_alfalfa.copy()
+
