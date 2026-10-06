@@ -5415,7 +5415,172 @@ with tab_picadoras:
                 use_container_width=True
             
             )
+
+            # ---------------------------------------------------
+            # RANKING ORGANIZACIONES
+            # ---------------------------------------------------
             
+            st.markdown("---")
+            st.subheader(
+                "🏢 Ranking de Organizaciones"
+            )
+            
+            df_rank_org = (
+            
+                df_hl[
+                    mask_curva
+                ]
+            
+                .groupby(
+                    "Organizaciones",
+                    as_index=False
+                )
+            
+                .agg(
+            
+                    Score=(
+                        "Score Calidad",
+                        "mean"
+                    ),
+            
+                    Superficie=(
+                        "Superficie cosechada",
+                        "sum"
+                    )
+            
+                )
+            
+                .dropna(
+                    subset=["Score"]
+                )
+            
+                .sort_values(
+                    "Score",
+                    ascending=False
+                )
+            
+            )
+            
+            fig_rank_org = px.bar(
+            
+                df_rank_org.head(15),
+            
+                x="Score",
+            
+                y="Organizaciones",
+            
+                orientation="h",
+            
+                color="Score",
+            
+                text="Score",
+            
+                color_continuous_scale=[
+                    "#d62728",
+                    "#f2b134",
+                    "#2ca02c"
+                ],
+            
+                title="Top Organizaciones por Calidad de Forraje"
+            
+            )
+            
+            fig_rank_org.update_layout(
+            
+                yaxis=dict(
+                    categoryorder="total ascending"
+                )
+            
+            )
+            
+            st.plotly_chart(
+                fig_rank_org,
+                use_container_width=True
+            )
+
+            # ---------------------------------------------------
+            # RANKING CLIENTES
+            # ---------------------------------------------------
+            
+            st.markdown("---")
+            st.subheader(
+                "👤 Ranking de Clientes"
+            )
+            
+            df_rank_cli = (
+            
+                df_hl[
+                    mask_curva
+                ]
+            
+                .groupby(
+                    "Clientes",
+                    as_index=False
+                )
+            
+                .agg(
+            
+                    Score=(
+                        "Score Calidad",
+                        "mean"
+                    ),
+            
+                    Superficie=(
+                        "Superficie cosechada",
+                        "sum"
+                    )
+            
+                )
+            
+                .dropna(
+                    subset=["Score"]
+                )
+            
+                .sort_values(
+                    "Score",
+                    ascending=False
+                )
+            
+            )
+            
+            fig_rank_cli = px.bar(
+            
+                df_rank_cli.head(20),
+            
+                x="Score",
+            
+                y="Clientes",
+            
+                orientation="h",
+            
+                color="Score",
+            
+                text="Score",
+            
+                color_continuous_scale=[
+                    "#d62728",
+                    "#f2b134",
+                    "#2ca02c"
+                ],
+            
+                title="Top Clientes por Calidad de Forraje"
+            
+            )
+            
+            fig_rank_cli.update_layout(
+            
+                yaxis=dict(
+                    categoryorder="total ascending"
+                )
+            
+            )
+            
+            st.plotly_chart(
+                fig_rank_cli,
+                use_container_width=True
+            )
+
+
             # ---------------------------------------------------
             # REFERENCIA SCORE
             # ---------------------------------------------------
