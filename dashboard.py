@@ -6248,64 +6248,91 @@ with tab_picadoras:
         with col_radar:
         
             fig_radar = go.Figure()
-        
-            # Limite máximo recomendado
-        
+
+            # ---------------------------------------------------
+            # MAXIMO RECOMENDADO
+            # ---------------------------------------------------
+            
             fig_radar.add_trace(
-        
+            
                 go.Scatterpolar(
-        
+            
                     r=perfil["Máximo"],
-        
+            
                     theta=perfil["Indicador"],
-        
+            
                     fill="toself",
-        
-                    opacity=0.15,
-        
-                    name="Rango Máximo"
-        
+            
+                    fillcolor="rgba(44,160,44,0.12)",
+            
+                    line=dict(
+                        color="rgba(44,160,44,0.25)",
+                        width=1
+                    ),
+            
+                    name="Límite Superior"
+            
                 )
-        
+            
             )
-        
-            # Limite mínimo recomendado
-        
+            
+            # ---------------------------------------------------
+            # MINIMO RECOMENDADO
+            # ---------------------------------------------------
+            
             fig_radar.add_trace(
-        
+            
                 go.Scatterpolar(
-        
+            
                     r=perfil["Mínimo"],
-        
+            
                     theta=perfil["Indicador"],
-        
+            
                     fill="toself",
-        
-                    opacity=0.35,
-        
-                    name="Rango Mínimo"
-        
+            
+                    fillcolor="rgba(44,160,44,0.30)",
+            
+                    line=dict(
+                        color="rgba(44,160,44,0.5)",
+                        width=1
+                    ),
+            
+                    name="Límite Inferior"
+            
                 )
-        
+            
             )
-        
-            # Actual
-        
+            
+            # ---------------------------------------------------
+            # ACTUAL
+            # ---------------------------------------------------
+            
             fig_radar.add_trace(
-        
+            
                 go.Scatterpolar(
-        
+            
                     r=perfil["Actual"],
-        
+            
                     theta=perfil["Indicador"],
-        
-                    fill="toself",
-        
+            
+                    mode="lines+markers",
+            
+                    line=dict(
+                        color="#1f77b4",
+                        width=4
+                    ),
+            
+                    marker=dict(
+                        size=8,
+                        color="#1f77b4"
+                    ),
+            
                     name="Actual"
-        
+            
                 )
-        
+            
             )
+
         
             fig_radar.update_layout(
         
