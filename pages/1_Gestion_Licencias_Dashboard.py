@@ -223,6 +223,27 @@ def preparar_foto_actual(df):
         sort=False
     )
 
+    st.sidebar.write(
+        "Foto original:",
+        len(foto)
+    )
+    
+    st.sidebar.write(
+        "Operations:",
+        len(operations)
+    )
+    
+    st.sidebar.write(
+        "Admin:",
+        len(admin)
+    )
+    
+    st.sidebar.write(
+        "Foto final:",
+        len(actual)
+    )
+    
+
     return actual, ultima_actualizacion
 
 
