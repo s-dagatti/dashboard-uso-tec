@@ -110,16 +110,43 @@ def preparar_foto_actual(df):
         if columna in base.columns:
             base[columna] = pd.to_datetime(
                 base[columna],
-                format="mixed",
-                dayfirst=True,
-                errors="coerce"
+                errors="coerce",
+                utc=False
             )
+
+    st.sidebar.write(
+        "Tipo fecha:",
+        base["Fecha de Actualización"].dtype
+    )
+    
+    st.sidebar.write(
+        "Fechas parseadas:"
+    )
+    
+    st.sidebar.write(
+        base["Fecha de Actualización"]
+        .dropna()
+        .sort_values()
+        .tail(10)
+    )
+    st.sidebar.write(
+        "Max datetime:",
+        base["Fecha de Actualización"].max()
+    )
+
+
 
     base["Días para Vencer"] = pd.to_numeric(
         base.get("Días para Vencer"),
         errors="coerce"
     )
 
+    st.sidebar.write(
+        base["Fecha de Actualización"]
+        .describe()
+    )
+    
+    
     ultima_actualizacion = base["Fecha de Actualización"].max()
     st.sidebar.write(
         "Última actualización:",
