@@ -110,11 +110,27 @@ def preparar_foto_actual(df):
         if columna in base.columns:
             base[columna] = pd.to_datetime(
                 base[columna],
+                format="mixed",
                 errors="coerce"
             )
 
+    temp = pd.to_datetime(
+        df_licencias["Fecha de Actualización"],
+        format="mixed",
+        errors="coerce"
+    )
     
-
+    st.sidebar.write(
+        "Max directo:",
+        temp.max()
+    )
+    
+    st.sidebar.write(
+        "NaT:",
+        temp.isna().sum()
+    )
+    
+    
     base["Días para Vencer"] = pd.to_numeric(
         base.get("Días para Vencer"),
         errors="coerce"
