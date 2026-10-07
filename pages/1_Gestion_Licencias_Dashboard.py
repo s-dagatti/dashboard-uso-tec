@@ -247,25 +247,22 @@ try:
         token,
         HISTORICO_PATH
     )
-    ultima_fecha = pd.to_datetime(
-        df_licencias["Fecha de Actualización"],
-        format="mixed",
-        dayfirst=True,
-        errors="coerce"
-    ).max()
     
-    st.sidebar.markdown("---")
-    
-    st.sidebar.success(
-        f"""
-        Archivo leído: {HISTORICO_PATH}
-    
-        Registros: {len(df_licencias):,}
-    
-        Última fecha:
-        {ultima_fecha.strftime('%d/%m/%Y')}
-        """
+    st.sidebar.write(
+        "Filas leídas:",
+        len(df_licencias)
     )
+    
+    st.sidebar.write(
+        "Fecha máxima:",
+        pd.to_datetime(
+            df_licencias["Fecha de Actualización"],
+            format="mixed",
+            dayfirst=True,
+            errors="coerce"
+        ).max()
+    )
+
 
 except Exception as error:
     error_carga = error
