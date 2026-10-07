@@ -166,8 +166,8 @@ df["Horas Totales"] = (
 
 tab_dashboard, tab_edicion = st.tabs(
     [
-        "📊 Visualización",
-        "✏️ Edición"
+        "Visualización",
+        "Edición"
     ]
 )
 
@@ -321,22 +321,22 @@ with tab_dashboard:
     k1, k2, k3, k4 = st.columns(4)
 
     k1.metric(
-        "📁 Proyectos Activos",
+        "Proyectos Activos",
         f"{proyectos_activos:,}"
     )
 
     k2.metric(
-        "⏱ Horas Totales",
+        "Horas Totales",
         f"{horas_totales:,.1f}"
     )
 
     k3.metric(
-        "📄 Informes Terminados",
+        "Informes Terminados",
         f"{informes_terminados:,}"
     )
 
     k4.metric(
-        "✅ Tasa de Cierre",
+        "Tasa de Cierre",
         f"{tasa_cierre:.1f}%"
     )
 
@@ -347,7 +347,7 @@ with tab_dashboard:
     st.markdown("---")
 
     st.subheader(
-        "📅 Cronograma de Proyectos"
+        "Cronograma de Proyectos"
     )
 
     gantt_data = []
@@ -616,7 +616,7 @@ with tab_dashboard:
     st.markdown("---")
     
     st.subheader(
-        "📌 Listado Maestro de Proyectos"
+        "Listado Maestro de Proyectos"
     )
     
     # -----------------------------------------
@@ -815,7 +815,7 @@ with tab_dashboard:
     st.markdown("---")
     
     st.subheader(
-        "📊 Análisis de Esfuerzo"
+        "Análisis de tiempo requerido"
     )
     
     g1, g2 = st.columns(2)
@@ -856,7 +856,7 @@ with tab_dashboard:
     
             text_auto=".1f",
     
-            title="⏱ Horas Totales por Sucursal",
+            title="Horas Totales por Sucursal",
     
             color_discrete_sequence=[
                 "#367c2b"
@@ -929,7 +929,7 @@ with tab_dashboard:
     
             hole=0.45,
     
-            title="🕒 Distribución de Horas por Etapa",
+            title="Distribución de Horas por Etapa",
     
             color_discrete_sequence=px.colors.qualitative.Pastel
     
@@ -958,7 +958,7 @@ with tab_dashboard:
 with tab_edicion:
 
     st.subheader(
-        "✏️ Actualización de Proyectos"
+        "Actualización de Proyectos"
     )
 
     if df.empty:
@@ -1004,7 +1004,7 @@ with tab_edicion:
             row = df_edit.loc[idx]
 
             st.info(
-                f"📍 Cliente: {row['CLIENTE']} | "
+                f"Cliente: {row['CLIENTE']} | "
                 f"Proyecto: {row['NOMBRE']}"
             )
 
