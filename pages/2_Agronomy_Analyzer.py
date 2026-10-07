@@ -539,40 +539,7 @@ with tab_dashboard:
         
         )
 
-        fig_gantt.update_layout(
-
-            height=max(
-                450,
-                len(df_gantt) * 35
-            ),
-
-            margin=dict(
-                t=30,
-                b=30,
-                l=250
-            )
-
-        )
-
-        fig_gantt.add_vline(
-
-            x=hoy.timestamp() * 1000,
-
-            line_dash="dash",
-
-            line_color="orange",
-
-            annotation_text="HOY"
-
-        )
-
-        st.plotly_chart(
-
-            fig_gantt,
-
-            use_container_width=True
-
-        )
+        
 
     else:
 
