@@ -115,6 +115,14 @@ def preparar_foto_actual(df):
             )
 
     st.sidebar.write(
+        "NaT Fecha Actualización:",
+        base["Fecha de Actualización"]
+        .isna()
+        .sum()
+    )
+    
+
+    st.sidebar.write(
         "Tipo fecha:",
         base["Fecha de Actualización"].dtype
     )
