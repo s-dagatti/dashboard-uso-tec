@@ -121,9 +121,19 @@ def preparar_foto_actual(df):
     )
 
     ultima_actualizacion = base["Fecha de Actualización"].max()
+    st.sidebar.write(
+        "Última actualización:",
+        ultima_actualizacion
+    )
+
     foto = base[
         base["Fecha de Actualización"].eq(ultima_actualizacion)
     ].copy()
+
+    st.sidebar.write(
+        "Registros foto cruda:",
+        len(foto)
+    )
 
     foto["Licencia Normalizada"] = np.where(
         foto["Fuente"].eq("Control administrativo"),
