@@ -700,7 +700,20 @@ with tab_dashboard:
     df_tabla = df_tabla[
         columnas_tabla
     ].copy()
+
+    if "ID PRUEBA" in df_tabla.columns:
+
+        df_tabla["ID PRUEBA"] = (
     
+            pd.to_numeric(
+                df_tabla["ID PRUEBA"],
+                errors="coerce"
+            )
+    
+            .astype("Int64")
+    
+        )
+        
     # -----------------------------------------
     # RENOMBRAR
     # -----------------------------------------
