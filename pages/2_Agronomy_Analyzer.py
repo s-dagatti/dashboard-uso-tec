@@ -290,6 +290,21 @@ with tab_edicion:
 # ---------------------------------------------------
 # GANTT DE PROYECTOS
 # ---------------------------------------------------
+df_gantt = df_f.copy()
+
+df_gantt["Agronomy Proyecto"] = (
+
+    df_gantt["CLIENTE"]
+    .fillna("Sin Cliente")
+    .astype(str)
+
+    + " - "
+
+    + df_gantt["NOMBRE"]
+    .fillna("Sin Nombre")
+    .astype(str)
+
+)
 
 st.markdown("---")
 
@@ -440,10 +455,9 @@ df_gantt = (
         [
             "FY",
             "Q PLANTEADO",
-            "Agronomy"
+            "Agronomy Proyecto"
         ]
     )
-
 )
 
 # ---------------------------------------------------
@@ -458,7 +472,7 @@ fig_gantt = px.timeline(
 
     x_end="Fin",
 
-    y="Agronomy",
+    y="Agronomy Proyecto",
 
     color="Estado Proyecto",
 
