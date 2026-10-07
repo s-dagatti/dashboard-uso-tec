@@ -1211,8 +1211,21 @@ with tab_edicion:
                     # Estados y Horas
             
                     for campo, valor in cambios.items():
-            
-                        df.loc[idx, campo] = valor
+
+                        if "Horas" in campo:
+                    
+                            try:
+                    
+                                df.loc[idx, campo] = float(valor)
+                    
+                            except Exception:
+                    
+                                df.loc[idx, campo] = 0.0
+                    
+                        else:
+                    
+                            df.loc[idx, campo] = str(valor)
+
             
                     exito = guardar_base_github(df)
             
