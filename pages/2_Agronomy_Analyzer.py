@@ -547,6 +547,206 @@ with tab_dashboard:
             "No se encontraron proyectos para los filtros seleccionados."
         )
 
+    # ---------------------------------------------------
+    # TABLA MAESTRA DE PROYECTOS
+    # ---------------------------------------------------
+    
+    st.markdown("---")
+    
+    st.subheader(
+        "📌 Listado Maestro de Proyectos"
+    )
+    
+    # -----------------------------------------
+    # ESTILO DE ESTADOS
+    # -----------------------------------------
+    
+    def color_estado(valor):
+    
+        v = str(valor).strip().upper()
+    
+        if v == "COMPLETADO":
+    
+            return (
+                "background-color: #2ca02c;"
+                "color: white;"
+                "font-weight: bold;"
+            )
+    
+        elif v == "EN PROCESO":
+    
+            return (
+                "background-color: #f2b134;"
+                "color: black;"
+                "font-weight: bold;"
+            )
+    
+        elif v == "NO INICIADO":
+    
+            return (
+                "background-color: #d62728;"
+                "color: white;"
+                "font-weight: bold;"
+            )
+    
+        return ""
+    
+    # -----------------------------------------
+    # COLUMNAS A MOSTRAR
+    # -----------------------------------------
+    
+    df_tabla = df_f.copy()
+    
+    columnas_tabla = [
+    
+        "FY",
+    
+        "CLIENTE",
+    
+        "NOMBRE",
+    
+        "Tipo de Proyecto",
+    
+        "SUCURSAL",
+    
+        "Q PLANTEADO",
+    
+        "ID PRUEBA",
+    
+        "LINK ACCESO",
+    
+        "Planificación - Estado",
+    
+        "Recopilación de Datos - Estado",
+    
+        "Generación de informe - Estado",
+    
+        "Horas Totales"
+    
+    ]
+    
+    columnas_tabla = [
+    
+        c
+    
+        for c in columnas_tabla
+    
+        if c in df_tabla.columns
+    
+    ]
+    
+    df_tabla = df_tabla[
+        columnas_tabla
+    ].copy()
+    
+    # -----------------------------------------
+    # RENOMBRAR
+    # -----------------------------------------
+    
+    df_tabla = df_tabla.rename(
+    
+        columns={
+    
+            "FY":
+                "FY",
+    
+            "CLIENTE":
+                "Cliente",
+    
+            "NOMBRE":
+                "Nombre",
+    
+            "Tipo de Proyecto":
+                "Tipo",
+    
+            "SUCURSAL":
+                "Sucursal",
+    
+            "Q PLANTEADO":
+                "Trimestre",
+    
+            "ID PRUEBA":
+                "ID Prueba",
+    
+            "LINK ACCESO":
+                "Enlace",
+    
+            "Planificación - Estado":
+                "Planificación",
+    
+            "Recopilación de Datos - Estado":
+                "Datos",
+    
+            "Generación de informe - Estado":
+                "Informe",
+    
+            "Horas Totales":
+                "Hs Totales"
+    
+        }
+    
+    )
+    
+    # -----------------------------------------
+    # FORMATO TABLA
+    # -----------------------------------------
+    
+    tabla_style = (
+    
+        df_tabla
+    
+        .style
+    
+        .map(
+            color_estado,
+            subset=["Planificación"]
+        )
+    
+        .map(
+            color_estado,
+            subset=["Datos"]
+        )
+    
+        .map(
+            color_estado,
+            subset=["Informe"]
+        )
+    
+        .format(
+            {
+                "Hs Totales": "{:.1f}"
+            }
+        )
+    
+    )
+    
+    # -----------------------------------------
+    # VISUALIZACIÓN
+    # -----------------------------------------
+    
+    st.dataframe(
+    
+        tabla_style,
+    
+        use_container_width=True,
+    
+        hide_index=True,
+    
+        column_config={
+    
+            "Enlace": st.column_config.LinkColumn(
+    
+                "Enlace",
+    
+                display_text="🔗 Abrir"
+    
+            )
+    
+        }
+    
+    )
+    
+
 
 # ===================================================
 # TAB EDICIÓN
