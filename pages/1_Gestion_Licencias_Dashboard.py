@@ -217,8 +217,23 @@ def preparar_foto_actual(df):
             na_position="last"
         )
 
+        st.sidebar.write("Columnas admin:")
+        st.sidebar.write(admin.columns.tolist())
+        
+        st.sidebar.write("claves_admin:")
+        st.sidebar.write(claves_admin)
+
+        st.sidebar.write(
+            "Existen columnas:",
+            all(col in admin.columns for col in claves_admin)
+        )
+        
         admin = admin.drop_duplicates(
-            subset=claves_admin,
+            subset=[
+                col
+                for col in claves_admin
+                if col in admin.columns
+            ],
             keep="first"
         )
 
@@ -317,6 +332,22 @@ try:
         df_licencias["Fecha de Actualización"]
         .value_counts()
     )
+
+    temp = pd.to_datetime(
+        df_licencias["Fecha de Actualización"],
+        errors="coerce"
+    )
+    
+    st.sidebar.write(
+        "Max directo:",
+        temp.max()
+    )
+    
+    st.sidebar.write(
+        "NaT:",
+        temp.isna().sum()
+    )
+
     
 
 
