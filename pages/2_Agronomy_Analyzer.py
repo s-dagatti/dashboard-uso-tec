@@ -277,6 +277,127 @@ with tab_dashboard:
         f"{tasa_cierre:.1f}%"
     )
 
+# 4. GANTT
+        st.subheader("📅 Cronograma de Proyectos (Gantt)")
+        
+        gantt_data = []
+        hoy = datetime.now()
+
+        for _, row in df_f.iterrows():
+            q_val = str(row.get('Q PLANTEADO', '')).strip().upper()
+            fy_val = str(row.get('FY', '26')).strip()
+            
+            # Determinamos el año calendario de inicio del FY (por ejemplo, FY26 -> Nov 2025)
+            try:
+                fy_int = int(fy_val)
+                start_year = (2000 + fy_int) - 1 if fy_int < 100 else fy_int - 1
+            except ValueError:
+                start_year = 2025  # Fallback a FY26 si hay dato inválido
+
+            # Fechas del Fiscal Year (Nov 1 a Oct 31)
+            q_dates = {
+                "Q1": (datetime(start_year, 11, 1), datetime(start_year + 1, 1, 31)),
+                "Q2": (datetime(start_year + 1, 2, 1), datetime(start_year + 1, 4, 30)),
+                "Q3": (datetime(start_year + 1, 5, 1), datetime(start_year + 1, 7, 31)),
+                "Q4": (datetime(start_year + 1, 8, 1), datetime(start_year + 1, 10, 31))
+            }
+
+            plan_est = str(row.get("PLANIFICACIÓN - ESTADO", "")).upper()
+            reco_est = str(row.get("RECOPILACIÓN DE DATOS - ESTADO", "")).upper()
+            info_est = str(row.get("GENERACIÓN DE INFORME - ESTADO", "")).upper()
+
+            if q_val in q_dates:
+                start, end = q_dates[q_val]
+                if info_est == "COMPLETADO":
+                    recurso = "✅ Terminado"
+                elif "EN PROCESO" in [plan_est, reco_est, info_est] or "COMPLETADO" in [plan_est, reco_est]:
+                    recurso = "🟡 En Proceso"
+                elif start <= hoy <= end:
+                    recurso = "🔥 Debería estar Activo"
+                else:
+                    recurso = "⏳ Pendiente"
+
+                gantt_data.append(
+                    dict(Task=f"{row['CLIENTE']} - {row['NOMBRE']} (FY{fy_val})", Start=start, Finish=end, Resource=recurso))
+
+        if gantt_data:
+            df_gantt = pd.DataFrame(gantt_data)
+            colors_gantt = {"✅ Terminado": "#28a745", "🟡 En Proceso": "#ffc107", "🔥 Debería estar Activo": "#dc3545",
+                            "⏳ Pendiente": "#6c757d"}
+            fig_gantt = ff.create_gantt(df_gantt, colors=colors_gantt, index_col='Resource', show_colorbar=True,
+                                        group_tasks=True, showgrid_x=True)
+            altura_g = max(450, len(df_gantt) * 35)
+            fig_gantt.update_layout(height=altura_g, margin=dict(t=30, b=30, l=200))
+            fig_gantt.add_vline(x=hoy.timestamp() * 1000, line_dash="dash", line_color="orange", annotation_text="HOY")
+            st.plotly_chart(fig_gantt, use_container_width=True)
+        else:
+            st.info("No se encontraron proyectos para los filtros seleccionados.")
+
+        st.divider()
+
+        # 5. TABLA SEMAFÓRICA (Con ID, Link, FY y Tipo de Proyecto)
+        st.subheader("📌 Listado Maestro de Proyectos")
+
+        def style_estados_fuerte(val):
+            v = str(val).upper()
+            if v == "COMPLETADO": return "background-color: #28a745; color: white; font-weight: bold;"
+            if v == "EN PROCESO": return "background-color: #ffc107; color: black; font-weight: bold;"
+            if v == "NO INICIADO": return "background-color: #dc3545; color: white; font-weight: bold;"
+            return ""
+
+        cols_est_names = [s[0] for s in STAGES_COLS]
+        
+        base_cols = ['FY', 'CLIENTE', 'NOMBRE']
+        if 'TIPO DE PROYECTO' in df_f.columns:
+            base_cols.append('TIPO DE PROYECTO')
+        base_cols += ['SUCURSAL', 'Q PLANTEADO', 'ID PRUEBA', 'LINK ACCESO']
+        
+        cols_mostrar = base_cols + cols_est_names + ['TOTAL_HS']
+
+        df_styled = df_f[cols_mostrar].style.applymap(style_estados_fuerte, subset=cols_est_names)
+
+        column_config = {
+            "FY": st.column_config.TextColumn("FY", help="Año Fiscal del Proyecto"),
+            "TIPO DE PROYECTO": st.column_config.TextColumn("Tipo", help="Tipo de Proyecto / Producto"),
+            "TOTAL_HS": st.column_config.NumberColumn("Hs Totales", format="%.1f ⏳"),
+            "LINK ACCESO": st.column_config.LinkColumn(
+                "Enlace",
+                help="Acceso directo a la prueba",
+                display_text="🔗 Abrir"
+            ),
+            "ID PRUEBA": st.column_config.TextColumn("ID Prueba", help="ID único de la prueba en el sistema"),
+            "Q PLANTEADO": "Trimestre",
+            "PLANIFICACIÓN - ESTADO": "Planif.",
+            "RECOPILACIÓN DE DATOS - ESTADO": "Datos",
+            "GENERACIÓN DE INFORME - ESTADO": "Informe"
+        }
+
+        st.dataframe(
+            df_styled,
+            column_config=column_config,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # 6. GRÁFICOS FINALES
+        st.subheader("📊 Análisis de Esfuerzo")
+        g1, g2 = st.columns(2)
+
+        with g1:
+            suc_hs = df_f.groupby('SUCURSAL')['TOTAL_HS'].sum().reset_index().sort_values('TOTAL_HS', ascending=False)
+            st.plotly_chart(px.bar(suc_hs, x='SUCURSAL', y='TOTAL_HS', title="Horas por Sucursal", text_auto='.1f',
+                                   color_discrete_sequence=['#28a745']), use_container_width=True)
+
+        with g2:
+            dict_hs_etapas = {
+                "Planificación": df_f["PLANIFICACIÓN - HORAS"].sum(),
+                "Recopilación Datos": df_f["RECOPILACIÓN DE DATOS - HORAS"].sum(),
+                "Generación Informe": df_f["GENERACIÓN DE INFORME - HORAS"].sum()
+            }
+            df_pie = pd.DataFrame(list(dict_hs_etapas.items()), columns=['Etapa', 'Horas'])
+            st.plotly_chart(px.pie(df_pie, values='Horas', names='Etapa', title="Horas por Etapa", hole=0.4,
+                                   color_discrete_sequence=px.colors.qualitative.Pastel), use_container_width=True)
+
 # ===================================================
 # TAB EDICIÓN
 # ===================================================
@@ -286,244 +407,4 @@ with tab_edicion:
     st.info(
         "Aquí irá el módulo de edición que ya tienen desarrollado."
     )
-
-# ---------------------------------------------------
-# GANTT DE PROYECTOS
-# ---------------------------------------------------
-df_gantt = df_f.copy()
-
-df_gantt["Agronomy Proyecto"] = (
-
-    df_gantt["CLIENTE"]
-    .fillna("Sin Cliente")
-    .astype(str)
-
-    + " - "
-
-    + df_gantt["NOMBRE"]
-    .fillna("Sin Nombre")
-    .astype(str)
-
-)
-
-st.markdown("---")
-
-st.subheader(
-    "📅 Planificación de Proyectos Agronomy"
-)
-
-# ---------------------------------------------------
-# FECHAS DE CADA Q
-# ---------------------------------------------------
-
-q_fechas = {
-
-    "Q1": (
-        pd.Timestamp("2025-11-01"),
-        pd.Timestamp("2026-01-31")
-    ),
-
-    "Q2": (
-        pd.Timestamp("2026-02-01"),
-        pd.Timestamp("2026-04-30")
-    ),
-
-    "Q3": (
-        pd.Timestamp("2026-05-01"),
-        pd.Timestamp("2026-07-31")
-    ),
-
-    "Q4": (
-        pd.Timestamp("2026-08-01"),
-        pd.Timestamp("2026-10-31")
-    )
-
-}
-
-hoy = pd.Timestamp.today().normalize()
-
-df_gantt = df_f.copy()
-
-# ---------------------------------------------------
-# INICIO Y FIN SEGÚN EL Q
-# ---------------------------------------------------
-
-df_gantt["Inicio"] = (
-
-    df_gantt["Q PLANTEADO"]
-
-    .map(
-        lambda q:
-        q_fechas[q][0]
-        if q in q_fechas
-        else pd.NaT
-    )
-
-)
-
-df_gantt["Fin"] = (
-
-    df_gantt["Q PLANTEADO"]
-
-    .map(
-        lambda q:
-        q_fechas[q][1]
-        if q in q_fechas
-        else pd.NaT
-    )
-
-)
-
-# ---------------------------------------------------
-# ESTADO DEL PROYECTO
-# ---------------------------------------------------
-
-def clasificar_proyecto(row):
-
-    plan = str(
-        row["Planificación - Estado"]
-    ).strip()
-
-    datos = str(
-        row["Recopilación de Datos - Estado"]
-    ).strip()
-
-    informe = str(
-        row["Generación de informe - Estado"]
-    ).strip()
-
-    # COMPLETADO
-
-    if informe == "Completado":
-
-        return "🟢 Terminado"
-
-    # NUNCA INICIADO
-
-    sin_avance = (
-
-        plan == "No Iniciado"
-
-        and
-
-        datos == "No Iniciado"
-
-        and
-
-        informe == "No Iniciado"
-
-    )
-
-    if sin_avance:
-
-        if hoy < row["Inicio"]:
-
-            return "⚪ Pendiente"
-
-        else:
-
-            return "🔴 Debería estar activo"
-
-    # EN PROCESO
-
-    return "🟡 En proceso"
-
-# ---------------------------------------------------
-# CATEGORÍA
-# ---------------------------------------------------
-
-df_gantt["Estado Proyecto"] = (
-
-    df_gantt
-
-    .apply(
-        clasificar_proyecto,
-        axis=1
-    )
-
-)
-
-# ---------------------------------------------------
-# ORDEN
-# ---------------------------------------------------
-
-df_gantt = (
-
-    df_gantt
-
-    .sort_values(
-        [
-            "FY",
-            "Q PLANTEADO",
-            "Agronomy Proyecto"
-        ]
-    )
-)
-
-# ---------------------------------------------------
-# GANTT
-# ---------------------------------------------------
-
-fig_gantt = px.timeline(
-
-    df_gantt,
-
-    x_start="Inicio",
-
-    x_end="Fin",
-
-    y="Agronomy Proyecto",
-
-    color="Estado Proyecto",
-
-    hover_data=[
-
-        "Tipo de Proyecto",
-
-        "FY",
-
-        "Q PLANTEADO"
-
-    ],
-
-    color_discrete_map={
-
-        "⚪ Pendiente":
-            "#9e9e9e",
-
-        "🔴 Debería estar activo":
-            "#d62728",
-
-        "🟡 En proceso":
-            "#f2b134",
-
-        "🟢 Terminado":
-            "#2ca02c"
-
-    }
-
-)
-
-fig_gantt.update_yaxes(
-    autorange="reversed"
-)
-
-fig_gantt.update_layout(
-
-    height=800,
-
-    xaxis_title="Año Fiscal",
-
-    yaxis_title="Agronomy",
-
-    hovermode="closest",
-
-    legend_title_text="Estado"
-
-)
-
-st.plotly_chart(
-    fig_gantt,
-    use_container_width=True
-)
 
