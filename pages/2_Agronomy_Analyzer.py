@@ -745,7 +745,148 @@ with tab_dashboard:
         }
     
     )
+
+    # ---------------------------------------------------
+    # ANÁLISIS DE ESFUERZO
+    # ---------------------------------------------------
     
+    st.markdown("---")
+    
+    st.subheader(
+        "📊 Análisis de Esfuerzo"
+    )
+    
+    g1, g2 = st.columns(2)
+    
+    # ---------------------------------------------------
+    # HORAS POR SUCURSAL
+    # ---------------------------------------------------
+    
+    with g1:
+    
+        hs_sucursal = (
+    
+            df_f
+    
+            .groupby(
+                "SUCURSAL",
+                dropna=False
+            )["Horas Totales"]
+    
+            .sum()
+    
+            .reset_index()
+    
+            .sort_values(
+                "Horas Totales",
+                ascending=False
+            )
+    
+        )
+    
+        fig_sucursal = px.bar(
+    
+            hs_sucursal,
+    
+            x="SUCURSAL",
+    
+            y="Horas Totales",
+    
+            text_auto=".1f",
+    
+            title="⏱ Horas Totales por Sucursal",
+    
+            color_discrete_sequence=[
+                "#367c2b"
+            ]
+    
+        )
+    
+        fig_sucursal.update_layout(
+    
+            xaxis_title="Sucursal",
+    
+            yaxis_title="Horas Totales",
+    
+            showlegend=False
+    
+        )
+    
+        st.plotly_chart(
+            fig_sucursal,
+            use_container_width=True
+        )
+    
+    # ---------------------------------------------------
+    # HORAS POR ETAPA
+    # ---------------------------------------------------
+    
+    with g2:
+    
+        horas_etapa = pd.DataFrame(
+    
+            {
+    
+                "Etapa": [
+    
+                    "Planificación",
+    
+                    "Recopilación de Datos",
+    
+                    "Generación de Informe"
+    
+                ],
+    
+                "Horas": [
+    
+                    df_f[
+                        "Planificación - Horas"
+                    ].sum(),
+    
+                    df_f[
+                        "Recopilación de Datos - Horas"
+                    ].sum(),
+    
+                    df_f[
+                        "Generación de informe - Horas"
+                    ].sum()
+    
+                ]
+    
+            }
+    
+        )
+    
+        fig_etapas = px.pie(
+    
+            horas_etapa,
+    
+            values="Horas",
+    
+            names="Etapa",
+    
+            hole=0.45,
+    
+            title="🕒 Distribución de Horas por Etapa",
+    
+            color_discrete_sequence=px.colors.qualitative.Pastel
+    
+        )
+    
+        fig_etapas.update_traces(
+    
+            textinfo="percent+label"
+    
+        )
+    
+        st.plotly_chart(
+    
+            fig_etapas,
+    
+            use_container_width=True
+    
+        )
+
 
 
 # ===================================================
