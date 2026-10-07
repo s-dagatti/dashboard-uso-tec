@@ -2128,6 +2128,314 @@ with tab_autotrac:
         st.write(
             "No hay máquinas aptas con datos disponibles para mostrar en la tabla."
         )
+# ==============================================================================
+# PESTAÑA: GESTIÓN DEL MOTOR
+# Pegar este bloque al mismo nivel que: with tab_autotrac:, with tab_guiado:, etc.
+# ===============================================================================
+with tab_motor:
+    col_logo_motor, col_titulo_motor = st.columns([1, 12])
+    with col_logo_motor:
+        # Si todavía no existe motor.png, comentar estas 4 líneas.
+        try:
+            st.image("motor.png", width=80)
+        except Exception:
+            pass
+    with col_titulo_motor:
+        st.title("Gestión del Motor")
+
+    st.caption(
+        "Uso de Efficiency Manager™ y FieldCruise™. "
+        "NaN se interpreta como tecnología no informada; 0% como medida sin uso; "
+        "y ≥ 1% como uso efectivo."
+    )
+
+    tecnologias_motor = {
+        "Efficiency Manager™": "Tiempo de activación de Efficiency Manager™ Automático",
+        "FieldCruise™": "FieldCruise™ Activado",
+    }
+
+    tecnologias_motor_presentes = {
+        nombre: columna
+        for nombre, columna in tecnologias_motor.items()
+        if columna in df_filtrado_raw.columns
+    }
+
+    if not tecnologias_motor_presentes:
+        st.warning(
+            "La base cargada no contiene las columnas de Efficiency Manager™ "
+            "y FieldCruise™. Verificá que el CSV actualizado esté en GitHub."
+        )
+    else:
+        df_motor = df_filtrado_raw.copy()
+        col_serie_motor = (
+            "Número de serie de la máquina"
+            if "Número de serie de la máquina" in df_motor.columns
+            else "Máquina"
+        )
+
+        for columna in tecnologias_motor_presentes.values():
+            df_motor[columna] = pd.to_numeric(df_motor[columna], errors="coerce")
+
+        # Solo filas con al menos una medición real de las tecnologías de motor.
+        columnas_motor = list(tecnologias_motor_presentes.values())
+        df_motor_medido = df_motor[df_motor[columnas_motor].notna().any(axis=1)].copy()
+
+        if df_motor_medido.empty:
+            st.info("No hay mediciones de Gestión del Motor para los filtros seleccionados.")
+        else:
+            fecha_min_motor = df_motor_medido["Fecha_inicio_dt"].min()
+            fecha_max_motor = df_motor_medido["Fecha_fin_dt"].max()
+            if pd.notna(fecha_min_motor) and pd.notna(fecha_max_motor):
+                st.info(
+                    f"Período con datos de motor: **{fecha_min_motor:%d/%m/%Y}** "
+                    f"a **{fecha_max_motor:%d/%m/%Y}**"
+                )
+
+            # ------------------------------------------------------------------
+            # KPIs POR TECNOLOGÍA
+            # ------------------------------------------------------------------
+            st.subheader("Indicadores de adopción")
+            columnas_kpi_motor = st.columns(len(tecnologias_motor_presentes))
+
+            for indice, (nombre_motor, columna_motor) in enumerate(
+                tecnologias_motor_presentes.items()
+            ):
+                medidos = df_motor[df_motor[columna_motor].notna()].copy()
+                con_uso = medidos[medidos[columna_motor] >= 1].copy()
+
+                maquinas_medidas = medidos[col_serie_motor].nunique()
+                maquinas_con_uso = con_uso[col_serie_motor].nunique()
+                adopcion_motor = (
+                    maquinas_con_uso / maquinas_medidas * 100
+                    if maquinas_medidas > 0 else 0.0
+                )
+                promedio_motor = con_uso[columna_motor].mean()
+
+                max_fecha_motor = con_uso["Fecha_fin_dt"].max()
+                prom_ultima_motor = (
+                    con_uso.loc[
+                        con_uso["Fecha_fin_dt"] == max_fecha_motor,
+                        columna_motor,
+                    ].mean()
+                    if pd.notna(max_fecha_motor) else np.nan
+                )
+                delta_motor = (
+                    f"{prom_ultima_motor - promedio_motor:+.2f} pp vs. período"
+                    if pd.notna(promedio_motor) and pd.notna(prom_ultima_motor)
+                    else None
+                )
+
+                with columnas_kpi_motor[indice]:
+                    st.metric(
+                        label=f"Promedio {nombre_motor}",
+                        value=(
+                            f"{promedio_motor:.2f}%"
+                            if pd.notna(promedio_motor) else "Sin uso"
+                        ),
+                        delta=delta_motor,
+                    )
+                    st.caption(
+                        f"Máquinas con uso: **{maquinas_con_uso}** / "
+                        f"medidas: **{maquinas_medidas}** · "
+                        f"adopción: **{adopcion_motor:.1f}%**"
+                    )
+
+            st.markdown("---")
+            tecnologia_motor_sel = st.selectbox(
+                "Tecnología a analizar",
+                options=list(tecnologias_motor_presentes.keys()),
+                key="select_tecnologia_motor",
+            )
+            col_motor_sel = tecnologias_motor_presentes[tecnologia_motor_sel]
+
+            df_motor_sel = df_motor[df_motor[col_motor_sel].notna()].copy()
+            max_fecha_sel = df_motor_sel["Fecha_fin_dt"].max()
+            inicio_ultimos_7 = (
+                max_fecha_sel - pd.Timedelta(days=7)
+                if pd.notna(max_fecha_sel) else pd.NaT
+            )
+
+            # ------------------------------------------------------------------
+            # RESUMEN POR MÁQUINA
+            # ------------------------------------------------------------------
+            group_motor = [
+                c for c in [
+                    col_serie_motor, "Máquina", "Modelo", "Tipo",
+                    "Organización", "Sucursal"
+                ]
+                if c in df_motor_sel.columns
+            ]
+            # Evita repetir la misma columna si Máquina es la clave alternativa.
+            group_motor = list(dict.fromkeys(group_motor))
+
+            resumen_motor = (
+                df_motor_sel.groupby(group_motor, dropna=False, as_index=False)
+                .agg(
+                    Uso_Promedio=(col_motor_sel, "mean"),
+                    Periodos_Medidos=(col_motor_sel, "count"),
+                    Periodos_Con_Uso=(col_motor_sel, lambda s: (s >= 1).sum()),
+                )
+            )
+
+            ult_motor = (
+                df_motor_sel[df_motor_sel["Fecha_fin_dt"] >= inicio_ultimos_7]
+                .groupby(col_serie_motor, dropna=False)[col_motor_sel]
+                .mean()
+                .rename("Uso_Ultimos_7_Dias")
+                .reset_index()
+                if pd.notna(inicio_ultimos_7)
+                else pd.DataFrame(columns=[col_serie_motor, "Uso_Ultimos_7_Dias"])
+            )
+            resumen_motor = resumen_motor.merge(
+                ult_motor, on=col_serie_motor, how="left"
+            )
+            resumen_motor["Evolucion_pp"] = (
+                resumen_motor["Uso_Ultimos_7_Dias"]
+                - resumen_motor["Uso_Promedio"]
+            )
+            resumen_motor["Estado"] = np.where(
+                resumen_motor["Uso_Promedio"] >= 1,
+                "Con uso", "Sin uso"
+            )
+
+            # ------------------------------------------------------------------
+            # GRÁFICOS
+            # ------------------------------------------------------------------
+            col_motor_g1, col_motor_g2 = st.columns(2)
+            with col_motor_g1:
+                estado_motor = (
+                    resumen_motor.groupby("Estado", as_index=False)
+                    .size().rename(columns={"size": "Máquinas"})
+                )
+                fig_estado_motor = px.pie(
+                    estado_motor,
+                    names="Estado",
+                    values="Máquinas",
+                    hole=0.55,
+                    title=f"Adopción de {tecnologia_motor_sel}",
+                    color="Estado",
+                    color_discrete_map={
+                        "Con uso": "#367c2b",
+                        "Sin uso": "#d62728",
+                    },
+                )
+                fig_estado_motor.update_traces(textinfo="percent+label+value")
+                st.plotly_chart(fig_estado_motor, use_container_width=True)
+
+            with col_motor_g2:
+                potencial_sucursal = (
+                    resumen_motor[resumen_motor["Estado"] == "Sin uso"]
+                    .groupby("Sucursal", dropna=False, as_index=False)[col_serie_motor]
+                    .nunique()
+                    .rename(columns={col_serie_motor: "Máquinas potenciales"})
+                    .sort_values("Máquinas potenciales", ascending=False)
+                )
+                if not potencial_sucursal.empty:
+                    fig_pot_motor = px.bar(
+                        potencial_sucursal,
+                        x="Sucursal",
+                        y="Máquinas potenciales",
+                        title="Oportunidades por sucursal",
+                        text="Máquinas potenciales",
+                        color_discrete_sequence=["#2b5c8f"],
+                    )
+                    st.plotly_chart(fig_pot_motor, use_container_width=True)
+                else:
+                    st.success("Todas las máquinas medidas registran uso ≥ 1%.")
+
+            # ------------------------------------------------------------------
+            # HISTÓRICO SEMANAL
+            # ------------------------------------------------------------------
+            st.subheader(f"Evolución semanal — {tecnologia_motor_sel}")
+            hist_motor = df_motor_sel.dropna(subset=["Fecha_fin_dt"]).copy()
+            hist_motor["Semana"] = (
+                hist_motor["Fecha_fin_dt"].dt.to_period("W").dt.start_time
+            )
+            hist_motor_uso = hist_motor[hist_motor[col_motor_sel] >= 1].copy()
+            semanal_motor = (
+                hist_motor_uso.groupby("Semana")
+                .agg(
+                    Maquinas_Con_Uso=(col_serie_motor, "nunique"),
+                    Uso_Promedio=(col_motor_sel, "mean"),
+                )
+                .reset_index().sort_values("Semana")
+            )
+
+            if not semanal_motor.empty:
+                fig_hist_motor = make_subplots(specs=[[{"secondary_y": True}]])
+                fig_hist_motor.add_trace(
+                    go.Bar(
+                        x=semanal_motor["Semana"],
+                        y=semanal_motor["Maquinas_Con_Uso"],
+                        name="Máquinas con uso",
+                        marker_color="#2b5c8f",
+                    ),
+                    secondary_y=False,
+                )
+                fig_hist_motor.add_trace(
+                    go.Scatter(
+                        x=semanal_motor["Semana"],
+                        y=semanal_motor["Uso_Promedio"],
+                        name="% uso promedio",
+                        mode="lines+markers",
+                        line=dict(color="#367c2b", width=3),
+                    ),
+                    secondary_y=True,
+                )
+                fig_hist_motor.update_layout(
+                    hovermode="x unified",
+                    legend=dict(orientation="h", y=1.08, x=1, xanchor="right"),
+                    xaxis_title="Semana",
+                )
+                fig_hist_motor.update_yaxes(
+                    title_text="Cantidad de máquinas", secondary_y=False
+                )
+                fig_hist_motor.update_yaxes(
+                    title_text="Uso promedio (%)", range=[0, 100],
+                    secondary_y=True
+                )
+                st.plotly_chart(fig_hist_motor, use_container_width=True)
+            else:
+                st.info("No hay registros con uso ≥ 1% para la serie histórica.")
+
+            # ------------------------------------------------------------------
+            # TABLA DETALLADA
+            # ------------------------------------------------------------------
+            st.subheader(f"Detalle por máquina — {tecnologia_motor_sel}")
+            vista_motor = resumen_motor.copy()
+            vista_motor["Uso promedio"] = vista_motor["Uso_Promedio"].map(
+                lambda x: f"{x:.2f}%"
+            )
+            vista_motor["Últimos 7 días"] = vista_motor["Uso_Ultimos_7_Dias"].map(
+                lambda x: f"{x:.2f}%" if pd.notna(x) else "-"
+            )
+            vista_motor["Evolución"] = vista_motor["Evolucion_pp"].map(
+                lambda x: f"{x:+.2f} pp" if pd.notna(x) else "-"
+            )
+            columnas_vista_motor = [
+                c for c in [
+                    "Máquina", "Modelo", "Tipo", "Organización", "Sucursal",
+                    "Uso promedio", "Últimos 7 días", "Evolución", "Estado",
+                    "Periodos_Medidos", "Periodos_Con_Uso"
+                ]
+                if c in vista_motor.columns
+            ]
+
+            def estilo_estado_motor(valor):
+                if valor == "Con uso":
+                    return "color: #2e7d32; font-weight: bold;"
+                if valor == "Sin uso":
+                    return "color: #c62828; font-weight: bold;"
+                return ""
+
+            tabla_motor = (
+                vista_motor.sort_values("Uso_Promedio", ascending=False)
+                [columnas_vista_motor]
+                .style.map(estilo_estado_motor, subset=["Estado"])
+            )
+            st.dataframe(tabla_motor, use_container_width=True, hide_index=True)
+
+
 with tab_cosechadoras:
 
     col_logo, col_titulo = st.columns([1,21])
