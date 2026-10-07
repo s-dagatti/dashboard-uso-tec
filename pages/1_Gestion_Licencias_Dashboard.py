@@ -110,39 +110,10 @@ def preparar_foto_actual(df):
         if columna in base.columns:
             base[columna] = pd.to_datetime(
                 base[columna],
-                errors="coerce",
-                utc=False
+                errors="coerce"
             )
 
-    st.sidebar.write(
-        "NaT Fecha Actualización:",
-        base["Fecha de Actualización"]
-        .isna()
-        .sum()
-    )
     
-
-    st.sidebar.write(
-        "Tipo fecha:",
-        base["Fecha de Actualización"].dtype
-    )
-    
-    st.sidebar.write(
-        "Fechas parseadas:"
-    )
-    
-    st.sidebar.write(
-        base["Fecha de Actualización"]
-        .dropna()
-        .sort_values()
-        .tail(10)
-    )
-    st.sidebar.write(
-        "Max datetime:",
-        base["Fecha de Actualización"].max()
-    )
-
-
 
     base["Días para Vencer"] = pd.to_numeric(
         base.get("Días para Vencer"),
@@ -150,31 +121,10 @@ def preparar_foto_actual(df):
     )
 
     st.sidebar.write(
-        base["Fecha de Actualización"]
-        .describe()
-    )
-    
-    
-    ultima_actualizacion = base["Fecha de Actualización"].max()
-    st.sidebar.write(
-        "Última actualización:",
-        ultima_actualizacion
+        "Max datetime:",
+        base["Fecha de Actualización"].max()
     )
 
-    foto = base[
-        base["Fecha de Actualización"].eq(ultima_actualizacion)
-    ].copy()
-
-    st.sidebar.write(
-        "Registros foto cruda:",
-        len(foto)
-    )
-
-    foto["Licencia Normalizada"] = np.where(
-        foto["Fuente"].eq("Control administrativo"),
-        foto["Nombre Licencia"].apply(normalizar_licencia_admin),
-        foto["Nombre Licencia"].fillna("").astype(str).str.strip()
-    )
 
     # Evita claves vacías y mantiene trazabilidad de registros sin componente resuelto.
     foto["Clave Componente Dashboard"] = (
