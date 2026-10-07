@@ -119,8 +119,23 @@ except Exception as e:
 df_raw['Fecha_inicio_dt'] = pd.to_datetime(df_raw['Fecha de inicio'], dayfirst=True, errors='coerce')
 df_raw['Fecha_fin_dt'] = pd.to_datetime(df_raw['Fecha de terminación'], dayfirst=True, errors='coerce')
 
-if 'AutoTrac™ Activo' in df_raw.columns:
-    df_raw['AutoTrac™ Activo'] = pd.to_numeric(df_raw['AutoTrac™ Activo'], errors='coerce')
+columnas_tecnologia = [
+    "AutoTrac™ Activo",
+    "AutoPath™ Activo",
+    "Automatización de maniobras AutoTrac™ Activo",
+    "Guiado pasivo de implemento AutoTrac™ Activo",
+    "John Deere Machine Sync Vehículo guía activo",
+    "Tiempo de activación de Efficiency Manager™ Automático",
+    "FieldCruise™ Activado"
+]
+
+for columna in columnas_tecnologia:
+    if columna in df_raw.columns:
+        df_raw[columna] = pd.to_numeric(
+            df_raw[columna],
+            errors="coerce"
+        )
+
 
 # Identificación dinámica de columnas de Licencia, Vencimiento y Estado Licencia
 col_licencia = 'Licencia' if 'Licencia' in df_raw.columns else ('licencia' if 'licencia' in df_raw.columns else None)
@@ -255,13 +270,20 @@ df_filtrado_autotrac = df_filtrado_aptas[
 ]
 
 # --- 6. PESTAÑA: USO DE AUTOTRAC ---
-tab_autotrac, tab_guiado, tab_cosechadoras, tab_pulverizadoras, tab_picadoras = st.tabs([
-    "AutoTrac",
-    "Guiado Avanzado",
-    "Cosechadoras",
-    "Pulverizadoras",
-    "Picadoras"
-])
+    tab_autotrac,
+    tab_guiado,
+    tab_motor,
+    tab_cosechadoras,
+    tab_pulverizadoras,
+    tab_picadoras = st.tabs([
+        "AutoTrac",
+        "Guiado Avanzado",
+        "Gestión del Motor",
+        "Cosechadoras",
+        "Pulverizadoras",
+        "Picadoras"
+    ])
+
 
 with tab_autotrac:
     col_logo, col_titulo = st.columns([1,12])
