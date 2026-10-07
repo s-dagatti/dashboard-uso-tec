@@ -170,7 +170,7 @@ with col_logo:
 
     st.image(
         "agronomy.png",
-        width=100
+        width=120
     )
 
 with col_titulo:
