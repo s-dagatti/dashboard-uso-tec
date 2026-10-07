@@ -300,6 +300,17 @@ if faltantes:
 
 foto_actual, fecha_actualizacion = preparar_foto_actual(df_licencias)
 
+st.sidebar.write(
+    "Base completa:",
+    len(df_licencias)
+)
+
+st.sidebar.write(
+    "Foto actual:",
+    len(foto_actual)
+)
+
+
 # =========================================================
 # SIDEBAR DE FILTROS
 # =========================================================
