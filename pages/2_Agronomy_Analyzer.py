@@ -161,6 +161,30 @@ df["Horas Totales"] = (
 )
 
 # ---------------------------------------------------
+# ENCABEZADO
+# ---------------------------------------------------
+
+col_logo, col_titulo = st.columns([1, 12])
+
+with col_logo:
+
+    st.image(
+        "agronomy.png",
+        width=80
+    )
+
+with col_titulo:
+
+    st.title(
+        "Agronomic Answers where you are."
+    )
+
+    st.caption(
+        "Seguimiento de proyectos agronómicos"
+    )
+
+
+# ---------------------------------------------------
 # TABS
 # ---------------------------------------------------
 
