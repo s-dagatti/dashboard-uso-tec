@@ -237,6 +237,9 @@ def opciones_ordenadas(serie):
 # =========================================================
 
 repo, token = cargar_config_github()
+st.sidebar.write("Repo:", repo)
+st.sidebar.write("Archivo:", HISTORICO_PATH)
+
 
 df_licencias = pd.DataFrame()
 error_carga = None
@@ -249,19 +252,10 @@ try:
     )
     
     st.sidebar.write(
-        "Filas leídas:",
-        len(df_licencias)
+        df_licencias["Fecha de Actualización"]
+        .value_counts()
     )
     
-    st.sidebar.write(
-        "Fecha máxima:",
-        pd.to_datetime(
-            df_licencias["Fecha de Actualización"],
-            format="mixed",
-            dayfirst=True,
-            errors="coerce"
-        ).max()
-    )
 
 
 except Exception as error:
