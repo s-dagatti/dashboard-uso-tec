@@ -286,3 +286,230 @@ with tab_edicion:
     st.info(
         "Aquí irá el módulo de edición que ya tienen desarrollado."
     )
+
+# ---------------------------------------------------
+# GANTT DE PROYECTOS
+# ---------------------------------------------------
+
+st.markdown("---")
+
+st.subheader(
+    "📅 Planificación de Proyectos Agronomy"
+)
+
+# ---------------------------------------------------
+# FECHAS DE CADA Q
+# ---------------------------------------------------
+
+q_fechas = {
+
+    "Q1": (
+        pd.Timestamp("2025-11-01"),
+        pd.Timestamp("2026-01-31")
+    ),
+
+    "Q2": (
+        pd.Timestamp("2026-02-01"),
+        pd.Timestamp("2026-04-30")
+    ),
+
+    "Q3": (
+        pd.Timestamp("2026-05-01"),
+        pd.Timestamp("2026-07-31")
+    ),
+
+    "Q4": (
+        pd.Timestamp("2026-08-01"),
+        pd.Timestamp("2026-10-31")
+    )
+
+}
+
+hoy = pd.Timestamp.today().normalize()
+
+df_gantt = df_f.copy()
+
+# ---------------------------------------------------
+# INICIO Y FIN SEGÚN EL Q
+# ---------------------------------------------------
+
+df_gantt["Inicio"] = (
+
+    df_gantt["Q PLANTEADO"]
+
+    .map(
+        lambda q:
+        q_fechas[q][0]
+        if q in q_fechas
+        else pd.NaT
+    )
+
+)
+
+df_gantt["Fin"] = (
+
+    df_gantt["Q PLANTEADO"]
+
+    .map(
+        lambda q:
+        q_fechas[q][1]
+        if q in q_fechas
+        else pd.NaT
+    )
+
+)
+
+# ---------------------------------------------------
+# ESTADO DEL PROYECTO
+# ---------------------------------------------------
+
+def clasificar_proyecto(row):
+
+    plan = str(
+        row["Planificación - Estado"]
+    ).strip()
+
+    datos = str(
+        row["Recopilación de Datos - Estado"]
+    ).strip()
+
+    informe = str(
+        row["Generación de informe - Estado"]
+    ).strip()
+
+    # COMPLETADO
+
+    if informe == "Completado":
+
+        return "🟢 Terminado"
+
+    # NUNCA INICIADO
+
+    sin_avance = (
+
+        plan == "No Iniciado"
+
+        and
+
+        datos == "No Iniciado"
+
+        and
+
+        informe == "No Iniciado"
+
+    )
+
+    if sin_avance:
+
+        if hoy < row["Inicio"]:
+
+            return "⚪ Pendiente"
+
+        else:
+
+            return "🔴 Debería estar activo"
+
+    # EN PROCESO
+
+    return "🟡 En proceso"
+
+# ---------------------------------------------------
+# CATEGORÍA
+# ---------------------------------------------------
+
+df_gantt["Estado Proyecto"] = (
+
+    df_gantt
+
+    .apply(
+        clasificar_proyecto,
+        axis=1
+    )
+
+)
+
+# ---------------------------------------------------
+# ORDEN
+# ---------------------------------------------------
+
+df_gantt = (
+
+    df_gantt
+
+    .sort_values(
+        [
+            "FY",
+            "Q PLANTEADO",
+            "Agronomy"
+        ]
+    )
+
+)
+
+# ---------------------------------------------------
+# GANTT
+# ---------------------------------------------------
+
+fig_gantt = px.timeline(
+
+    df_gantt,
+
+    x_start="Inicio",
+
+    x_end="Fin",
+
+    y="Agronomy",
+
+    color="Estado Proyecto",
+
+    hover_data=[
+
+        "Tipo de Proyecto",
+
+        "FY",
+
+        "Q PLANTEADO"
+
+    ],
+
+    color_discrete_map={
+
+        "⚪ Pendiente":
+            "#9e9e9e",
+
+        "🔴 Debería estar activo":
+            "#d62728",
+
+        "🟡 En proceso":
+            "#f2b134",
+
+        "🟢 Terminado":
+            "#2ca02c"
+
+    }
+
+)
+
+fig_gantt.update_yaxes(
+    autorange="reversed"
+)
+
+fig_gantt.update_layout(
+
+    height=800,
+
+    xaxis_title="Año Fiscal",
+
+    yaxis_title="Agronomy",
+
+    hovermode="closest",
+
+    legend_title_text="Estado"
+
+)
+
+st.plotly_chart(
+    fig_gantt,
+    use_container_width=True
+)
+
