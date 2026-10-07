@@ -837,7 +837,7 @@ with tab_renovaciones:
     # Utilizar exactamente el mismo universo filtrado
     # del tablero principal
     
-    df_renov = df_filtrado.copy()
+    df_renov = df_renov_base.copy()
     
 
     # -----------------------------------------
