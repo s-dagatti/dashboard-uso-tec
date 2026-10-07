@@ -728,7 +728,7 @@ with tab_dashboard:
                 "Trimestre",
     
             "ID PRUEBA":
-                "ID Prueba",
+                "ID Ubicación",
     
             "LINK ACCESO":
                 "Enlace",
@@ -1071,7 +1071,7 @@ with tab_edicion:
 
                 id_nuevo = c3.text_input(
 
-                    "ID Prueba",
+                    "ID Ubicación",
 
                     value=str(
                         row.get(
