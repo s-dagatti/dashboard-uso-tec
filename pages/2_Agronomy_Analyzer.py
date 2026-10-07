@@ -3,7 +3,6 @@ import pandas as pd
 import requests
 import streamlit as st
 import plotly.express as px
-import plotly.figure_factory as ff
 
 from datetime import datetime
 
@@ -469,20 +468,75 @@ with tab_dashboard:
 
         }
 
-        fig_gantt = ff.create_gantt(
+        fig_gantt = px.timeline(
 
             df_gantt,
-
-            colors=colores,
-
-            index_col="Resource",
-
-            show_colorbar=True,
-
-            group_tasks=True,
-
-            showgrid_x=True
-
+        
+            x_start="Start",
+        
+            x_end="Finish",
+        
+            y="Task",
+        
+            color="Resource",
+        
+            color_discrete_map={
+        
+                "✅ Terminado":
+                    "#2ca02c",
+        
+                "🟡 En Proceso":
+                    "#f2b134",
+        
+                "🔴 Debería estar Activo":
+                    "#d62728",
+        
+                "⚪ Pendiente":
+                    "#9e9e9e"
+        
+            }
+        
+        )
+        
+        fig_gantt.update_yaxes(
+            autorange="reversed"
+        )
+        
+        fig_gantt.update_layout(
+        
+            height=max(
+                450,
+                len(df_gantt) * 35
+            ),
+        
+            margin=dict(
+                t=30,
+                b=30,
+                l=250
+            ),
+        
+            legend_title_text="Estado"
+        
+        )
+        
+        fig_gantt.add_vline(
+        
+            x=hoy,
+        
+            line_dash="dash",
+        
+            line_color="orange",
+        
+            annotation_text="HOY"
+        
+        )
+        
+        st.plotly_chart(
+        
+            fig_gantt,
+        
+            use_container_width=True
+        
         )
 
         fig_gantt.update_layout(
