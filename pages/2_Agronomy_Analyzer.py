@@ -895,7 +895,259 @@ with tab_dashboard:
 
 with tab_edicion:
 
-    st.info(
-        "Aquí irá el módulo de edición que ya tienen desarrollado."
+    st.subheader(
+        "✏️ Actualización de Proyectos"
     )
+
+    if df.empty:
+
+        st.warning(
+            "No existen proyectos disponibles."
+        )
+
+    else:
+
+        df_edit = df.copy()
+
+        # -----------------------------------------
+        # SELECTOR
+        # -----------------------------------------
+
+        df_edit["SELECTOR"] = (
+
+            df_edit["CLIENTE"]
+            .astype(str)
+
+            + " | "
+
+            + df_edit["NOMBRE"]
+            .astype(str)
+
+        )
+
+        seleccion = st.selectbox(
+
+            "Seleccione el proyecto:",
+
+            [""] + df_edit["SELECTOR"].tolist()
+
+        )
+
+        if seleccion:
+
+            idx = df_edit[
+                df_edit["SELECTOR"] == seleccion
+            ].index[0]
+
+            row = df_edit.loc[idx]
+
+            st.info(
+                f"📍 Cliente: {row['CLIENTE']} | "
+                f"Proyecto: {row['NOMBRE']}"
+            )
+
+            with st.form("editar_proyecto"):
+
+                # ---------------------------------------------------
+                # PLANIFICACIÓN GENERAL
+                # ---------------------------------------------------
+
+                c1, c2, c3, c4 = st.columns(4)
+
+                fy_options = [
+                    "25",
+                    "26",
+                    "27",
+                    "28"
+                ]
+
+                fy_actual = str(
+                    row.get("FY", "26")
+                )
+
+                fy_nuevo = c1.selectbox(
+
+                    "FY",
+
+                    fy_options,
+
+                    index=(
+                        fy_options.index(fy_actual)
+                        if fy_actual in fy_options
+                        else 1
+                    )
+
+                )
+
+                q_options = [
+                    "Q1",
+                    "Q2",
+                    "Q3",
+                    "Q4"
+                ]
+
+                q_actual = str(
+                    row.get(
+                        "Q PLANTEADO",
+                        "Q1"
+                    )
+                ).upper()
+
+                q_nuevo = c2.selectbox(
+
+                    "Trimestre",
+
+                    q_options,
+
+                    index=(
+                        q_options.index(q_actual)
+                        if q_actual in q_options
+                        else 0
+                    )
+
+                )
+
+                id_nuevo = c3.text_input(
+
+                    "ID Prueba",
+
+                    value=str(
+                        row.get(
+                            "ID PRUEBA",
+                            ""
+                        )
+                    )
+
+                )
+
+                link_nuevo = c4.text_input(
+
+                    "Link",
+
+                    value=str(
+                        row.get(
+                            "LINK ACCESO",
+                            ""
+                        )
+                    )
+
+                )
+
+                st.divider()
+
+                st.subheader(
+                    "Estados y Horas"
+                )
+
+                estado_options = [
+
+                    "No Iniciado",
+
+                    "En Proceso",
+
+                    "Completado"
+
+                ]
+
+                cambios = {}
+
+                etapas = [
+
+                    (
+                        "Planificación - Estado",
+                        "Planificación - Horas"
+                    ),
+
+                    (
+                        "Recopilación de Datos - Estado",
+                        "Recopilación de Datos - Horas"
+                    ),
+
+                    (
+                        "Generación de informe - Estado",
+                        "Generación de informe - Horas"
+                    )
+
+                ]
+
+                for estado_col, hora_col in etapas:
+
+                    a, b = st.columns([2, 1])
+
+                    estado_actual = str(
+                        row.get(
+                            estado_col,
+                            "No Iniciado"
+                        )
+                    )
+
+                    horas_actual = float(
+                        row.get(
+                            hora_col,
+                            0
+                        )
+                    )
+
+                    cambios[estado_col] = a.selectbox(
+
+                        estado_col.replace(
+                            " - Estado",
+                            ""
+                        ),
+
+                        estado_options,
+
+                        index=(
+                            estado_options.index(
+                                estado_actual
+                            )
+                            if estado_actual in estado_options
+                            else 0
+                        )
+
+                    )
+
+                    cambios[hora_col] = b.number_input(
+
+                        hora_col.replace(
+                            " - Horas",
+                            ""
+                        ),
+
+                        min_value=0.0,
+
+                        value=horas_actual,
+
+                        step=0.5
+
+                    )
+
+                # ---------------------------------------------------
+                # BOTÓN
+                # ---------------------------------------------------
+
+                guardar = st.form_submit_button(
+                    "💾 Guardar Cambios"
+                )
+
+            if guardar:
+
+                st.success(
+                    "✅ Cambios preparados correctamente."
+                )
+
+                st.write(
+                    {
+                        "FY": fy_nuevo,
+                        "Q": q_nuevo,
+                        "ID PRUEBA": id_nuevo,
+                        "LINK": link_nuevo,
+                        **cambios
+                    }
+                )
+
+                st.info(
+                    "Próximo paso: conectar esta sección "
+                    "al guardado en GitHub."
+                )
 
