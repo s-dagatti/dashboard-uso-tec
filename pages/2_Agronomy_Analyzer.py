@@ -1192,6 +1192,25 @@ with tab_edicion:
                     "💾 Guardar Cambios"
                 )
 
+            # Fuerza estas columnas a texto
+            
+            for col in [
+            
+                "ID PRUEBA",
+            
+                "LINK ACCESO"
+            
+            ]:
+            
+                if col in df.columns:
+            
+                    df[col] = (
+                        df[col]
+                        .fillna("")
+                        .astype(str)
+                    )
+            
+                        
             if guardar:
             
                 try:
@@ -1203,10 +1222,29 @@ with tab_edicion:
                     df.loc[idx, "Q PLANTEADO"] = q_nuevo
             
                     # ID
-                    df.loc[idx, "ID PRUEBA"] = id_nuevo
-            
+
+                    df.loc[idx, "ID PRUEBA"] = (
+                    
+                        str(id_nuevo)
+                    
+                        if id_nuevo is not None
+                    
+                        else ""
+                    
+                    )
+                    
                     # LINK
-                    df.loc[idx, "LINK ACCESO"] = link_nuevo
+                    
+                    df.loc[idx, "LINK ACCESO"] = (
+                    
+                        str(link_nuevo)
+                    
+                        if link_nuevo is not None
+                    
+                        else ""
+                    
+                    )
+
             
                     # Estados y Horas
             
