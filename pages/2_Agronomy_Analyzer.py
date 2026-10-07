@@ -133,11 +133,11 @@ with tab_dashboard:
             .unique()
         )
 
-        sel_fy = st.multiselect(
+        sel_fy = st.selectbox(
             "FY",
-            lista_fy,
-            default=lista_fy
+            ["Todos"] + lista_fy
         )
+        
 
     with f2:
 
@@ -147,11 +147,11 @@ with tab_dashboard:
             .unique()
         )
 
-        sel_sucursal = st.multiselect(
+        sel_sucursal = st.selectbox(
             "Sucursal",
-            lista_sucursal,
-            default=lista_sucursal
+            ["Todas"] + lista_sucursal
         )
+
 
     with f3:
 
@@ -161,11 +161,11 @@ with tab_dashboard:
             .unique()
         )
 
-        sel_q = st.multiselect(
+        sel_q = st.selectbox(
             "Q",
-            lista_q,
-            default=lista_q
+            ["Todos"] + lista_q
         )
+
 
     with f4:
 
@@ -175,10 +175,9 @@ with tab_dashboard:
             .unique()
         )
 
-        sel_tipo = st.multiselect(
+        sel_tipo = st.selectbox(
             "Tipo de Proyecto",
-            lista_tipo,
-            default=lista_tipo
+            ["Todos"] + lista_tipo
         )
 
     # ---------------------------------------------------
@@ -187,21 +186,29 @@ with tab_dashboard:
 
     df_f = df.copy()
 
-    df_f = df_f[
-        df_f["FY"].isin(sel_fy)
-    ]
-
-    df_f = df_f[
-        df_f["SUCURSAL"].isin(sel_sucursal)
-    ]
-
-    df_f = df_f[
-        df_f["Q PLANTEADO"].isin(sel_q)
-    ]
-
-    df_f = df_f[
-        df_f["Tipo de Proyecto"].isin(sel_tipo)
-    ]
+    if sel_fy != "Todos":
+    
+        df_f = df_f[
+            df_f["FY"] == sel_fy
+        ]
+    
+    if sel_sucursal != "Todas":
+    
+        df_f = df_f[
+            df_f["SUCURSAL"] == sel_sucursal
+        ]
+    
+    if sel_q != "Todos":
+    
+        df_f = df_f[
+            df_f["Q PLANTEADO"] == sel_q
+        ]
+    
+    if sel_tipo != "Todos":
+    
+        df_f = df_f[
+            df_f["Tipo de Proyecto"] == sel_tipo
+        ]
 
     # ---------------------------------------------------
     # KPIs
