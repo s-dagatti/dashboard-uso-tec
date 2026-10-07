@@ -114,21 +114,6 @@ def preparar_foto_actual(df):
                 errors="coerce"
             )
 
-    temp = pd.to_datetime(
-        df_licencias["Fecha de Actualización"],
-        format="mixed",
-        errors="coerce"
-    )
-    
-    st.sidebar.write(
-        "Max directo:",
-        temp.max()
-    )
-    
-    st.sidebar.write(
-        "NaT:",
-        temp.isna().sum()
-    )
     
     
     base["Días para Vencer"] = pd.to_numeric(
@@ -136,10 +121,6 @@ def preparar_foto_actual(df):
         errors="coerce"
     )
 
-    st.sidebar.write(
-        "Max datetime:",
-        base["Fecha de Actualización"].max()
-    )
     ultima_actualizacion = (
         base["Fecha de Actualización"]
         .max()
@@ -166,17 +147,6 @@ def preparar_foto_actual(df):
         .astype(str)
         .str.strip()
     
-    )
-
-
-    st.sidebar.write(
-        "Última actualización:",
-        ultima_actualizacion
-    )
-    
-    st.sidebar.write(
-        "Registros foto cruda:",
-        len(foto)
     )
         
     # Evita claves vacías y mantiene trazabilidad de registros sin componente resuelto.
@@ -233,16 +203,6 @@ def preparar_foto_actual(df):
             na_position="last"
         )
 
-        st.sidebar.write("Columnas admin:")
-        st.sidebar.write(admin.columns.tolist())
-        
-        st.sidebar.write("claves_admin:")
-        st.sidebar.write(claves_admin)
-
-        st.sidebar.write(
-            "Existen columnas:",
-            all(col in admin.columns for col in claves_admin)
-        )
         
         admin = admin.drop_duplicates(
             subset=[
@@ -252,15 +212,6 @@ def preparar_foto_actual(df):
             ],
             keep="first"
         )
-
-        st.sidebar.write(
-            "Columnas foto:"
-        )
-        
-        st.sidebar.write(
-            foto.columns.tolist()
-        )
-        
 
     if not operations.empty:
         operations["Clave OC Dashboard"] = (
@@ -295,26 +246,6 @@ def preparar_foto_actual(df):
         sort=False
     )
 
-    st.sidebar.write(
-        "Foto original:",
-        len(foto)
-    )
-    
-    st.sidebar.write(
-        "Operations:",
-        len(operations)
-    )
-    
-    st.sidebar.write(
-        "Admin:",
-        len(admin)
-    )
-    
-    st.sidebar.write(
-        "Foto final:",
-        len(actual)
-    )
-    
 
     return actual, ultima_actualizacion
 
@@ -330,8 +261,6 @@ def opciones_ordenadas(serie):
 # =========================================================
 
 repo, token = cargar_config_github()
-st.sidebar.write("Repo:", repo)
-st.sidebar.write("Archivo:", HISTORICO_PATH)
 
 
 df_licencias = pd.DataFrame()
@@ -343,29 +272,7 @@ try:
         token,
         HISTORICO_PATH
     )
-    
-    st.sidebar.write(
-        df_licencias["Fecha de Actualización"]
-        .value_counts()
-    )
-
-    temp = pd.to_datetime(
-        df_licencias["Fecha de Actualización"],
-        errors="coerce"
-    )
-    
-    st.sidebar.write(
-        "Max directo:",
-        temp.max()
-    )
-    
-    st.sidebar.write(
-        "NaT:",
-        temp.isna().sum()
-    )
-
-    
-
+  
 
 except Exception as error:
     error_carga = error
@@ -408,16 +315,6 @@ if faltantes:
     st.stop()
 
 foto_actual, fecha_actualizacion = preparar_foto_actual(df_licencias)
-
-st.sidebar.write(
-    "Base completa:",
-    len(df_licencias)
-)
-
-st.sidebar.write(
-    "Foto actual:",
-    len(foto_actual)
-)
 
 
 # =========================================================
