@@ -1197,7 +1197,7 @@ with tab_edicion:
                 try:
             
                     # FY
-                    df.loc[idx, "FY"] = fy_nuevo
+                    df.loc[idx, "FY"] = int(fy_nuevo)
             
                     # Q
                     df.loc[idx, "Q PLANTEADO"] = q_nuevo
