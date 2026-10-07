@@ -269,20 +269,28 @@ df_filtrado_autotrac = df_filtrado_aptas[
     pd.notna(df_filtrado_aptas['AutoTrac™ Activo']) & (df_filtrado_aptas['AutoTrac™ Activo'] >= 1)
 ]
 
-# --- 6. PESTAÑA: USO DE AUTOTRAC ---
+# ---------------------------------------------------
+# TABS PRINCIPALES
+# ---------------------------------------------------
+
+(
     tab_autotrac,
     tab_guiado,
     tab_motor,
     tab_cosechadoras,
     tab_pulverizadoras,
-    tab_picadoras = st.tabs([
+    tab_picadoras
+) = st.tabs(
+    [
         "AutoTrac",
         "Guiado Avanzado",
         "Gestión del Motor",
         "Cosechadoras",
         "Pulverizadoras",
         "Picadoras"
-    ])
+    ]
+)
+
 
 
 with tab_autotrac:
