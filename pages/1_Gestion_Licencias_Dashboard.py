@@ -770,6 +770,51 @@ with tab_actual:
             """
         )
 
+# ---------------------------------------------------
+# BASE HISTÓRICA FILTRADA
+# ---------------------------------------------------
+
+df_renov_base = df_licencias.copy()
+
+if excluir_conci:
+
+    df_renov_base = df_renov_base[
+        ~df_renov_base["Organización"]
+        .fillna("")
+        .astype(str)
+        .str.upper()
+        .str.contains("CONCI", na=False)
+    ]
+
+if filtro_sucursal:
+
+    df_renov_base = df_renov_base[
+        df_renov_base["Sucursal"]
+        .isin(filtro_sucursal)
+    ]
+
+if filtro_organizacion:
+
+    df_renov_base = df_renov_base[
+        df_renov_base["Organización"]
+        .isin(filtro_organizacion)
+    ]
+
+if filtro_tipo_maquina:
+
+    df_renov_base = df_renov_base[
+        df_renov_base["Tipo Máquina"]
+        .isin(filtro_tipo_maquina)
+    ]
+
+if filtro_modelo:
+
+    df_renov_base = df_renov_base[
+        df_renov_base["Modelo Máquina"]
+        .isin(filtro_modelo)
+    ]
+
+
 with tab_renovaciones:
 
     # =========================================================
@@ -789,7 +834,11 @@ with tab_renovaciones:
             "Renovaciones de Licencias"
         )
 
-    df_renov = df_licencias.copy()
+    # Utilizar exactamente el mismo universo filtrado
+    # del tablero principal
+    
+    df_renov = df_filtrado.copy()
+    
 
     # -----------------------------------------
     # Fechas
@@ -825,6 +874,14 @@ with tab_renovaciones:
         df_renov["Nombre Licencia"]
 
     )
+
+    if filtro_licencia:
+
+        df_renov = df_renov[
+            df_renov["Licencia Normalizada"]
+            .isin(filtro_licencia)
+        ]
+    
 
     # -----------------------------------------
     # Clave de renovación
@@ -1062,3 +1119,59 @@ with tab_renovaciones:
         st.info(
             "Todavía no se detectaron renovaciones."
         )
+    st.markdown("---")
+    st.subheader(
+        "Licencias más renovadas"
+    )
+
+    if not df_renovadas.empty:
+
+        df_top_licencias = (
+    
+            df_renovadas
+    
+            .groupby(
+                "Licencia",
+                as_index=False
+            )
+    
+            .size()
+    
+            .rename(
+                columns={
+                    "size": "Renovaciones"
+                }
+            )
+    
+            .sort_values(
+                "Renovaciones",
+                ascending=False
+            )
+    
+        )
+    
+        fig_lic = px.pie(
+    
+            df_top_licencias,
+    
+            names="Licencia",
+    
+            values="Renovaciones",
+    
+            hole=0.45,
+    
+            title="Distribución de Renovaciones por Licencia"
+    
+        )
+    
+        st.plotly_chart(
+            fig_lic,
+            use_container_width=True
+        )
+    
+    else:
+    
+        st.info(
+            "No se detectaron renovaciones para los filtros seleccionados."
+        )
+
