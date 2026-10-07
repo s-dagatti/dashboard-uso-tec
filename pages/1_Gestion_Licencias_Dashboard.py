@@ -124,8 +124,26 @@ def preparar_foto_actual(df):
         "Max datetime:",
         base["Fecha de Actualización"].max()
     )
+    ultima_actualizacion = (
+        base["Fecha de Actualización"]
+        .max()
+    )
+    
+    foto = base[
+        base["Fecha de Actualización"]
+        .eq(ultima_actualizacion)
+    ].copy()
 
-
+    st.sidebar.write(
+        "Última actualización:",
+        ultima_actualizacion
+    )
+    
+    st.sidebar.write(
+        "Registros foto cruda:",
+        len(foto)
+    )
+        
     # Evita claves vacías y mantiene trazabilidad de registros sin componente resuelto.
     foto["Clave Componente Dashboard"] = (
         foto["Clave Componente"]
