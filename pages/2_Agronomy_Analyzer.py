@@ -57,6 +57,68 @@ def cargar_base():
 # ---------------------------------------------------
 
 df = cargar_base()
+import base64
+
+def guardar_base_github(df):
+
+    repo = "s-dagatti/uso-tec-v2"
+
+    path = "datos_proyectos_agronomy_analyzer.csv"
+
+    token = st.secrets["github"]["token"]
+
+    url = (
+        f"https://api.github.com/repos/"
+        f"{repo}/contents/{path}"
+    )
+
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+
+    # Obtener SHA actual
+    res_get = requests.get(
+        url,
+        headers=headers
+    )
+
+    sha = res_get.json()["sha"]
+
+    csv_bytes = (
+        df.to_csv(index=False)
+        .encode("utf-8")
+    )
+
+    contenido = (
+        base64.b64encode(csv_bytes)
+        .decode("utf-8")
+    )
+
+    payload = {
+
+        "message":
+            "Actualización proyecto Agronomy",
+
+        "content":
+            contenido,
+
+        "sha":
+            sha
+
+    }
+
+    res_put = requests.put(
+
+        url,
+
+        headers=headers,
+
+        json=payload
+
+    )
+
+    return res_put.status_code in [200, 201]
 
 # ---------------------------------------------------
 # FECHAS
@@ -1131,23 +1193,49 @@ with tab_edicion:
                 )
 
             if guardar:
+            
+                try:
+            
+                    # FY
+                    df.loc[idx, "FY"] = fy_nuevo
+            
+                    # Q
+                    df.loc[idx, "Q PLANTEADO"] = q_nuevo
+            
+                    # ID
+                    df.loc[idx, "ID PRUEBA"] = id_nuevo
+            
+                    # LINK
+                    df.loc[idx, "LINK ACCESO"] = link_nuevo
+            
+                    # Estados y Horas
+            
+                    for campo, valor in cambios.items():
+            
+                        df.loc[idx, campo] = valor
+            
+                    exito = guardar_base_github(df)
+            
+                    if exito:
+            
+                        st.success(
+                            "✅ Proyecto actualizado correctamente."
+                        )
+            
+                        st.cache_data.clear()
+            
+                        st.rerun()
+            
+                    else:
+            
+                        st.error(
+                            "❌ No se pudo guardar en GitHub."
+                        )
+            
+                except Exception as e:
+            
+                    st.error(
+                        f"Error guardando: {e}"
+                    )
 
-                st.success(
-                    "✅ Cambios preparados correctamente."
-                )
-
-                st.write(
-                    {
-                        "FY": fy_nuevo,
-                        "Q": q_nuevo,
-                        "ID PRUEBA": id_nuevo,
-                        "LINK": link_nuevo,
-                        **cambios
-                    }
-                )
-
-                st.info(
-                    "Próximo paso: conectar esta sección "
-                    "al guardado en GitHub."
-                )
 
