@@ -58,7 +58,7 @@ def cargar_config_github():
         return None, None
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def cargar_base_licencias(repo, token, path):
     if not repo or not token:
         return pd.DataFrame()
