@@ -134,6 +134,25 @@ def preparar_foto_actual(df):
         .eq(ultima_actualizacion)
     ].copy()
 
+    foto["Licencia Normalizada"] = np.where(
+    
+        foto["Fuente"].eq(
+            "Control administrativo"
+        ),
+    
+        foto["Nombre Licencia"]
+        .apply(
+            normalizar_licencia_admin
+        ),
+    
+        foto["Nombre Licencia"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    
+    )
+
+
     st.sidebar.write(
         "Última actualización:",
         ultima_actualizacion
@@ -202,6 +221,15 @@ def preparar_foto_actual(df):
             subset=claves_admin,
             keep="first"
         )
+
+        st.sidebar.write(
+            "Columnas foto:"
+        )
+        
+        st.sidebar.write(
+            foto.columns.tolist()
+        )
+        
 
     if not operations.empty:
         operations["Clave OC Dashboard"] = (
