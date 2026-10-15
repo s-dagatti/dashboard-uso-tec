@@ -22,3 +22,16 @@ st.link_button(
     "🚜 Ir al tablero Crack del Campo | Tractores",
     URL_CRACK_DEL_CAMPO,
 )
+
+# =====================================================
+# ACCESO DIRECTO A SMARTFARM
+# =====================================================
+
+URL_SMARTFARM = (
+    https://smartfarm-conci.streamlit.app/"
+)
+
+st.link_button(
+    "🏆 Ir al tablero SmartFarm",
+    URL_SMARTFARM,
+)
