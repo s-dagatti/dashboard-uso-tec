@@ -19,6 +19,6 @@ URL_CRACK_DEL_CAMPO = (
 )
 
 st.link_button(
-    "🚜 Ir al tablero Crack del Campo FY27",
+    "🚜 Ir al tablero Crack del Campo | Tractores",
     URL_CRACK_DEL_CAMPO,
 )
