@@ -1,3 +1,5 @@
+import streamlit as st
+
 st.title("Desafíos John Deere FY27")
 st.caption("Accesos directos a gestión de desafíos")
 
