@@ -1,5 +1,11 @@
 import streamlit as st
 
+st.set_page_config(
+    page_title="Desafíos JD",
+    page_icon="mtg.png",
+    layout="wide"
+)
+
 st.title("Desafíos John Deere FY27")
 st.caption("Accesos directos a gestión de desafíos")
 
